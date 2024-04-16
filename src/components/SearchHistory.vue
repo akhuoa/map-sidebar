@@ -130,7 +130,7 @@ export default {
 
 <style lang="scss" scoped>
 .history-container {
-  padding-bottom: 3px;
+  padding-bottom: 6px;
 }
 
 .search-tag.el-tag {

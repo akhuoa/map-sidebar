@@ -495,7 +495,7 @@ export default {
   font-family: Asap;
   font-size: 14px;
   font-style: italic;
-  padding-top: 15px;
+  padding: 15px;
 }
 
 .content-card :deep(.el-card__header) {
@@ -509,7 +509,7 @@ export default {
 }
 
 .content {
-  width: 515px;
+  // width: 515px;
   flex: 1 1 auto;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
   border: solid 1px #e4e7ed;

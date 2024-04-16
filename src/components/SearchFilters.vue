@@ -1,50 +1,10 @@
 <template>
   <div class="filters">
     <MapSvgSpriteColor />
-    <div class="cascader-tag" v-if="presentTags.length > 0">
-      <el-tag
-        class="ml-2"
-        type="info"
-        closable
-        @close="cascadeTagClose(presentTags[0])"
-      >
-        {{ presentTags[0] }}
-      </el-tag>
-      <el-popover
-        v-if="presentTags.length > 1"
-        placement="bottom-start"
-        :width="200"
-        trigger="hover"
-      >
-        <template #default>
-          <div class="el-tags-container">
-            <el-tag
-              v-for="(tag, i) in presentTags.slice(1)"
-              :key="i"
-              class="ml-2"
-              type="info"
-              closable
-              @close="cascadeTagClose(tag)"
-            >
-              {{ tag }}
-            </el-tag>
-          </div>
-        </template>
-        <template #reference>
-          <div class="el-tags-container">
-            <el-tag
-              v-if="presentTags.length > 1"
-              class="ml-2"
-              type="info"
-            >
-              +{{ presentTags.length - 1 }}
-            </el-tag>
-          </div>
-        </template>
-      </el-popover>
-    </div>
     <transition name="el-zoom-in-top">
-      <span v-show="showFilters" v-loading="!cascaderIsReady" class="search-filters transition-box">
+      <span v-show="showFilters" v-loading="!cascaderIsReady" class="search-filters transition-box"
+        :class="{'active': !showFiltersText}"
+      >
         <el-cascader
           class="cascader"
           ref="cascader"
@@ -60,7 +20,7 @@
           :show-all-levels="true"
           popper-class="sidebar-cascader-popper"
         />
-        <div v-if="showFiltersText" class="filter-default-value">Filters</div>
+        <div class="filter-default-value">Filters</div>
         <el-popover
           title="How do filters work?"
           width="250"
@@ -99,6 +59,48 @@
           :value="item"
         ></el-option>
       </el-select>
+    </div>
+    <div class="cascader-tag" v-if="presentTags.length > 0">
+      <el-tag
+        class="ml-2"
+        type="info"
+        closable
+        @close="cascadeTagClose(presentTags[0])"
+      >
+        {{ presentTags[0] }}
+      </el-tag>
+      <el-popover
+        v-if="presentTags.length > 1"
+        placement="bottom-start"
+        :width="300"
+        trigger="hover"
+      >
+        <template #default>
+          <div class="el-tags-container">
+            <el-tag
+              v-for="(tag, i) in presentTags.slice(1)"
+              :key="i"
+              class="ml-2"
+              type="info"
+              closable
+              @close="cascadeTagClose(tag)"
+            >
+              {{ tag }}
+            </el-tag>
+          </div>
+        </template>
+        <template #reference>
+          <div class="el-tags-container">
+            <el-tag
+              v-if="presentTags.length > 1"
+              class="ml-2"
+              type="info"
+            >
+              +{{ presentTags.length - 1 }}
+            </el-tag>
+          </div>
+        </template>
+      </el-popover>
     </div>
   </div>
 </template>
@@ -788,12 +790,13 @@ export default {
 <style lang="scss" scoped>
 
 .cascader-tag {
-  position: absolute;
-  top: 110px;
-  left: 50px;
+  // position: absolute;
+  // top: 110px;
+  // left: 50px;
   z-index: 1;
   display: flex;
   gap: 4px;
+  width: 100%;
 }
 
 .el-tags-container {
@@ -813,6 +816,10 @@ export default {
   left: 0;
   padding-top: 10px;
   padding-left: 16px;
+
+  .search-filters.active & {
+    color: $app-primary-color;
+  }
 }
 
 .help {
@@ -871,6 +878,12 @@ export default {
   position: relative;
   float: left;
   padding-right: 15px;
+
+  &.active {
+    :deep(.el-input__wrapper) {
+      box-shadow: 0 0 0 1px $app-primary-color inset;
+    }
+  }
 }
 
 .number-shown-select :deep(.el-select__wrapper) {
