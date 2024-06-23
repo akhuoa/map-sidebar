@@ -105,9 +105,6 @@ import { AlgoliaClient } from '../algolia/algolia.js'
 import { getFilters, facetPropPathMapping } from '../algolia/utils.js'
 import FlatmapQueries from '../flatmapQueries/flatmapQueries.js'
 
-// TODO: to update API URL
-const API_URL = "/data/pmr-sample.json";
-
 // handleErrors: A custom fetch error handler to recieve messages from the server
 //    even when an error is found
 var handleErrors = async function (response) {
@@ -217,7 +214,7 @@ export default {
         this.openAlgoliaSearch(filter, search)
       } else if (mode === 'PMR') {
         this.openPMRSearch(filter, search)
-      } 
+      }
     },
 
     // openPMRSearch: Resets the results, populates dataset cards and filters with PMR data.
