@@ -1,5 +1,5 @@
 function transformKeyValueArrayToObject(data) {
-  return data.values.map(valueArray => 
+  return data.values.map(valueArray =>
     data.keys.reduce((acc, key, index) => {
       acc[key] = valueArray[index];
       return acc;
@@ -70,7 +70,7 @@ let FlatmapQueries = function () {
   this.setAvailableFeatures = function (pd) {
     pd.forEach((d) => {
       Object.keys(d).forEach((key) => {
-        if (!features.includes(key)) {
+        if (!this.features.includes(key)) {
           this.features.push(key)
         }
       })
