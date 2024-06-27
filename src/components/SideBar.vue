@@ -245,7 +245,7 @@ export default {
        */
       this.$emit('anatomy-in-datasets', payLoad)
     })
-    
+
     EventBus.on('contextUpdate', (payLoad) => {
       /**
        * This event is emitted when the context card is updated.
@@ -363,6 +363,7 @@ export default {
   .tab-container ~ & {
     border-radius: 0;
     border: 0 none;
+    position: relative;
   }
 }
 </style>
