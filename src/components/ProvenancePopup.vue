@@ -390,6 +390,7 @@ export default {
   min-width: 16rem;
   background-color: #f7faff;
   height: 100%;
+  border-left: 1px solid var(--el-border-color);
   border-top: 1px solid var(--el-border-color);
 }
 

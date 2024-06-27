@@ -55,26 +55,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$tab-height: 30px;
+
 .tab-container {
-  height: 28px;
-  padding-bottom: 1px;
-  border-bottom: 1px solid $app-primary-color;
+  height: $tab-height;
   display: flex;
   flex-direction: row;
 }
 
 .title {
-  height: 28px;
+  height: $tab-height;
   border: 1px solid var(--el-border-color);
-  border-bottom-color: $app-primary-color;
+  border-top-color: transparent;
   background-color: white;
   display: flex;
   width: fit-content;
   align-items: center;
   position: relative;
-}
-
-.title:hover {
   cursor: pointer;
 }
 
@@ -90,19 +87,19 @@ export default {
   display: table;
   height: 100%;
   width: 100%;
-
-  &:hover {
-    color: $app-primary-color;
-  }
 }
 
 .parent-dialog:hover .title-text {
   color: $app-primary-color;
 }
 
+.title:hover,
 .active-tab {
-  border-color: $app-primary-color;
-  border-bottom-color: #292b66;
+  background-color: #f9f2fc;
+  border: solid #8300bf;
+  border-width: 1px 1px .125em;
+  color: #8300bf;
+  font-weight: 500;
 }
 
 .highlightText {
