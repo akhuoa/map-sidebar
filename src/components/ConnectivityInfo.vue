@@ -1,7 +1,7 @@
 <template>
   <div v-if="entry" class="main" v-loading="loading">
-    <!-- Provenance Info Title -->
-    <div class="provenance-info-title">
+    <!-- Connectivity Info Title -->
+    <div class="connectivity-info-title">
       <div>
         <div class="block" v-if="entry.title">
           <div class="title">{{ capitalise(entry.title) }}</div>
@@ -182,7 +182,7 @@ const capitalise = function (str) {
 }
 
 export default {
-  name: 'ProvenancePopup',
+  name: 'ConnectivityInfo',
   components: {
     Button,
     Container,
@@ -266,19 +266,19 @@ export default {
       window.open(url, '_blank')
     },
     openAll: function () {
-      EventBus.emit('onProvenanceActionClick', {
+      EventBus.emit('onConnectivityActionClick', {
         type: 'Facets',
         labels: this.entry.componentsWithDatasets.map((a) => a.name),
       })
     },
     openAxons: function () {
-      EventBus.emit('onProvenanceActionClick', {
+      EventBus.emit('onConnectivityActionClick', {
         type: 'Facets',
         labels: this.entry.destinationsWithDatasets.map((a) => a.name),
       })
     },
     openDendrites: function () {
-      EventBus.emit('onProvenanceActionClick', {
+      EventBus.emit('onConnectivityActionClick', {
         type: 'Facets',
         labels: this.entry.originsWithDatasets.map((a) => a.name),
       })
@@ -297,7 +297,7 @@ export default {
   word-break: normal;
 }
 
-.provenance-info-title {
+.connectivity-info-title {
   padding: 1rem;
   display: flex;
   flex-direction: row;
@@ -510,7 +510,7 @@ export default {
     padding-top: 0.5em;
   }
 
-  .provenance-info-title ~ & {
+  .connectivity-info-title ~ & {
     padding-top: 0;
   }
 }

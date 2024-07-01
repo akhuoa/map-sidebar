@@ -119,6 +119,11 @@ $tab-height: 30px;
   outline: none;
   background-color: transparent;
 
+  :deep(> span) {
+    height: $tab-height - 2; // tab height minus border
+    font-family: Arial; // to fix font alignment on different browsers
+  }
+
   &:hover,
   &:focus {
     border: 0 none;

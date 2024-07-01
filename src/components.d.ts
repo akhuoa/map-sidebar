@@ -25,7 +25,7 @@ declare module 'vue' {
     ElTag: typeof import('element-plus/es')['ElTag']
     ExternalResourceCard: typeof import('./components/ExternalResourceCard.vue')['default']
     ImageGallery: typeof import('./components/ImageGallery.vue')['default']
-    ProvenancePopup: typeof import('./components/ProvenancePopup.vue')['default']
+    ConnectivityInfo: typeof import('./components/ConnectivityInfo.vue')['default']
     SearchFilters: typeof import('./components/SearchFilters.vue')['default']
     SearchHistory: typeof import('./components/SearchHistory.vue')['default']
     SideBar: typeof import('./components/SideBar.vue')['default']
