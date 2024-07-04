@@ -168,7 +168,6 @@ export default {
       cascadeSelectedWithBoolean: [],
       numberShown: 10,
       filters: [],
-      isPMRSearch: false,
       facets: ['Species', 'Gender', 'Organ', 'Datasets'],
       numberDatasetsShown: ['10', '20', '50'],
       props: { multiple: true },

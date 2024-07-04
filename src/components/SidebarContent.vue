@@ -148,6 +148,7 @@ export default {
         display: 'flex',
       },
       cascaderIsReady: false,
+      isPMRSearchOnly: false,
     }
   },
   computed: {
@@ -240,15 +241,25 @@ export default {
     filterUpdate: function (filters) {
       this.filters = [...filters]
       this.resetPageNavigation()
+      const pmrSearchObject = filters.find((tmp) => tmp.term === 'PMR');
+      if (pmrSearchObject) {
+        this.isPMRSearchOnly = true;
+        this.searchPMR();
+      } else {
       this.searchAlgolia(filters, this.searchInput)
       this.$emit('search-changed', {
         value: filters,
         type: 'filter-update',
       })
+      }
+    },
+    searchPMR: function () {
+      // only show PMR search results;
+      console.log('Show PMR search results ...');
     },
     searchAlgolia(filters, query = '') {
       // Algolia search
-      
+
       this.loadingCards = true
       this.algoliaClient
         .anatomyInSearch(getFilters(filters), query)
