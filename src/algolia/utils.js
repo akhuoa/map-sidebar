@@ -93,7 +93,6 @@ export function getFilters(selectedFacetArray=undefined) {
 
     filters = filters.split('()AND ').join(''); // Handle case where there where no OR facets
   });
-  console.log('filters about to be applied:', filters)
   return filters.substring(0, filters.lastIndexOf(" AND "));
 }
 

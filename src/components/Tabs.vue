@@ -9,7 +9,7 @@
       <div
         class="title-text-table"
         v-bind:class="{ highlightText: title.id == activeId }"
-        v-on:click="titleClicked(title.id)"
+        v-on:click="titleClicked(title.id, title.type)"
       >
         <div class="title-text">
           {{ title.title }}
@@ -44,8 +44,8 @@ export default {
     },
   },
   methods: {
-    titleClicked: function (id) {
-      this.$emit('titleClicked', id)
+    titleClicked: function (id, type) {
+      this.$emit('titleClicked', {id, type})
     },
     tabClose: function (id) {
       this.$emit('tab-close', id);

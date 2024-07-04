@@ -118,6 +118,7 @@ import '@abi-software/svg-sprite/dist/style.css'
 
 import { AlgoliaClient } from '../algolia/algolia.js'
 import { facetPropPathMapping } from '../algolia/utils.js'
+import EventBus from './EventBus.js'
 
 const capitalise = function (txt) {
   return txt.charAt(0).toUpperCase() + txt.slice(1)
@@ -217,6 +218,7 @@ export default {
           .getAlgoliaFacets(facetPropPathMapping)
           .then((data) => {
             this.facets = data
+            EventBus.emit('available-facets', data)
             this.options = data
 
             // create top level of options in cascader

@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BadgesGroup: typeof import('./components/BadgesGroup.vue')['default']
+    ConnectivityInfo: typeof import('./components/ConnectivityInfo.vue')['default']
     DatasetCard: typeof import('./components/DatasetCard.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
@@ -25,7 +26,6 @@ declare module 'vue' {
     ElTag: typeof import('element-plus/es')['ElTag']
     ExternalResourceCard: typeof import('./components/ExternalResourceCard.vue')['default']
     ImageGallery: typeof import('./components/ImageGallery.vue')['default']
-    ConnectivityInfo: typeof import('./components/ConnectivityInfo.vue')['default']
     SearchFilters: typeof import('./components/SearchFilters.vue')['default']
     SearchHistory: typeof import('./components/SearchHistory.vue')['default']
     SideBar: typeof import('./components/SideBar.vue')['default']

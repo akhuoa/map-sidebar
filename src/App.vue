@@ -4,22 +4,25 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap"
     />
-    Click arrow to open sidebar
-    <el-button @click="openSearch">search Uberon from refs</el-button>
-    <el-button @click="singleFacets">Add heart to Filter</el-button>
-    <el-button @click="addStomach">Add stomach to Filter</el-button>
-    <el-button @click="addInvalidTerm">Add invalid term to Filter</el-button>
-    <el-button @click="multiFacets">multiple facets</el-button>
-    <el-button @click="neuronSearch">open neuron search</el-button>
-    <el-button @click="keywordSearch">keyword search</el-button>
-    <el-button @click="getFacets">Get facets</el-button>
+    <div class="options-container">
+      <div>Click arrow to open sidebar</div>
+      <el-button @click="openSearch">search Uberon from refs</el-button>
+      <el-button @click="singleFacets">Add heart to Filter</el-button>
+      <el-button @click="addStomach">Add stomach to Filter</el-button>
+      <el-button @click="addInvalidTerm">Add invalid term to Filter</el-button>
+      <el-button @click="multiFacets">multiple facets</el-button>
+      <el-button @click="neuronSearch">open neuron search</el-button>
+      <el-button @click="keywordSearch">keyword search</el-button>
+      <el-button @click="getFacets">Get facets</el-button>
+    </div>
     <SideBar
       :envVars="envVars"
       class="side-bar"
       ref="sideBar"
       :visible="sideBarVisibility"
       :tabs="tabs"
-      :activeId="activeId"
+      :activeTabId="activeId"
+      :connectivityInfo="connectivityInput"
       @tabClicked="tabClicked"
       @search-changed="searchChanged($event)"
       @hover-changed="hoverChanged($event)"
@@ -33,6 +36,9 @@
 // optionally import default styles
 import SideBar from './components/SideBar.vue'
 import EventBus from './components/EventBus.js'
+import exampleConnectivityInput from './exampleConnectivityInput.js'
+
+const capitalise = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 // let testContext = {
 //   "description": "3D digital tracings of the enteric plexus obtained from seven subjects (M11, M16, M162, M163, M164, M168) are mapped randomly on mouse proximal colon. The data depicts individual neural wiring patterns in enteric microcircuits, and revealed both neuron and fiber units wired in a complex organization.",
@@ -94,8 +100,8 @@ export default {
   },
   data: function () {
     return {
-      tabArray: [{ title: 'Flatmap', id: 1 }],
-      contextArray: [null, null, null],
+      contextArray: [null, null],
+      tabArray: [{ title: 'Flatmap', id: 1, type: 'search'}, { title: 'Connectivity', id: 2, type: 'connectivity' }],
       sideBarVisibility: true,
       envVars: {
         API_LOCATION: import.meta.env.VITE_APP_API_LOCATION,
@@ -107,6 +113,7 @@ export default {
         NL_LINK_PREFIX: import.meta.env.VITE_APP_NL_LINK_PREFIX,
         ROOT_URL: import.meta.env.VITE_APP_ROOT_URL,
       },
+      connectivityInput: exampleConnectivityInput,
       activeId: 1,
     }
   },
@@ -117,11 +124,24 @@ export default {
     searchChanged: function (data) {
       console.log(data)
     },
-    tabClicked: function (id) {
-      this.activeId = id
+    tabClicked: function (tab) {
+      this.activeId = tab.id
     },
-    action: function (val) {
-      console.log('action fired: ', val)
+    // For connectivity input actions
+    action: function (action) {
+      console.log('action fired: ', action)
+      let facets = [];
+      facets.push(
+        ...action.labels.map(val => ({
+          facet: capitalise(val),
+          term: "Anatomical structure",
+          facetPropPath: "anatomy.organ.category.name",
+        }))
+      );
+      if (this.$refs.sideBar) {
+        console.log('openSearch', facets)
+        this.$refs.sideBar.openSearch(facets, "");
+      }
     },
     openSearch: function () {
       this.$refs.sideBar.openSearch(
@@ -229,5 +249,17 @@ body {
 }
 .map-icon {
   color: $app-primary-color;
+}
+.options-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% - 600px);
+  padding: 1rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

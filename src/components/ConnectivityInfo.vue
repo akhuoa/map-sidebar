@@ -68,7 +68,8 @@
         </div>
         <el-button
           v-show="
-            entry.originsWithDatasets && entry.originsWithDatasets.length > 0
+            entry.originsWithDatasets && entry.originsWithDatasets.length > 0 &&
+            shouldShowExploreButton(entry.originsWithDatasets)
           "
           class="button"
           id="open-dendrites-button"
@@ -132,7 +133,8 @@
         <el-button
           v-show="
             entry.destinationsWithDatasets &&
-            entry.destinationsWithDatasets.length > 0
+            entry.destinationsWithDatasets.length > 0 &&
+            shouldShowExploreButton(entry.destinationsWithDatasets)
           "
           class="button"
           @click="openAxons"
@@ -144,7 +146,8 @@
       <el-button
         v-show="
           entry.componentsWithDatasets &&
-          entry.componentsWithDatasets.length > 0
+          entry.componentsWithDatasets.length > 0 &&
+          shouldShowExploreButton(entry.componentsWithDatasets)
         "
         class="button"
         @click="openAll"
@@ -168,7 +171,7 @@ import {
   ElIcon as Icon,
 } from 'element-plus'
 import ExternalResourceCard from './ExternalResourceCard.vue'
-import EventBus from './EventBus'
+import EventBus from './EventBus.js'
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => {
@@ -205,6 +208,10 @@ export default {
         resource: undefined,
       }),
     },
+    availableAnatomyFacets: {
+      type: Array,
+      default: () => [],
+    },
   },
   // inject: ['getFeaturesAlert'],
   data: function () {
@@ -213,6 +220,7 @@ export default {
       activeSpecies: undefined,
       pubmedSearchUrl: '',
       loading: false,
+      facetList: [],
       showToolip: false,
       showDetails: false,
       originDescriptions: {
@@ -222,6 +230,15 @@ export default {
       componentsWithDatasets: [],
       uberons: [{ id: undefined, name: undefined }],
     }
+  },
+  watch: {
+    availableAnatomyFacets: {
+      handler: function (val) {
+        this.convertFacetsToList(val)
+      },
+      immediate: true,
+      deep: true,
+    },
   },
   computed: {
     resources: function () {
@@ -275,6 +292,25 @@ export default {
       EventBus.emit('onConnectivityActionClick', {
         type: 'Facets',
         labels: this.entry.destinationsWithDatasets.map((a) => a.name),
+      })
+    },
+    // shouldShowExploreButton: Checks if the feature is in the list of available anatomy facets
+    shouldShowExploreButton: function (features) {
+      for (let i = 0; i < features.length; i++) {
+        if (this.facetList.includes(features[i].name.toLowerCase())) {
+          return true
+        }
+      }
+      return false
+    },
+    // convertFacetsToList: Converts the available anatomy facets to a list for easy searching
+    convertFacetsToList: function (facets) {
+      facets.forEach((facet) => {
+        if(facet.children) {
+          this.convertFacetsToList(facet.children)
+        } else {
+          this.facetList.push(facet.label.toLowerCase())
+        }
       })
     },
     openDendrites: function () {
@@ -508,6 +544,10 @@ export default {
 
   .block {
     padding-top: 0.5em;
+
+    + .block {
+      margin-top: 1rem;
+    }
   }
 
   .connectivity-info-title ~ & {
