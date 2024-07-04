@@ -78,6 +78,7 @@ import EventBus from './EventBus.js'
 
 import { AlgoliaClient } from '../algolia/algolia.js'
 import { getFilters, facetPropPathMapping } from '../algolia/utils.js'
+import FlatmapQueries from '../flatmapQueries/flatmapQueries.js'
 
 // handleErrors: A custom fetch error handler to recieve messages from the server
 //    even when an error is found
@@ -106,6 +107,8 @@ var initial_state = {
   start: 0,
   hasSearched: false,
   contextCardEnabled: false,
+  pmrResults: [],
+  mode: 'all', // 'pmr', 'no-pmr'
 }
 
 export default {
@@ -254,8 +257,13 @@ export default {
       }
     },
     searchPMR: function () {
-      // only show PMR search results;
-      console.log('Show PMR search results ...');
+      const search = this.searchInput;
+      // openPMRSearch: Resets the results, populates dataset cards and filters with PMR data.
+      this.flatmapQueries.pmrSearch(search).then((data) => {
+        this.pmrResults = data
+      })
+
+      console.log('PMR search results ...', this.pmrResults);
     },
     searchAlgolia(filters, query = '') {
       // Algolia search
@@ -459,6 +467,11 @@ export default {
       this.envVars.PENNSIEVE_API_LOCATION
     )
     this.algoliaClient.initIndex(this.envVars.ALGOLIA_INDEX)
+
+    // initialise flatmap queries
+    this.flatmapQueries = new FlatmapQueries()
+    this.flatmapQueries.initialise(this.envVars.FLATMAP_API_LOCATION)
+
     this.openSearch(this.filter, this.searchInput)
   },
   created: function () {
