@@ -183,6 +183,7 @@ export default {
       this.discoverIds = []
       this._dois = []
       this.results = []
+      this.pmrResultsresults = []
       this.loadingCards = false
     },
     openSearch: function (filter, search = '') {
@@ -204,7 +205,14 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes()
           this.resetSearch()
         } else if (this.filter) {
-          this.searchAlgolia(this.filter, search)
+          // this.searchAlgolia(this.filter, search)
+          if (this.mode !== 'no-pmr') {
+            this.searchPMR(search);
+          }
+
+          if (this.mode !== 'pmr-only') {
+            this.searchAlgolia(this.filter, search)
+          }
           this.$refs.filtersRef.setCascader(this.filter)
         }
       } else {
@@ -212,7 +220,14 @@ export default {
         //otherwise waith for cascader to be ready
         this.filter = filter
         if (!filter || filter.length == 0) {
-          this.searchAlgolia(this.filter, search)
+          // this.searchAlgolia(this.filter, search)
+          if (this.mode !== 'no-pmr') {
+            this.searchPMR(search);
+          }
+
+          if (this.mode !== 'pmr-only') {
+            this.searchAlgolia(this.filter, search)
+          }
         }
       }
     },
