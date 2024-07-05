@@ -38,6 +38,7 @@
       <div class="error-feedback" v-if="results.length === 0 && !loadingCards">
         No results found - Please change your search / filter criteria.
       </div>
+      <template v-if="mode !== 'pmr-only'">
       <div v-for="result in results" :key="result.doi" class="step-item">
         <DatasetCard
           class="dataset-card"
@@ -47,6 +48,15 @@
           @mouseleave="hoverChanged(undefined)"
         />
       </div>
+      </template>
+      <template v-if="mode !== 'no-pmr'">
+        <div v-for="(result, i) in pmrResults" :key="i" class="step-item">
+          <PMRDatasetCard
+            :entry="result"
+            :envVars="envVars"
+          />
+        </div>
+      </template>
       <el-pagination
         class="pagination"
         v-model:current-page="page"
@@ -74,6 +84,7 @@ import {
 import SearchFilters from './SearchFilters.vue'
 import SearchHistory from './SearchHistory.vue'
 import DatasetCard from './DatasetCard.vue'
+import PMRDatasetCard from './PMRDatasetCard.vue'
 import EventBus from './EventBus.js'
 
 import { AlgoliaClient } from '../algolia/algolia.js'
@@ -108,13 +119,14 @@ var initial_state = {
   hasSearched: false,
   contextCardEnabled: false,
   pmrResults: [],
-  mode: 'all', // 'pmr', 'no-pmr'
+  mode: 'all', // 'pmr-only', 'no-pmr'
 }
 
 export default {
   components: {
     SearchFilters,
     DatasetCard,
+    PMRDatasetCard,
     SearchHistory,
     Button,
     Card,
@@ -151,7 +163,6 @@ export default {
         display: 'flex',
       },
       cascaderIsReady: false,
-      isPMRSearchOnly: false,
     }
   },
   computed: {
@@ -244,26 +255,48 @@ export default {
     filterUpdate: function (filters) {
       this.filters = [...filters]
       this.resetPageNavigation()
-      const pmrSearchObject = filters.find((tmp) => tmp.term === 'PMR');
-      if (pmrSearchObject) {
-        this.isPMRSearchOnly = true;
-        this.searchPMR();
-      } else {
-      this.searchAlgolia(filters, this.searchInput)
+      this.updateSearchMode(filters);
+
+      if (this.mode !== 'no-pmr') {
+        this.searchPMR(this.searchInput);
+      }
+
+      if (this.mode !== 'pmr-only') {
+        this.searchAlgolia(filters, this.searchInput)
+      }
+
       this.$emit('search-changed', {
         value: filters,
         type: 'filter-update',
       })
+    },
+    updateSearchMode: function (filters) {
+      this.mode = 'all';
+
+      const dataTypeFilters = filters.filter((item) => item.facetPropPath === 'item.types.name');
+      const dataTypeAll = dataTypeFilters.find((item) => item.facet == 'Show all');
+      const pmrSearchObject = dataTypeFilters.find((item) => item.term === 'PMR')
+
+      // only one filter and which is pmr
+      if (dataTypeFilters.length === 1 && pmrSearchObject) {
+        this.mode = 'pmr-only';
+      }
+
+      if (!dataTypeAll && !pmrSearchObject) {
+        this.mode = 'no-pmr';
       }
     },
-    searchPMR: function () {
-      const search = this.searchInput;
+    searchPMR: function (search) {
       // openPMRSearch: Resets the results, populates dataset cards and filters with PMR data.
       this.flatmapQueries.pmrSearch(search).then((data) => {
-        this.pmrResults = data
-      })
-
-      console.log('PMR search results ...', this.pmrResults);
+        this.pmrResults = data;
+        this.loadingCards = false;
+        this.scrollToTop();
+        this.$emit('search-changed', {
+          value: this.searchInput,
+          type: 'query-update',
+        });
+      });
     },
     searchAlgolia(filters, query = '') {
       // Algolia search
