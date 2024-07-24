@@ -564,9 +564,8 @@ export default {
       return facets
     },
     searchHistorySearch: function (item) {
-      this.searchInput = item.search
-      this.filters = item.filters
-      this.openSearch(item.filters, item.search)
+      this.searchInput = item.search;
+      this.openSearch(this.filter, item.search);
     },
   },
   mounted: function () {
