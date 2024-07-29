@@ -97,10 +97,11 @@ export default {
      * The environment variables object with
      * `API_LOCATION`, `ALGOLIA_KEY`, `ALGOLIA_ID`,
      * `ALGOLIA_INDEX`, `PENNSIEVE_API_LOCATION`, `BL_SERVER_URL`,
-     * `NL_LINK_PREFIX`, `ROOT_URL`
+     * `NL_LINK_PREFIX`, `ROOT_URL`, and `FLATMAP_API_LOCATION` _(for PMR flatmap query)_
      */
     envVars: {
       type: Object,
+      required: true,
       default: () => {},
     },
     /**
