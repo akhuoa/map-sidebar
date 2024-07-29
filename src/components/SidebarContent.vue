@@ -115,6 +115,8 @@ var initial_state = {
   searchInput: '',
   lastSearch: '',
   results: [],
+  algoliaResults: [],
+  pmrResults: [],
   pmrNumberOfHits: 0,
   sparcNumberOfHits: 0,
   filter: [],
@@ -125,7 +127,6 @@ var initial_state = {
   noPMRResultsFlag: false,
   hasSearched: false,
   contextCardEnabled: false,
-  pmrResults: [],
   RatioOfPMRResults: RatioOfPMRResults,
 };
 
@@ -222,6 +223,8 @@ export default {
       this.discoverIds = []
       this._dois = []
       this.results = []
+      this.algoliaResults = []
+      this.pmrResults = []
       this.loadingCards = false
     },
     // openSearch: Resets the results, populates dataset cards and filters. Will use Algolia and SciCrunch data uness pmr mode is set
@@ -243,9 +246,13 @@ export default {
       this.flatmapQueries.updateOffset(this.calculatePMROffest())
       this.flatmapQueries.updateLimit(this.PMRLimit(this.pmrResultsOnlyFlag))
       this.flatmapQueries.pmrSearch(filter, search).then((data) => {
+        // clear the existing results for concurrent requests
+        this.results = [];
+        this.pmrResults = [];
         data.forEach((result) => {
-          this.results.push(result)
-        })
+          this.pmrResults.push(result);
+        });
+        this.results = [...this.algoliaResults, ...this.pmrResults];
         this.pmrNumberOfHits = this.flatmapQueries.numberOfHits
         this.loadingCards = false;
       })
@@ -394,10 +401,14 @@ export default {
           this.sparcNumberOfHits = searchData.total
           this.discoverIds = searchData.discoverIds
           this._dois = searchData.dois
+          // clear the existing results for concurrent requests
+          this.results = [];
+          this.algoliaResults = [];
           searchData.items.forEach((item) => {
             item.detailsReady = false
-            this.results.push(item)
-          })
+            this.algoliaResults.push(item);
+          });
+          this.results = [...this.algoliaResults, ...this.pmrResults];
           // add the items to the results
           this.results.concat(searchData.items)
           this.loadingCards = false
