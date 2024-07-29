@@ -93,6 +93,7 @@ import { AlgoliaClient } from '../algolia/algolia.js'
 import { getFilters, facetPropPathMapping } from '../algolia/utils.js'
 import FlatmapQueries from '../flatmapQueries/flatmapQueries.js'
 import mixedPageCalculation from '../mixins/mixedPageCalculation.vue'
+import { markRaw } from 'vue'
 
 const RatioOfPMRResults = 0.2; // Ratio of PMR results to Sparc results
 
@@ -174,6 +175,7 @@ export default {
     return {
       ...this.entry,
       ...this.initFilters,
+      algoliaClient: undefined,
       bodyStyle: {
         flex: '1 1 auto',
         'flex-flow': 'column',
@@ -570,11 +572,11 @@ export default {
   },
   mounted: function () {
     // initialise algolia
-    this.algoliaClient = new AlgoliaClient(
+    this.algoliaClient = markRaw(new AlgoliaClient(
       this.envVars.ALGOLIA_ID,
       this.envVars.ALGOLIA_KEY,
       this.envVars.PENNSIEVE_API_LOCATION
-    )
+    ))
     this.algoliaClient.initIndex(this.envVars.ALGOLIA_INDEX)
 
     // initialise flatmap queries

@@ -156,6 +156,7 @@ export default {
   },
   data: function () {
     return {
+      algoliaClient: undefined,
       cascaderIsReady: false,
       previousShowAllChecked: {
         species: false,
@@ -793,11 +794,11 @@ export default {
     },
   },
   mounted: function () {
-    this.algoliaClient = new AlgoliaClient(
+    this.algoliaClient = markRaw(new AlgoliaClient(
       this.envVars.ALGOLIA_ID,
       this.envVars.ALGOLIA_KEY,
       this.envVars.PENNSIEVE_API_LOCATION
-    )
+    ))
     this.algoliaClient.initIndex(this.envVars.ALGOLIA_INDEX)
     this.populateCascader().then(() => {
       this.cascaderIsReady = true
