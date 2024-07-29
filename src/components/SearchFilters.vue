@@ -282,6 +282,7 @@ export default {
             label: 'PMR',
             value: this.createCascaderItemValue("Data type", "PMR"),
           });
+          option.total += 1;
         }
       }
     },
