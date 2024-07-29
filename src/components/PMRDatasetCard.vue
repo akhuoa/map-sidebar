@@ -117,7 +117,7 @@ import {
  * ---------------------------------------
  */
 
-const placeholderThumbnail = 'assets/missing-image.svg';
+import MissingImage from '@/../assets/missing-image.svg'
 
 export default {
   name: "PMRDatasetCard",
@@ -142,7 +142,7 @@ export default {
   },
   data: function () {
     return {
-      thumbnail: this.entry.image || placeholderThumbnail,
+      thumbnail: this.entry.image || MissingImage,
       loading: false,
     };
   },
