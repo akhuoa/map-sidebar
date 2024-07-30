@@ -24,6 +24,7 @@
       class="filters"
       ref="filtersRef"
       :entry="filterEntry"
+      :withPMRData="withPMRData"
       :envVars="envVars"
       @filterResults="filterUpdate"
       @numberPerPage="numberPerPageUpdate"
@@ -34,7 +35,6 @@
       ref="searchHistory"
       @search="searchHistorySearch"
     ></SearchHistory>
-      pmr hits: {{ pmrNumberOfHits }}
     <div class="content scrollbar" v-loading="loadingCards" ref="content">
       <div class="error-feedback" v-if="results.length === 0 && !loadingCards">
         No results found - Please change your search / filter criteria.
@@ -171,6 +171,10 @@ export default {
       type: Object,
       default: () => {},
     },
+    withPMRData: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {
@@ -190,6 +194,7 @@ export default {
     filterEntry: function () {
       return {
         numberOfHits: this.numberOfHits,
+        pmrNumberOfHits: this.pmrNumberOfHits,
         filterFacets: this.filter,
       }
     },

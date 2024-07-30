@@ -85,7 +85,17 @@
       </span>
     </transition>
     <div class="dataset-shown">
-      <span class="dataset-results-feedback">{{ numberOfResultsText }}</span>
+      <span class="dataset-results-feedback">
+        <template v-if="withPMRData">
+          <el-tooltip :content="numberOfPMRText" placement="bottom" effect="results-tooltip">
+            {{ numberOfResultsText }}
+          </el-tooltip>
+        </template>
+        <template v-else>
+          {{ numberOfResultsText }}
+        </template>
+        | Showing
+      </span>
       <el-select
         class="number-shown-select"
         v-model="numberShown"
@@ -153,6 +163,10 @@ export default {
       type: Object,
       default: () => {},
     },
+    withPMRData: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {
@@ -194,7 +208,14 @@ export default {
   },
   computed: {
     numberOfResultsText: function () {
-      return `${this.entry.numberOfHits} results | Showing`
+      const total = this.entry.numberOfHits;
+      const text = this.getResultsLabelByTotalNumbers(total);
+      return `${total} ${text}`;
+    },
+    numberOfPMRText: function () {
+      const total = this.entry.pmrNumberOfHits;
+      const text = this.getResultsLabelByTotalNumbers(total);
+      return `including ${total} PMR ${text}`;
     },
   },
   methods: {
@@ -793,6 +814,9 @@ export default {
       }
       return []
     },
+    getResultsLabelByTotalNumbers: function (total) {
+      return total > 1 ? 'results' : 'result';
+    },
   },
   mounted: function () {
     this.algoliaClient = markRaw(new AlgoliaClient(
@@ -894,6 +918,7 @@ export default {
 .dataset-shown {
   display: flex;
   flex-direction: row;
+  align-items: center;
   float: right;
   padding-bottom: 6px;
   gap: 8px;
@@ -904,9 +929,8 @@ export default {
   text-align: right;
   color: rgb(48, 49, 51);
   font-family: Asap;
-  font-size: 18px;
+  font-size: 1rem;
   font-weight: 500;
-  padding-top: 8px;
 }
 
 .search-filters {
@@ -1021,5 +1045,17 @@ export default {
 .el-checkbox__input.is-indeterminate .el-checkbox__inner {
   background-color: $app-primary-color;
   border-color: $app-primary-color;
+}
+
+.el-popper.is-results-tooltip {
+  padding: 4px 10px;
+  font-family: Asap;
+  color: #333;
+  background: white;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+
+  & .el-popper__arrow::before {
+    background: white;
+  }
 }
 </style>

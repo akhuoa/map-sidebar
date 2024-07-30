@@ -46,6 +46,7 @@
               :contextCardEntry="tab.contextCard"
               :envVars="envVars"
               :initFilters="initFilters"
+              :withPMRData="withPMRData"
               :ref="'searchTab_' + tab.id"
               @pmr-action-click="onPmrActionClick"
               @search-changed="searchChanged(tab.id, $event)"
@@ -134,6 +135,14 @@ export default {
     connectivityInfo: {
       type: Object,
       default: null,
+    },
+    /**
+     * The option to show PMR results from flatmap API
+     * together with existing Algolia results.
+     */
+    withPMRData: {
+      type: Boolean,
+      default: false,
     },
   },
   data: function () {

@@ -24,6 +24,7 @@
       :tabs="tabs"
       :activeTabId="activeId"
       :connectivityInfo="connectivityInput"
+      :withPMRData="true"
       @tabClicked="tabClicked"
       @search-changed="searchChanged($event)"
       @hover-changed="hoverChanged($event)"
