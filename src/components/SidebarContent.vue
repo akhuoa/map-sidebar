@@ -232,16 +232,23 @@ export default {
       this.pmrResults = []
       this.loadingCards = false
     },
-    // openSearch: Resets the results, populates dataset cards and filters. Will use Algolia and SciCrunch data uness pmr mode is set
+    // openSearch: Resets the results, populates dataset cards and filters.
+    // Will use Algolia and SciCrunch data uness pmr mode is set in PMR flag.
     openSearch: function(filter, search = '', resetSearch = true) {
-      this.updatePMROnlyFlag(filter);
+      this.updatePMRFlags(filter);
 
       if (resetSearch) {
         this.resetSearch();
         this.openFilterSearch(filter, search);
       } else {
-        this.searchAlgolia(filter, search);
-        this.openPMRSearch(filter, search);
+        if (this.pmrResultsOnlyFlag) {
+          this.openPMRSearch(filter, search);
+        } else if (this.noPMRResultsFlag) {
+          this.searchAlgolia(filter, search);
+        } else {
+          this.searchAlgolia(filter, search);
+          this.openPMRSearch(filter, search);
+        }
       }
     },
 
@@ -344,13 +351,18 @@ export default {
         )
       }
     },
-    updatePMROnlyFlag: function (filters) {
+    updatePMRFlags: function (filters) {
+      this.pmrResultsOnlyFlag = false;
+      this.noPMRResultsFlag = false;
+
+      if (!this.withPMRData) {
+        this.noPMRResultsFlag = true;
+        return;
+      }
+
       const dataTypeFilters = filters.filter((item) => item.facetPropPath === 'item.types.name');
       const pmrFilter = dataTypeFilters.filter((item) => item.facet === 'PMR');
       const showAllFilter = dataTypeFilters.filter((item) => item.facet === 'Show all');
-
-      this.pmrResultsOnlyFlag = false;
-      this.noPMRResultsFlag = false;
 
       if (dataTypeFilters.length === 1 && pmrFilter.length === 1) {
         this.pmrResultsOnlyFlag = true;
@@ -364,7 +376,7 @@ export default {
       this.filter = [...filters]
 
       // Check if PMR is in the filters
-      this.updatePMROnlyFlag(filters)
+      this.updatePMRFlags(filters)
 
       // Note that we cannot use the openSearch function as that modifies filters
       this.resetSearch()
@@ -596,11 +608,13 @@ export default {
     this.algoliaClient.initIndex(this.envVars.ALGOLIA_INDEX)
 
     // initialise flatmap queries
-    this.flatmapQueries = new FlatmapQueries()
-    this.flatmapQueries.initialise(this.envVars.FLATMAP_API_LOCATION)
+    if (this.withPMRData) {
+      this.flatmapQueries = new FlatmapQueries();
+      this.flatmapQueries.initialise(this.envVars.FLATMAP_API_LOCATION);
+    }
 
     // open search
-    this.openSearch(this.filter, this.searchInput, this.mode )
+    this.openSearch(this.filter, this.searchInput);
   },
   created: function () {
     //Create non-reactive local variables

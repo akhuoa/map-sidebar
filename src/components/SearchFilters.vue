@@ -284,7 +284,9 @@ export default {
               })
             })
 
-            this.populatePMRinCascader();
+            if (this.withPMRData) {
+              this.populatePMRinCascader();
+            }
           })
           .finally(() => {
             resolve()

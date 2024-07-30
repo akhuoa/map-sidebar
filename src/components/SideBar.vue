@@ -192,6 +192,19 @@ export default {
       this.initFilters.filter = facets;
       this.initFilters.searchInput = query;
       this.drawerOpen = true;
+
+      // Warning for PMR search when withPMRData flag is not enabled.
+      const foundPMRFacet = facets.filter((facet) => facet.facet === 'PMR');
+      if (foundPMRFacet.length && !this.withPMRData) {
+        const warningText = [
+          "Warning:",
+          "Found PMR facet in search filter but withPMRData flag is not enabled.",
+          "No PMR result will be shown!",
+          "Set withPMRData = true to see PMR results."
+        ];
+        console.warn(warningText.join('\n'));
+      }
+
       // Because refs are in v-for, nextTick is needed here
       this.$nextTick(() => {
         const searchTabRef = this.getSearchTabRefById(1);
