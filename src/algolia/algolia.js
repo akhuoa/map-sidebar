@@ -45,7 +45,7 @@ export class AlgoliaClient {
               }
               if (facet === info[0]) {
                 filtered.push({
-                  label: info[1], 
+                  label: info[1],
                   id: facetId++,
                   facetPropPath: `${parentFacet ? parentFacet.facetSubpropPath : undefined}`
                 });
@@ -154,7 +154,6 @@ export class AlgoliaClient {
    * This is using fetch from the Algolia API
    */
   search(filter, query = '', offset = 0, length = 8) {
-    console.log('searching', filter, query, offset, length)
     // If the length is 0, return an empty result
     if (length === 0) {
       return new Promise(resolve => {
@@ -233,7 +232,7 @@ export class AlgoliaClient {
       id: h.objectID,
       terms: h.anatomy? h.anatomy.organ.map(o=>o.curie) : []
     }))
-    return curieForDatsets 
+    return curieForDatsets
   }
   processResultsForScaffold(hits) {
     let numberOfDatasetsForAnatomy = {}
