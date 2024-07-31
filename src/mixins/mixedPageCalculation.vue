@@ -2,14 +2,14 @@
 // The functions below are needed because the number of results shown on the page is dependent what is available from each index.
 // We fix this by calcuting how many results we have shown before the requested page and then calculating the offset based on that.
 
-// Note that this.RatioOfPMRResults is a number that determines how many PMR results are shown compared to SPARC results. It is grabbed from a constant in 
+// Note that this.RatioOfPMRResults is a number that determines how many PMR results are shown compared to SPARC results. It is grabbed from a constant in
 //  SidebarContent.vue.
 
 export default {
   methods: {
-    
+
     // Calculate Variable Ratio is used as a number to determine how the ratio of PMR results to SPARC results
-    //   will be shown on the page. 1 means only PMR results, 0 means only SPARC results. 
+    //   will be shown on the page. 1 means only PMR results, 0 means only SPARC results.
     calculateVariableRatio: function () {
       if (this.page === 1) {
         this.variableRatio = this.RatioOfPMRResults
@@ -17,7 +17,7 @@ export default {
       // Check if we have run out of Sparc results
       } else if( this.npp_SPARC * (this.page -1) >= this.sparcNumberOfHits) {
         this.variableRatio = 1
-      
+
       // Check if we have run out of PMR results
       } else if(this.npp_PMR * (this.page - 1) >= this.pmrNumberOfHits) {
         this.variableRatio = 0
@@ -48,13 +48,13 @@ export default {
         return numberOfPMRResultsShownInMixed + numberOfPMRResultsShownInPMROnly
       }
     },
-    
+
     // calculateSPARCOffest is used to calculate how many SPARC results we have shown before the requested page. See above for details
     calculateSPARCOffest: function() {
       if(this.variableRatio === this.RatioOfPMRResults) {
         return (this.page-1)*this.npp_SPARC
       } else if (this.variableRatio === 0) {
-        
+
         // calculate how many results we showed before the requested page
         let pageWherePMRResultsRanOut = Math.ceil(this.pmrNumberOfHits / this.npp_PMR)
         let numberOfSPARCResultsShownInMixed = this.npp_SPARC * pageWherePMRResultsRanOut
@@ -65,9 +65,9 @@ export default {
     },
 
     // PMRLimit is used to calculate how many PMR results we can show on the page.
-    PMRLimit: function(pmrResultsOnlyFlag=false) {
-      // If we only want PMR results, return the number per page  
-      if (pmrResultsOnlyFlag) {
+    PMRLimit: function(pmrResultsFlag=false) {
+      // If we only want PMR results, return the number per page
+      if (pmrResultsFlag) {
         return this.numberPerPage
       }
       // If the variable ratio is the same as the ratio of PMR results, return the number per page set for PMR
@@ -83,8 +83,8 @@ export default {
         return 0
       }
     },
-    SPARCLimit: function(pmrResultsOnlyFlag=false) {
-      if(pmrResultsOnlyFlag) {
+    SPARCLimit: function(pmrResultsFlag=false) {
+      if(pmrResultsFlag) {
         return 0
       }
       if (this.variableRatio === this.RatioOfPMRResults) {
