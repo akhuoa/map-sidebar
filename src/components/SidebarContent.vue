@@ -200,11 +200,15 @@ export default {
     },
     // npp_SPARC: Number per page for SPARC datasets
     npp_SPARC: function () {
-      return Math.round(this.numberPerPage * (1 - RatioOfPMRResults))
+      const ratioNumber = Math.round(this.numberPerPage * (1 - RatioOfPMRResults));
+      const numberPerPage = this.sparcResultsFlag ? this.numberPerPage : ratioNumber;
+      return numberPerPage;
     },
     // npp_PMR: Number per page for PMR datasets
     npp_PMR: function () {
-      return Math.round(this.numberPerPage * RatioOfPMRResults)
+      const ratioNumber = Math.round(this.numberPerPage * RatioOfPMRResults);
+      const numberPerPage = this.pmrResultsFlag ? this.numberPerPage : ratioNumber;
+      return numberPerPage;
     },
     numberOfHits: function () {
       return this.sparcNumberOfHits + this.pmrNumberOfHits
@@ -413,7 +417,7 @@ export default {
           EventBus.emit('number-of-datasets-for-anatomies', r.forScaffold)
         })
       this.algoliaClient
-        .search(getFilters(filters), query, this.calculateSPARCOffest(), this.SPARCLimit(this.pmrResultsFlag) )
+        .search(getFilters(filters), query, this.calculateSPARCOffest(), this.SPARCLimit(this.pmrResultsFlag))
         .then((searchData) => {
           this.sparcNumberOfHits = searchData.total
           this.discoverIds = searchData.discoverIds
