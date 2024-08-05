@@ -1052,12 +1052,13 @@ export default {
 .el-popper.is-results-tooltip {
   padding: 4px 10px;
   font-family: Asap;
-  color: #333;
-  background: white;
-  box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+  background: #f3ecf6 !important;
+  border: 1px solid $app-primary-color;
 
   & .el-popper__arrow::before {
-    background: white;
+    border: 1px solid;
+    border-color: $app-primary-color;
+    background: #f3ecf6;
   }
 }
 </style>
