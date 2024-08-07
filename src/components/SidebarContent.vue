@@ -246,17 +246,21 @@ export default {
         this.resetSearch();
         this.openFilterSearch(filter, search);
       } else {
-        if (this.pmrResultsFlag) {
-          this.openPMRSearch(filter, search);
-        } else if (this.sparcResultsFlag) {
-          this.searchAlgolia(filter, search);
-        } else {
-          this.searchAlgolia(filter, search);
-          this.openPMRSearch(filter, search);
-        }
+        this.handleAllSearch(filter, search);
       }
     },
-
+    handleAllSearch: function (filter, search) {
+      if (this.pmrResultsFlag) {
+        this.openPMRSearch(filter, search);
+      }
+      else if (this.sparcResultsFlag) {
+        this.searchAlgolia(filter, search);
+      }
+      else {
+        this.searchAlgolia(filter, search);
+        this.openPMRSearch(filter, search);
+      }
+    },
     // openPMRSearch: Resets the results, populates dataset cards and filters with PMR data.
     openPMRSearch: function (filter, search = '') {
       this.loadingCards = true;
@@ -295,14 +299,7 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes()
           this.resetSearch()
         } else if (this.filter) {
-          if (this.pmrResultsFlag) {
-            this.openPMRSearch(this.filter, search);
-          } else if (this.sparcResultsFlag) {
-            this.searchAlgolia(this.filter, search);
-          } else {
-            this.searchAlgolia(this.filter, search);
-            this.openPMRSearch(this.filter, search);
-          }
+          this.handleAllSearch(this.filter, search);
           this.$refs.filtersRef.setCascader(this.filter)
         }
       } else {
@@ -310,14 +307,7 @@ export default {
         //otherwise waith for cascader to be ready
         this.filter = filter
         if (!filter || filter.length == 0) {
-          if (this.pmrResultsFlag) {
-            this.openPMRSearch(this.filter, search);
-          } else if (this.sparcResultsFlag) {
-            this.searchAlgolia(this.filter, search);
-          } else {
-            this.searchAlgolia(this.filter, search);
-            this.openPMRSearch(this.filter, search);
-          }
+          this.handleAllSearch(this.filter, search);
         }
       }
     },
@@ -385,14 +375,7 @@ export default {
 
       // Note that we cannot use the openSearch function as that modifies filters
       this.resetSearch()
-      if (this.pmrResultsFlag) {
-        this.openPMRSearch(filters, this.searchInput)
-      } else if (this.sparcResultsFlag) {
-        this.searchAlgolia(filters, this.searchInput)
-      } else {
-        this.searchAlgolia(filters, this.searchInput)
-        this.openPMRSearch(filters, this.searchInput)
-      }
+      this.handleAllSearch(filters, this.searchInput);
 
       this.$emit('search-changed', {
         value: filters,
