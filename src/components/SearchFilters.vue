@@ -87,7 +87,7 @@
     <div class="dataset-shown">
       <span class="dataset-results-feedback">
         <template v-if="withPMRData">
-          <el-tooltip :content="numberOfPMRText" placement="bottom" effect="results-tooltip">
+          <el-tooltip :content="detailNumberOfResultsText" placement="bottom" effect="results-tooltip">
             {{ numberOfResultsText }}
           </el-tooltip>
         </template>
@@ -212,10 +212,12 @@ export default {
       const text = this.getResultsLabelByTotalNumbers(total);
       return `${total} ${text}`;
     },
-    numberOfPMRText: function () {
-      const total = this.entry.pmrNumberOfHits;
-      const text = this.getResultsLabelByTotalNumbers(total);
-      return `including ${total} PMR ${text}`;
+    detailNumberOfResultsText: function () {
+      const totalPMR = this.entry.pmrNumberOfHits;
+      const textPMR = this.getResultsLabelByTotalNumbers(totalPMR);
+      const totalSPARC = this.entry.sparcNumberOfHits;
+      const textSPARC = this.getResultsLabelByTotalNumbers(totalSPARC);
+      return `${totalSPARC} SPARC ${textSPARC} and ${totalPMR} PMR ${textPMR}`;
     },
   },
   methods: {
