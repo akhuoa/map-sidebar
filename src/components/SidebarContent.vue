@@ -195,6 +195,7 @@ export default {
       return {
         numberOfHits: this.numberOfHits,
         pmrNumberOfHits: this.pmrNumberOfHits,
+        sparcNumberOfHits: this.sparcNumberOfHits,
         filterFacets: this.filter,
       }
     },
