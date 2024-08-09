@@ -83,8 +83,8 @@ export default {
         return 0
       }
     },
-    SPARCLimit: function(pmrResultsFlag=false) {
-      if(pmrResultsFlag) {
+    SPARCLimit: function(sparcResultsFlag=true) {
+      if(!sparcResultsFlag) {
         return 0
       }
       if (this.variableRatio === this.RatioOfPMRResults) {
