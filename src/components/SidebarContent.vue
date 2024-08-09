@@ -124,7 +124,7 @@ var initial_state = {
   numberPerPage: 10,
   page: 1,
   pmrResultsFlag: false,
-  sparcResultsFlag: false,
+  sparcResultsFlag: true,
   hasSearched: false,
   contextCardEnabled: false,
   RatioOfPMRResults: RatioOfPMRResults,
@@ -250,14 +250,11 @@ export default {
       }
     },
     handleAllSearch: function (filter, search) {
+      if (this.sparcResultsFlag) {
+        this.searchAlgolia(filter, search);
+      }
+
       if (this.pmrResultsFlag) {
-        this.openPMRSearch(filter, search);
-      }
-      else if (this.sparcResultsFlag) {
-        this.searchAlgolia(filter, search);
-      }
-      else {
-        this.searchAlgolia(filter, search);
         this.openPMRSearch(filter, search);
       }
     },
@@ -265,7 +262,8 @@ export default {
     openPMRSearch: function (filter, search = '') {
       this.loadingCards = true;
       this.flatmapQueries.updateOffset(this.calculatePMROffest())
-      this.flatmapQueries.updateLimit(this.PMRLimit(this.pmrResultsFlag))
+      const pmrLimit = 2; // TODO: this.PMRLimit(this.sparcResultsFlag);
+      this.flatmapQueries.updateLimit(pmrLimit);
       this.flatmapQueries.pmrSearch(filter, search).then((data) => {
         // clear the existing results for concurrent requests
         this.results = [];
@@ -299,6 +297,7 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes()
           this.resetSearch()
         } else if (this.filter) {
+          this.updatePMRAndSPARCResultsFlags(this.filter);
           this.handleAllSearch(this.filter, search);
           this.$refs.filtersRef.setCascader(this.filter)
         }
@@ -307,6 +306,7 @@ export default {
         //otherwise waith for cascader to be ready
         this.filter = filter
         if (!filter || filter.length == 0) {
+          this.updatePMRAndSPARCResultsFlags(this.filter);
           this.handleAllSearch(this.filter, search);
         }
       }
@@ -355,6 +355,15 @@ export default {
         return;
       }
 
+      if (!filters.length) {
+        this.sparcResultsFlag = true;
+
+        if (this.withPMRData) {
+          this.pmrResultsFlag = true;
+        }
+        return;
+      }
+
       const dataTypeFilters = filters.filter((item) => item.facetPropPath === 'item.types.name');
       const pmrFilter = dataTypeFilters.filter((item) => item.facet === 'PMR');
       const showAllFilter = dataTypeFilters.filter((item) => item.facet === 'Show all');
@@ -399,9 +408,14 @@ export default {
           // Send result anatomy to the scaffold and flatmap
           EventBus.emit('anatomy-in-datasets', r.forFlatmap)
           EventBus.emit('number-of-datasets-for-anatomies', r.forScaffold)
-        })
+
+          // TODO: to update ratio and offset limit before search
+          this.sparcNumberOfHits = r.forFlatmap.length;
+          this.calculateVariableRatio();
+          const sparcLimit = 8; // this.SPARCLimit(this.sparcResultsFlag);
+      // TODO: to perform search only if there has result
       this.algoliaClient
-        .search(getFilters(filters), query, this.calculateSPARCOffest(), this.SPARCLimit(this.pmrResultsFlag))
+        .search(getFilters(filters), query, this.calculateSPARCOffest(), sparcLimit)
         .then((searchData) => {
           this.sparcNumberOfHits = searchData.total
           this.discoverIds = searchData.discoverIds
@@ -427,7 +441,8 @@ export default {
           const signal = this._abortController.signal
           //Search ongoing, let the current flow progress
           this.perItemSearch(signal, { count: 0 })
-        })
+        });
+      });
     },
     filtersLoading: function (val) {
       this.loadingCards = val
