@@ -250,7 +250,7 @@ export default {
     },
     searchAlgolia(filters, query = '') {
       // Algolia search
-      
+
       this.loadingCards = true
       this.algoliaClient
         .anatomyInSearch(getFilters(filters), query)
