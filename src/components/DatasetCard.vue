@@ -47,6 +47,11 @@
               @categoryChanged="categoryChanged"
             />
           </div>
+
+          <!-- Copy to clipboard button container -->
+          <div class="float-button-container">
+            <CopyToClipboard :content="copyContent" />
+          </div>
         </div>
       </div>
     </div>
@@ -65,6 +70,8 @@ import EventBus from './EventBus.js'
 import speciesMap from './species-map.js'
 import ImageGallery from './ImageGallery.vue'
 import MissingImage from '@/../assets/missing-image.svg'
+import { CopyToClipboard } from '@abi-software/map-utilities';
+import '@abi-software/map-utilities/dist/style.css';
 
 export default {
   data() {
@@ -77,7 +84,8 @@ export default {
     BadgesGroup,
     ImageGallery,
     Button,
-    Icon
+    Icon,
+    CopyToClipboard,
   },
   props: {
     /**
@@ -103,6 +111,7 @@ export default {
       lastDoi: undefined,
       biolucidaData: undefined,
       currentCategory: 'All',
+      copyContent: '',
     }
   },
   computed: {
@@ -154,6 +163,9 @@ export default {
     publishYear: function () {
       return this.entry.publishDate.split('-')[0]
     },
+  },
+  mounted: function () {
+    this.updateCopyContent();
   },
   methods: {
     cardClicked: function () {
@@ -227,6 +239,7 @@ export default {
             this.dataLocation = `https://sparc.science/datasets/${data.id}?type=dataset`
             this.getBiolucidaInfo(this.discoverId)
             this.loading = false
+            this.updateCopyContent();
           })
           .catch(() => {
             //set defaults if we hit an error
@@ -248,6 +261,66 @@ export default {
         .then((data) => {
           if (data.status == 'success') this.biolucidaData = data
         })
+    },
+    updateCopyContent: function () {
+      const contentArray = [];
+
+      // Use <div> instead of <h1>..<h6> or <p>
+      // to avoid default formatting on font size and margin
+
+      // Title
+      if (this.entry.name) {
+        contentArray.push(`<div><strong>${this.entry.name}</strong></div>`);
+      }
+
+      // Contributors and Publish Date
+      if (this.contributors) {
+        let details = this.contributors;
+
+        if (this.entry.publishDate) {
+          details += ` (${this.publishYear})`;
+        }
+        contentArray.push(`<div>${details}</div>`);
+      }
+
+      // samples
+      if (this.samples) {
+        contentArray.push(`<div>${this.samples}</div>`);
+      }
+
+      // DOI
+      if (this.entry.doi) {
+        let doiContent = `<div><strong>DOI:</strong></div>`;
+        doiContent += `\n`;
+        doiContent += `<a href="${this.entry.doi}">${this.entry.doi}</a>`;
+        contentArray.push(`<div>${doiContent}</div>`);
+      }
+
+      // Dataset ID
+      if (this.entry.datasetId) {
+        let datasetIdContent = `<div><strong>Dataset ID:</strong></div>`;
+        datasetIdContent += `\n`;
+        datasetIdContent += `${this.entry.datasetId}`;
+        contentArray.push(`<div>${datasetIdContent}</div>`);
+      }
+
+      // Dataset URL
+      if (this.dataLocation) {
+        let dataLocationContent = `<div><strong>Dataset URL:</strong></div>`;
+        dataLocationContent += `\n`;
+        dataLocationContent += `<a href="${this.dataLocation}">${this.dataLocation}</a>`;
+        contentArray.push(`<div>${dataLocationContent}</div>`);
+      }
+
+      // Dataset version
+      if (this.version) {
+        let versionContent = `<div><strong>Dataset version:</strong></div>`;
+        versionContent += `\n`;
+        versionContent += `${this.version}`;
+        contentArray.push(`<div>${versionContent}</div>`);
+      }
+
+      this.copyContent = contentArray.join('\n\n<br>');
     },
   },
   created: function () {
@@ -363,5 +436,18 @@ export default {
 
 .loading-icon :deep(.el-loading-spinner .path) {
   stroke: $app-primary-color;
+}
+
+.float-button-container {
+  position: absolute;
+  bottom: 8px;
+  right: 16px;
+  opacity: 0;
+  visibility: hidden;
+
+  .card:hover & {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 </style>
