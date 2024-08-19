@@ -57,6 +57,11 @@
               Simulation
             </el-button>
           </div>
+
+          <!-- Copy to clipboard button container -->
+          <div class="float-button-container">
+            <CopyToClipboard :content="copyContent" />
+          </div>
         </div>
       </div>
     </div>
@@ -71,6 +76,8 @@ import {
   ElIcon,
   ElTag
 } from 'element-plus'
+import { CopyToClipboard } from '@abi-software/map-utilities';
+import '@abi-software/map-utilities/dist/style.css';
 
 /**
  * Entry Object - Data types
@@ -124,7 +131,8 @@ export default {
   components: {
     ElButton,
     ElIcon,
-    ElTag
+    ElTag,
+    CopyToClipboard,
   },
   props: {
     /**
@@ -144,7 +152,11 @@ export default {
     return {
       thumbnail: this.entry.image || MissingImage,
       loading: false,
+      copyContent: '',
     };
+  },
+  mounted: function () {
+    this.updateCopyContent();
   },
   methods: {
     onFlatmapClick: function (data) {
@@ -167,6 +179,55 @@ export default {
         apiLocation: this.envVars.API_LOCATION,
       };
       this.$emit('pmr-action-click', payload);
+    },
+    updateCopyContent: function () {
+      const contentArray = [];
+
+      console.log('entry', this.entry)
+      // Use <div> instead of <h1>..<h6> or <p>
+      // to avoid default formatting on font size and margin
+
+      // Title
+      if (this.entry.title) {
+        contentArray.push(`<div><strong>${this.entry.title}</strong></div>`);
+      }
+
+      // Contributors
+      if (this.entry.authors) {
+        const authors = this.entry.authors;
+        // To avoid formatting <author@email> string in copy content
+        const encodedAuthors = authors.replace(/[\u00A0-\u9999<>\&]/g, function(i) {
+          return '&#'+i.charCodeAt(0)+';';
+        });
+        contentArray.push(`<div>${encodedAuthors}</div>`);
+      }
+
+      // Description
+      if (this.entry.description) {
+        contentArray.push(`<div>${this.entry.description}</div>`);
+      }
+
+      // Exposure
+      if (this.entry.exposure) {
+        contentArray.push(`<div><strong>Exposure:</strong> ${this.entry.exposure}</div>`);
+      }
+
+      // OMEX archive
+      if (this.entry.omex) {
+        contentArray.push(`<div><strong>OMEX archive:</strong> ${this.entry.omex}</div>`);
+      }
+
+      // Flatmap
+      if (this.entry.flatmap) {
+        contentArray.push(`<div><strong>Flatmap:</strong> ${this.entry.flatmap}</div>`);
+      }
+
+      // Simulation
+      if (this.entry.simulation) {
+        contentArray.push(`<div><strong>Simulation:</strong> ${this.entry.simulation}</div>`);
+      }
+
+      this.copyContent = contentArray.join('\n\n<br>');
     },
   }
 };
@@ -313,5 +374,18 @@ export default {
 
 .loading-icon ::v-deep(.el-loading-spinner .path) {
   stroke: $app-primary-color;
+}
+
+.float-button-container {
+  position: absolute;
+  bottom: 0;
+  right: 4px;
+  opacity: 0;
+  visibility: hidden;
+
+  .card:hover & {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 </style>

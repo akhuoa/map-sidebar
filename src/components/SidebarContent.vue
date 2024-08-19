@@ -39,7 +39,7 @@
       <div class="error-feedback" v-if="results.length === 0 && !loadingCards">
         No results found - Please change your search / filter criteria.
       </div>
-      <div v-for="(result, i) in results" :key="result.doi || i" class="step-item">
+      <div v-for="(result, i) in results" :key="result.doi || result.sha" class="step-item">
         <DatasetCard
           v-if="result.dataSource === 'SPARC'"
           class="dataset-card"
@@ -612,7 +612,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dataset-card {
+.dataset-card-container {
   position: relative;
 
   &::before {

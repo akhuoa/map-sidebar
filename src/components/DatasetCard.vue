@@ -440,8 +440,8 @@ export default {
 
 .float-button-container {
   position: absolute;
-  bottom: 8px;
-  right: 16px;
+  bottom: 0;
+  right: 4px;
   opacity: 0;
   visibility: hidden;
 
