@@ -118,6 +118,14 @@ $tab-height: 30px;
   box-shadow: none !important;
   outline: none !important;
   background-color: transparent !important;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.25s ease;
+
+  .title:hover & {
+    visibility: visible;
+    opacity: 1;
+  }
 
   :deep(> span) {
     height: $tab-height - 2 !important; // tab height minus border
