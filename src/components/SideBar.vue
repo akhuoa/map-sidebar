@@ -22,7 +22,7 @@
         </div>
         <div class="sidebar-container">
           <Tabs
-            v-if="tabs.length > 1 && connectivityInfo"
+            v-if="tabs.length > 1 && (connectivityInfo || flatmapImages)"
             :tabTitles="tabs"
             :activeId="activeTabId"
             @titleClicked="tabClicked"
@@ -37,6 +37,13 @@
                 v-show="tab.id === activeTabId"
                 :ref="'connectivityTab_' + tab.id"
                 @show-connectivity="showConnectivity"
+              />
+            </template>
+            <!-- Flatmap Images -->
+            <template v-else-if="tab.type === 'flatmapImages'">
+              <FlatmapImages
+                :images="flatmapImages"
+                v-show="tab.id === activeTabId"
               />
             </template>
             <template v-else>
@@ -68,6 +75,7 @@ import SidebarContent from './SidebarContent.vue'
 import EventBus from './EventBus.js'
 import Tabs from './Tabs.vue'
 import ConnectivityInfo from './ConnectivityInfo.vue'
+import FlatmapImages from './FlatmapImages.vue'
 
 /**
  * Aims to provide a sidebar for searching capability for SPARC portal.
@@ -81,6 +89,7 @@ export default {
     Drawer,
     Icon,
     ConnectivityInfo,
+    FlatmapImages,
   },
   name: 'SideBar',
   props: {
@@ -108,7 +117,8 @@ export default {
       type: Array,
       default: () => [
         { id: 1, title: 'Search', type: 'search' },
-        { id: 2, title: 'Connectivity', type: 'connectivity' }
+        { id: 2, title: 'Connectivity', type: 'connectivity' },
+        { id: 3, title: 'Images', type: 'flatmapImages' },
       ],
     },
     /**
@@ -132,6 +142,13 @@ export default {
       type: Object,
       default: null,
     },
+    /**
+     * Flatmap images
+     */
+    flatmapImages: {
+      type: Object,
+      default: () => [],
+    }
   },
   data: function () {
     return {
@@ -261,6 +278,9 @@ export default {
     },
     tabClose: function (id) {
       this.$emit('connectivity-info-close');
+    },
+    setFlatmapImages: function (images) {
+      this.flatmapImages.push([...images]);
     },
   },
   created: function () {

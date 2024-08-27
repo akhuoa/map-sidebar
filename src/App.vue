@@ -14,6 +14,7 @@
       <el-button @click="neuronSearch">open neuron search</el-button>
       <el-button @click="keywordSearch">keyword search</el-button>
       <el-button @click="getFacets">Get facets</el-button>
+      <el-button @click="showFlatmapImages">Show Flatmap Images</el-button>
     </div>
     <SideBar
       :envVars="envVars"
@@ -23,6 +24,7 @@
       :tabs="tabs"
       :activeTabId="activeId"
       :connectivityInfo="connectivityInput"
+      :flatmapImages="flatmapImages"
       @tabClicked="tabClicked"
       @search-changed="searchChanged($event)"
       @hover-changed="hoverChanged($event)"
@@ -37,6 +39,7 @@
 import SideBar from './components/SideBar.vue'
 import EventBus from './components/EventBus.js'
 import exampleConnectivityInput from './exampleConnectivityInput.js'
+import flatmapImages from './data/flatmapImages.js';
 
 const capitalise = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -101,7 +104,11 @@ export default {
   data: function () {
     return {
       contextArray: [null, null],
-      tabArray: [{ title: 'Flatmap', id: 1, type: 'search'}, { title: 'Connectivity', id: 2, type: 'connectivity' }],
+      tabArray: [
+        { title: 'Flatmap', id: 1, type: 'search'},
+        { title: 'Connectivity', id: 2, type: 'connectivity' },
+        { title: 'Images', id: 3, type: 'flatmapImages' },
+      ],
       sideBarVisibility: true,
       envVars: {
         API_LOCATION: import.meta.env.VITE_APP_API_LOCATION,
@@ -114,6 +121,7 @@ export default {
         ROOT_URL: import.meta.env.VITE_APP_ROOT_URL,
       },
       connectivityInput: exampleConnectivityInput,
+      flatmapImages: flatmapImages,
       activeId: 1,
     }
   },
@@ -223,6 +231,12 @@ export default {
     getFacets: async function () {
       let facets = await this.$refs.sideBar.getAlgoliaFacets()
       console.log('Algolia facets:', facets)
+    },
+    showFlatmapImages: function () {
+      if (this.$refs.sideBar) {
+        this.$refs.sideBar.setDrawerOpen(true);
+        this.$refs.sideBar.tabClicked({id: 3, type: 'flatmapImages'})
+      }
     },
   },
   mounted: function () {
