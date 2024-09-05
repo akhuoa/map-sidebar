@@ -39,6 +39,13 @@
                 @show-connectivity="showConnectivity"
               />
             </template>
+            <template v-else-if="tab.type === 'images'">
+              <ImageThumbnails
+                v-if="imageThumbnails.length"
+                v-show="tab.id === activeTabId"
+                :imageThumbnails="imageThumbnails"
+              />
+            </template>
             <template v-else>
             <SidebarContent
               class="sidebar-content-container"
@@ -68,6 +75,7 @@ import SidebarContent from './SidebarContent.vue'
 import EventBus from './EventBus.js'
 import Tabs from './Tabs.vue'
 import ConnectivityInfo from './ConnectivityInfo.vue'
+import ImageThumbnails from './ImageThumbnails.vue'
 
 /**
  * Aims to provide a sidebar for searching capability for SPARC portal.
@@ -81,6 +89,7 @@ export default {
     Drawer,
     Icon,
     ConnectivityInfo,
+    ImageThumbnails,
   },
   name: 'SideBar',
   props: {
@@ -108,7 +117,8 @@ export default {
       type: Array,
       default: () => [
         { id: 1, title: 'Search', type: 'search' },
-        { id: 2, title: 'Connectivity', type: 'connectivity' }
+        { id: 2, title: 'Connectivity', type: 'connectivity' },
+        { id: 3, title: 'Images', type: 'images' }, // Temporary
       ],
     },
     /**
@@ -131,6 +141,13 @@ export default {
     connectivityInfo: {
       type: Object,
       default: null,
+    },
+    /**
+     * The image thumbnails data to show in sidebar.
+     */
+     imageThumbnails: {
+      type: Array,
+      default: [],
     },
   },
   data: function () {

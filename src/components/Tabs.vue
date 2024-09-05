@@ -16,7 +16,7 @@
         </div>
       </div>
       <el-button
-        v-if="title.id === 2"
+        v-if="title.type === 'connectivity' || title.type === 'images'"
         @click="tabClose(title.id)"
         class="button-tab-close"
         aria-label="Close"
