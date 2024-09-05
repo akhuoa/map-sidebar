@@ -2,7 +2,7 @@
   <div class="tab-container">
     <div
       class="title"
-      v-for="title in tabTitles"
+      v-for="title in titles"
       :key="title.id"
       :class="{ 'active-tab': title.id == activeId }"
     >
@@ -41,6 +41,25 @@ export default {
     activeId: {
       type: Number,
       default: 1,
+    },
+    hasConnectivityInfo: {
+      type: Boolean,
+      default: true,
+    },
+    hasImageThumbnails: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  computed: {
+    titles: function() {
+      if (!this.hasConnectivityInfo) {
+        return this.tabTitles.filter((tab) => tab.type !== 'connectivity');
+      }
+      else if (!this.hasImageThumbnails) {
+        return this.tabTitles.filter((tab) => tab.type !== 'images');
+      }
+      return this.tabTitles;
     },
   },
   methods: {

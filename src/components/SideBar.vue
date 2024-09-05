@@ -22,9 +22,11 @@
         </div>
         <div class="sidebar-container">
           <Tabs
-            v-if="tabs.length > 1 && connectivityInfo"
+            v-if="tabs.length > 1 && (connectivityInfo || imageThumbnails.length)"
             :tabTitles="tabs"
             :activeId="activeTabId"
+            :hasConnectivityInfo="!!connectivityInfo"
+            :hasImageThumbnails="!!imageThumbnails.length"
             @titleClicked="tabClicked"
             @tab-close="tabClose"
           />
