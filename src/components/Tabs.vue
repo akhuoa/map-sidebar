@@ -92,6 +92,7 @@ $tab-height: 30px;
   align-items: center;
   position: relative;
   cursor: pointer;
+  z-index: 1;
 }
 
 .title-text {

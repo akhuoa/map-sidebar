@@ -1,34 +1,47 @@
 <template>
   <div class="dataset-card-container">
-    <div class="dataset-card" v-for="imageThumbnail in imageThumbnails">
+    <div class="filters">
+      <el-tag
+        v-for="(species, index) in speciesFilterTags"
+        :key="index"
+        type="info"
+        class="tag"
+        :class="{ 'active-tag': species.name === activeSpecies.name }"
+        :closable="species.name === activeSpecies.name"
+        @close="removeSpeciesFilterTag"
+        @click="filterBySpecies(species)"
+      >
+        {{ species.name }} ({{ species.count }})
+      </el-tag>
+    </div>
+    <div class="dataset-card" v-for="imageThumbnail in imageItems">
       <div class="card">
         <div class="card-left">
-          <!-- <ImageGallery
-            v-if="!loading && discoverId"
-            :datasetId="discoverId"
-            :datasetVersion="version"
-            :entry="entry"
-            :envVars="envVars"
-            :label="label"
-            :datasetThumbnail="thumbnail"
-            :dataset-biolucida="biolucidaData"
-            :category="currentCategory"
-            @card-clicked="galleryClicked"
-            @datalink-clicked="galleryDatalinkClicked"
-          /> -->
+          <a :href="imageThumbnail.link" class="card-image">
+            <el-image :src="imageThumbnail.imgSrc" loading="lazy">
+              <template #error>
+                <div class="image-slot">Loading...</div>
+              </template>
+            </el-image>
+          </a>
         </div>
         <div class="card-right">
-          <div class="title">
-            {{ imageThumbnail.title }}
-          </div>
+          <a class="title" :href="imageThumbnail.link">
+            {{ formattedTitle(imageThumbnail) }}
+          </a>
           <!-- TODO: to replace with different data -->
           <div class="details" v-if="imageThumbnail.details">
             {{ imageThumbnail.details }}
           </div>
-          <!-- Copy to clipboard button container -->
-          <div class="float-button-container">
-            <!-- <CopyToClipboard :content="copyContent" /> -->
+          <div class="details">
+            <a class="button el-button" :href="imageThumbnail.link">
+              View {{ imageThumbnail.type }}
+            </a>
           </div>
+          <!-- Copy to clipboard button container -->
+          <!-- <div class="float-button-container">
+            <CopyToClipboard :content="copyContent" />
+          </div> -->
         </div>
       </div>
     </div>
@@ -36,14 +49,18 @@
 </template>
 
 <script>
+import { ElImage } from 'element-plus';
+import { ElTag as Tag } from "element-plus";
 import { CopyToClipboard } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
-import ImageGallery from './ImageGallery.vue';
+
+const BASE64PREFIX = 'data:image/png;base64,';
 
   export default {
     name: 'ImageThumbnails',
     components: {
-      ImageGallery,
+      Tag,
+      ElImage,
       CopyToClipboard,
     },
     props: {
@@ -55,18 +72,123 @@ import ImageGallery from './ImageGallery.vue';
         default: [],
       },
     },
-    mounted: function() {
-      console.log('image thumbnail mounted', this.imageThumbnails)
-    }
+    data: function () {
+      return {
+        activeSpecies: { name: "" },
+        speciesFilterTags: [],
+        imageItems: [],
+        showImageGallery: false,
+      };
+    },
+    computed: {
+      imageStyle() {
+        return {
+          width: "180px",
+          height: "135px",
+        };
+      },
+    },
+    mounted: function () {
+      this.imageThumbnails.forEach((imageThumbnail) => {
+        return this.mapImage(imageThumbnail)
+      });
+      this.populateFilterTags();
+      this.imageItems = this.imageThumbnails;
+    },
+    watch: {
+      imageThumbnails: {
+        handler: function (value) {
+          if (value) {
+            this.populateFilterTags();
+            this.imageItems = this.imageThumbnails;
+          }
+        },
+        deep: true,
+      },
+    },
+    methods: {
+      formattedTitle: function(imageThumbnail) {
+        const type = imageThumbnail.mimetype?.split('/')[1];
+        const title = imageThumbnail.title;
+        let formattedTitle = '';
+        if (type !== 'jpg') {
+          formattedTitle = title.replace('.' + type, '');
+        }
+        formattedTitle = formattedTitle.replaceAll('_', ' ');
+        return formattedTitle;
+      },
+      mapImage: async function (image) {
+        const imgSrc = await this.transformedImage(image.thumbnail);
+        if (imgSrc) {
+          image.imgSrc = imgSrc;
+        }
+      },
+      transformedImage: async function(imgUrl) {
+        try {
+          const response = await fetch(imgUrl);
+          if (!response.ok) {
+            return null;
+          }
+          const data = await response.text();
+          return BASE64PREFIX + data;
+        } catch (error) {
+          return null;
+        }
+      },
+      removeSpeciesFilterTag: function () {
+        this.activeSpecies = { name: "" };
+        this.imageItems = this.imageThumbnails;
+      },
+      filterBySpecies: function (tagInfo) {
+        this.activeSpecies = tagInfo;
+        let filteredImageItems = [];
+        this.imageThumbnails.forEach((image) => {
+          if (image.species && image.species.length) {
+            image.species.forEach((species) => {
+              if (species === tagInfo.name) {
+                filteredImageItems.push(image);
+              }
+            });
+          }
+        });
+        this.imageItems = filteredImageItems;
+      },
+      populateFilterTags: function () {
+        let imageObjects = {};
+        this.imageThumbnails.forEach((image) => {
+          if (image.species && image.species.length) {
+            image.species.forEach((species) => {
+              if (!(species in imageObjects)) {
+                imageObjects[species] = {
+                  name: species,
+                  count: 0,
+                };
+              }
+              imageObjects[species].count++;
+            });
+          }
+        });
+        this.speciesFilterTags = Object.values(imageObjects);
+      },
+    },
   }
 </script>
 
 <style lang="scss" scoped>
 .dataset-card-container {
+  font-size: 14px;
+  text-align: left;
+  line-height: 1.5em;
+  font-family: Asap, sans-serif, Helvetica;
+  font-weight: 400;
+  background-color: #f7faff;
+  border-left: 1px solid var(--el-border-color);
+  border-top: 1px solid var(--el-border-color);
   display: flex;
   flex-direction: column;
   gap: 18px;
   padding: 1rem;
+  height: 100%;
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -75,7 +197,7 @@ import ImageGallery from './ImageGallery.vue';
   padding-left: 5px;
   padding-right: 5px;
   position: relative;
-  min-height: 17rem;
+  min-height: 12rem;
 }
 
 .card {
@@ -90,6 +212,34 @@ import ImageGallery from './ImageGallery.vue';
 .card-right {
   flex: 1.3;
   padding-left: 6px;
+}
+
+.card-image {
+  display: block;
+  text-decoration: none;
+  outline: none;
+
+  .el-image {
+    display: block;
+    width: 200px;
+    height: 150px;
+
+    :deep(img) {
+      aspect-ratio: 4/3;
+      object-fit: cover;
+    }
+  }
+
+  .image-slot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background: var(--el-fill-color-light);
+    color: var(--el-text-color-secondary);
+    font-size: 14px;
+  }
 }
 
 .title {
@@ -114,5 +264,16 @@ import ImageGallery from './ImageGallery.vue';
   line-height: 1.5;
   letter-spacing: 1.05px;
   color: #484848;
+}
+
+.tag {
+  margin-right: 5px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.active-tag {
+  background-color: $app-primary-color;
+  color: #fff;
 }
 </style>
