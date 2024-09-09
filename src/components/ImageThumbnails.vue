@@ -1,5 +1,5 @@
 <template>
-  <div class="dataset-card-container">
+  <div class="image-thumbnails-container">
     <div class="filters">
       <el-tag
         v-for="(species, index) in speciesFilterTags"
@@ -14,34 +14,38 @@
         {{ species.name }} ({{ species.count }})
       </el-tag>
     </div>
-    <div class="dataset-card" v-for="imageThumbnail in imageItems">
-      <div class="card">
-        <div class="card-left">
-          <a :href="imageThumbnail.link" class="card-image">
-            <el-image :src="imageThumbnail.imgSrc" loading="lazy">
-              <template #error>
-                <div class="image-slot">Loading...</div>
-              </template>
-            </el-image>
-          </a>
-        </div>
-        <div class="card-right">
-          <a class="title" :href="imageThumbnail.link">
-            {{ formattedTitle(imageThumbnail) }}
-          </a>
-          <!-- TODO: to replace with different data -->
-          <div class="details" v-if="imageThumbnail.details">
-            {{ imageThumbnail.details }}
-          </div>
-          <div class="details">
-            <a class="button el-button" :href="imageThumbnail.link">
-              View {{ imageThumbnail.type }}
+    <div class="dataset-card-container">
+      <div class="dataset-card" v-for="imageThumbnail in imageItems">
+        <div class="card" :key="imageThumbnail.link">
+          <div class="card-left">
+            <a :href="imageThumbnail.link" class="card-image card-button-link">
+              <el-image :src="imageThumbnail.imgSrc" loading="lazy">
+                <template #error>
+                  <div class="image-slot">Loading...</div>
+                </template>
+              </el-image>
             </a>
           </div>
-          <!-- Copy to clipboard button container -->
-          <!-- <div class="float-button-container">
-            <CopyToClipboard :content="copyContent" />
-          </div> -->
+          <div class="card-right">
+            <div class="details">
+              <a class="title card-button-link" :href="imageThumbnail.link">
+                {{ formattedTitle(imageThumbnail) }}
+              </a>
+            </div>
+            <!-- TODO: to replace with different data -->
+            <div class="details" v-if="imageThumbnail.details">
+              {{ imageThumbnail.details }}
+            </div>
+            <div class="details">
+              <a class="button el-button card-button-link" :href="imageThumbnail.link">
+                View {{ imageThumbnail.type }}
+              </a>
+            </div>
+            <!-- Copy to clipboard button container -->
+            <!-- <div class="float-button-container">
+              <CopyToClipboard :content="copyContent" />
+            </div> -->
+          </div>
         </div>
       </div>
     </div>
@@ -89,9 +93,7 @@ const BASE64PREFIX = 'data:image/png;base64,';
       },
     },
     mounted: function () {
-      this.imageThumbnails.forEach((imageThumbnail) => {
-        return this.mapImage(imageThumbnail)
-      });
+      this.injectImgSrc();
       this.populateFilterTags();
       this.imageItems = this.imageThumbnails;
     },
@@ -99,6 +101,7 @@ const BASE64PREFIX = 'data:image/png;base64,';
       imageThumbnails: {
         handler: function (value) {
           if (value) {
+            this.injectImgSrc();
             this.populateFilterTags();
             this.imageItems = this.imageThumbnails;
           }
@@ -107,6 +110,11 @@ const BASE64PREFIX = 'data:image/png;base64,';
       },
     },
     methods: {
+      injectImgSrc: function() {
+        this.imageThumbnails.forEach((imageThumbnail) => {
+          return this.mapImage(imageThumbnail);
+        });
+      },
       formattedTitle: function(imageThumbnail) {
         const type = imageThumbnail.mimetype?.split('/')[1];
         const title = imageThumbnail.title;
@@ -175,7 +183,7 @@ const BASE64PREFIX = 'data:image/png;base64,';
 </script>
 
 <style lang="scss" scoped>
-.dataset-card-container {
+.image-thumbnails-container {
   font-size: 14px;
   text-align: left;
   line-height: 1.5em;
@@ -186,11 +194,37 @@ const BASE64PREFIX = 'data:image/png;base64,';
   border-top: 1px solid var(--el-border-color);
   display: flex;
   flex-direction: column;
+  height: 100%;
+  z-index: 1;
+}
+
+.filters {
+  position: sticky;
+  top: 0;
+  padding: 1rem;
+  background-color: #f7faff;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  .tag {
+    cursor: pointer;
+  }
+}
+
+.dataset-card-container {
+  display: flex;
+  flex-direction: column;
   gap: 18px;
   padding: 1rem;
-  height: 100%;
   overflow-y: auto;
   scrollbar-width: thin;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+  border: solid 1px #e4e7ed;
+  border-left: 0;
+  background-color: #ffffff;
 }
 
 .dataset-card {
@@ -212,6 +246,9 @@ const BASE64PREFIX = 'data:image/png;base64,';
 .card-right {
   flex: 1.3;
   padding-left: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .card-image {
@@ -266,14 +303,28 @@ const BASE64PREFIX = 'data:image/png;base64,';
   color: #484848;
 }
 
-.tag {
-  margin-right: 5px;
-  margin-bottom: 5px;
-  cursor: pointer;
-}
-
 .active-tag {
   background-color: $app-primary-color;
   color: #fff;
+}
+
+.button {
+  margin-left: 0px !important;
+  margin-top: 0px !important;
+  font-size: 14px !important;
+  background-color: $app-primary-color;
+  color: #fff;
+  & + .button {
+    margin-top: 10px !important;
+  }
+  &:hover {
+    color: #fff !important;
+    background: #ac76c5 !important;
+    border: 1px solid #ac76c5 !important;
+  }
+}
+
+.card-button-link {
+  text-decoration: none;
 }
 </style>

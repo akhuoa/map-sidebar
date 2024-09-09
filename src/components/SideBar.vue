@@ -286,7 +286,12 @@ export default {
       this.$emit('tabClicked', {id, type});
     },
     tabClose: function (id) {
-      this.$emit('connectivity-info-close');
+      const closedTab = this.tabs.find((tab) => tab.id === id);
+      if (closedTab.type === 'connectivity') {
+        this.$emit('connectivity-info-close');
+      } else if (closedTab.type === 'images') {
+        this.$emit('image-thumbnail-close');
+      }
     },
   },
   created: function () {
