@@ -233,7 +233,7 @@ const VIEW_OPTIONS = [
   border-top: 1px solid var(--el-border-color);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(100% - 30px); // minus tabs height
   z-index: 1;
 }
 
@@ -268,13 +268,16 @@ const VIEW_OPTIONS = [
 
 .gallery-container,
 .dataset-card-container {
+  margin: 1rem;
+  margin-top: 0;
   padding: 1rem;
+  flex-grow: 1;
   overflow-y: auto;
   scrollbar-width: thin;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
   border: solid 1px #e4e7ed;
-  border-left: 0;
   background-color: #ffffff;
+  border-radius: var(--el-border-radius-base);
 }
 
 .gallery-container {
@@ -296,10 +299,12 @@ const VIEW_OPTIONS = [
 }
 
 .dataset-card {
-  padding-left: 5px;
-  padding-right: 5px;
   position: relative;
-  min-height: 12rem;
+
+  + .dataset-card {
+    padding-top: 1rem;
+    border-top: 1px solid var(--el-border-color);
+  }
 }
 
 .card {
