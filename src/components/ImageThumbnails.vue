@@ -47,13 +47,18 @@
           </div>
           <div class="card-right">
             <div class="details">
-              <a class="title card-button-link" :href="imageThumbnail.link" target="_blank">
-                {{ formattedTitle(imageThumbnail) }}
-              </a>
+              <div class="title">
+                <strong>{{ imageThumbnail.type }}</strong>
+              </div>
             </div>
             <div class="details">
-              <a class="button el-button el-button--large card-button-link" :href="datasetURL(imageThumbnail.id)" target="_blank">
-                View Dataset {{ imageThumbnail.id }}
+              <div>
+                {{ formattedTitle(imageThumbnail) }}
+              </div>
+            </div>
+            <div class="details">
+              <a class="button el-button el-button--large card-button-link" :href="imageThumbnail.link" target="_blank">
+                View {{ imageThumbnail.type }}
               </a>
             </div>
             <!-- Copy to clipboard button container -->
@@ -228,6 +233,14 @@ const VIEW_OPTIONS = [
           contentArray.push(`<div><strong>${this.formattedTitle(imageThumbnail)}</strong></div>`);
         }
 
+        // Type
+        if (imageThumbnail.type) {
+          let imageType = `<div><strong>Type:</strong></div>`;
+          imageType += `\n`;
+          imageType += `${imageThumbnail.type}`;
+          contentArray.push(`<div>${imageType}</div>`);
+        }
+
         // Species
         if (imageThumbnail.species?.length) {
           let species = `<div><strong>Species:</strong></div>`;
@@ -281,7 +294,7 @@ const VIEW_OPTIONS = [
   font-size: 14px;
   text-align: left;
   line-height: 1.5em;
-  font-family: Asap, sans-serif, Helvetica;
+  font-family: $font-family;
   font-weight: 400;
   background-color: #f7faff;
   border-left: 1px solid var(--el-border-color);
@@ -318,7 +331,7 @@ const VIEW_OPTIONS = [
 
 .view-selector .el-select {
   width: 100px;
-  font-family: inherit;
+  font-family: $font-family;
 }
 
 .gallery-container,
@@ -350,14 +363,14 @@ const VIEW_OPTIONS = [
 .dataset-card-container {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 1.5rem;
 }
 
 .dataset-card {
   position: relative;
 
   + .dataset-card {
-    padding-top: 1rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--el-border-color);
   }
 }
@@ -365,6 +378,7 @@ const VIEW_OPTIONS = [
 .card {
   position: relative;
   display: flex;
+  gap: 1.5rem;
 }
 
 .card-left {
@@ -408,8 +422,7 @@ const VIEW_OPTIONS = [
 }
 
 .title {
-  padding-bottom: 0.75rem;
-  font-family: Asap;
+  font-family: $font-family;
   font-size: 14px;
   font-weight: bold;
   font-stretch: normal;
@@ -417,11 +430,10 @@ const VIEW_OPTIONS = [
   line-height: 1.5;
   letter-spacing: 1.05px;
   color: #484848;
-  cursor: pointer;
 }
 
 .details {
-  font-family: Asap;
+  font-family: $font-family;
   font-size: 14px;
   font-weight: normal;
   font-stretch: normal;
@@ -474,7 +486,7 @@ const VIEW_OPTIONS = [
 
 <style lang="scss">
   .view-selector-select-popper {
-    font-family: Asap, sans-serif, Helvetica;
+    font-family: $font-family;
     font-size: 14px;
     color: #292b66;
 
