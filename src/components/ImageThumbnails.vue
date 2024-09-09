@@ -57,9 +57,9 @@
               </a>
             </div>
             <!-- Copy to clipboard button container -->
-            <!-- <div class="float-button-container">
-              <CopyToClipboard :content="copyContent" />
-            </div> -->
+            <div class="float-button-container">
+              <CopyToClipboard :content="getCopyContent(imageThumbnail)" />
+            </div>
           </div>
         </div>
       </div>
@@ -216,6 +216,61 @@ const VIEW_OPTIONS = [
           }
         });
         this.speciesFilterTags = Object.values(imageObjects);
+      },
+      getCopyContent: function (imageThumbnail) {
+        const contentArray = [];
+
+        // Use <div> instead of <h1>..<h6> or <p>
+        // to avoid default formatting on font size and margin
+
+        // Title
+        if (imageThumbnail.title) {
+          contentArray.push(`<div><strong>${this.formattedTitle(imageThumbnail)}</strong></div>`);
+        }
+
+        // Species
+        if (imageThumbnail.species?.length) {
+          let species = `<div><strong>Species:</strong></div>`;
+          species += `\n`;
+          species += imageThumbnail.species.join(', ');
+          contentArray.push(`<div>${species}</div>`);
+        }
+
+        // Image URL
+        if (imageThumbnail.link) {
+          let thumbnailLink = `<div><strong>Link:</strong></div>`;
+          thumbnailLink += `\n`;
+          thumbnailLink += `<a href="${imageThumbnail.link}">${imageThumbnail.link}</a>`;
+          contentArray.push(`<div>${thumbnailLink}</div>`);
+        }
+
+        // Dataset ID
+        if (imageThumbnail.id) {
+          let datasetIdContent = `<div><strong>Dataset ID:</strong></div>`;
+          datasetIdContent += `\n`;
+          datasetIdContent += `${imageThumbnail.id}`;
+          contentArray.push(`<div>${datasetIdContent}</div>`);
+        }
+
+        // Dataset URL
+        if (imageThumbnail.id) {
+          const datasetURL = this.datasetURL(imageThumbnail.id);
+          let dataLocationContent = `<div><strong>Dataset URL:</strong></div>`;
+          dataLocationContent += `\n`;
+          dataLocationContent += `<a href="${datasetURL}">${datasetURL}</a>`;
+          contentArray.push(`<div>${dataLocationContent}</div>`);
+        }
+
+        // Dataset version
+        if (imageThumbnail.version) {
+          let versionContent = `<div><strong>Dataset version:</strong></div>`;
+          versionContent += `\n`;
+          versionContent += `${imageThumbnail.version}`;
+          contentArray.push(`<div>${versionContent}</div>`);
+        }
+
+        const copyContent = contentArray.join('\n\n<br>');
+        return copyContent;
       },
     },
   }
@@ -401,6 +456,19 @@ const VIEW_OPTIONS = [
 
 .card-button-link {
   text-decoration: none;
+}
+
+.float-button-container {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  opacity: 0;
+  visibility: hidden;
+
+  .dataset-card:hover & {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 </style>
 
