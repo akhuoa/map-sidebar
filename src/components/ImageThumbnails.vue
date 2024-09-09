@@ -18,7 +18,7 @@
       <div class="dataset-card" v-for="imageThumbnail in imageItems">
         <div class="card" :key="imageThumbnail.link">
           <div class="card-left">
-            <a :href="imageThumbnail.link" class="card-image card-button-link">
+            <a :href="imageThumbnail.link" class="card-image card-button-link" target="_blank">
               <el-image :src="imageThumbnail.imgSrc" loading="lazy">
                 <template #error>
                   <div class="image-slot">Loading...</div>
@@ -28,17 +28,13 @@
           </div>
           <div class="card-right">
             <div class="details">
-              <a class="title card-button-link" :href="imageThumbnail.link">
+              <a class="title card-button-link" :href="imageThumbnail.link" target="_blank">
                 {{ formattedTitle(imageThumbnail) }}
               </a>
             </div>
-            <!-- TODO: to replace with different data -->
-            <div class="details" v-if="imageThumbnail.details">
-              {{ imageThumbnail.details }}
-            </div>
             <div class="details">
-              <a class="button el-button card-button-link" :href="imageThumbnail.link">
-                View {{ imageThumbnail.type }}
+              <a class="button el-button el-button--large card-button-link" :href="datasetURL(imageThumbnail.id)" target="_blank">
+                View Dataset {{ imageThumbnail.id }}
               </a>
             </div>
             <!-- Copy to clipboard button container -->
@@ -124,6 +120,9 @@ const BASE64PREFIX = 'data:image/png;base64,';
         }
         formattedTitle = formattedTitle.replaceAll('_', ' ');
         return formattedTitle;
+      },
+      datasetURL: function(id) {
+        return `https://sparc.science/datasets/${id}?type=dataset`;
       },
       mapImage: async function (image) {
         const imgSrc = await this.transformedImage(image.thumbnail);
@@ -312,8 +311,10 @@ const BASE64PREFIX = 'data:image/png;base64,';
   margin-left: 0px !important;
   margin-top: 0px !important;
   font-size: 14px !important;
+  letter-spacing: initial;
   background-color: $app-primary-color;
   color: #fff;
+
   & + .button {
     margin-top: 10px !important;
   }
