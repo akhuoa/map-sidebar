@@ -47,11 +47,6 @@
                 v-show="tab.id === activeTabId"
                 :imageThumbnails="imageThumbnails"
               />
-              <!-- <ImageThumbnailsGallery
-                v-if="imageThumbnails.length"
-                v-show="tab.id === activeTabId"
-                :imageEntry="imageThumbnails"
-              /> -->
             </template>
             <template v-else>
             <SidebarContent
@@ -83,7 +78,6 @@ import EventBus from './EventBus.js'
 import Tabs from './Tabs.vue'
 import ConnectivityInfo from './ConnectivityInfo.vue'
 import ImageThumbnails from './ImageThumbnails.vue'
-import ImageThumbnailsGallery from './ImageThumbnailsGallery.vue'
 
 /**
  * Aims to provide a sidebar for searching capability for SPARC portal.
@@ -98,7 +92,6 @@ export default {
     Icon,
     ConnectivityInfo,
     ImageThumbnails,
-    ImageThumbnailsGallery,
   },
   name: 'SideBar',
   props: {

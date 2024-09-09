@@ -1,20 +1,39 @@
 <template>
   <div class="image-thumbnails-container">
-    <div class="filters">
-      <el-tag
-        v-for="(species, index) in speciesFilterTags"
-        :key="index"
-        type="info"
-        class="tag"
-        :class="{ 'active-tag': species.name === activeSpecies.name }"
-        :closable="species.name === activeSpecies.name"
-        @close="removeSpeciesFilterTag"
-        @click="filterBySpecies(species)"
-      >
-        {{ species.name }} ({{ species.count }})
-      </el-tag>
+    <div class="toolbar">
+      <div class="filters">
+        <el-tag
+          v-for="(species, index) in speciesFilterTags"
+          :key="index"
+          type="info"
+          class="tag"
+          :class="{ 'active-tag': species.name === activeSpecies.name }"
+          :closable="species.name === activeSpecies.name"
+          @close="removeSpeciesFilterTag"
+          @click="filterBySpecies(species)"
+        >
+          {{ species.name }} ({{ species.count }})
+        </el-tag>
+      </div>
+      <div class="view-selector">
+        <el-select
+          v-model="viewOption"
+          placeholder="Select view"
+          popper-class="view-selector-select-popper"
+        >
+          <el-option
+            v-for="item in viewOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </div>
     </div>
-    <div class="dataset-card-container">
+    <div class="gallery-container" v-if="viewOption === 'gallery'">
+      <Gallery :items="imageItems" :imageStyle="imageStyle" />
+    </div>
+    <div class="dataset-card-container" v-if="viewOption === 'list'">
       <div class="dataset-card" v-for="imageThumbnail in imageItems">
         <div class="card" :key="imageThumbnail.link">
           <div class="card-left">
@@ -49,18 +68,37 @@
 </template>
 
 <script>
-import { ElImage } from 'element-plus';
-import { ElTag as Tag } from "element-plus";
+import {
+  ElImage,
+  ElTag as Tag,
+  ElOption as Option,
+  ElSelect as Select,
+} from 'element-plus';
 import { CopyToClipboard } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
+import Gallery from "@abi-software/gallery";
+import "@abi-software/gallery/dist/style.css";
 
 const BASE64PREFIX = 'data:image/png;base64,';
+const VIEW_OPTIONS = [
+  {
+    value: 'list',
+    label: 'List'
+  },
+  {
+    value: 'gallery',
+    label: 'Gallery'
+  }
+];
 
   export default {
     name: 'ImageThumbnails',
     components: {
       Tag,
+      Option,
+      Select,
       ElImage,
+      Gallery,
       CopyToClipboard,
     },
     props: {
@@ -78,6 +116,8 @@ const BASE64PREFIX = 'data:image/png;base64,';
         speciesFilterTags: [],
         imageItems: [],
         showImageGallery: false,
+        viewOption: 'list',
+        viewOptions: VIEW_OPTIONS,
       };
     },
     computed: {
@@ -197,12 +237,20 @@ const BASE64PREFIX = 'data:image/png;base64,';
   z-index: 1;
 }
 
-.filters {
+.toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  gap: 1rem;
+  background-color: #f7faff;
   position: sticky;
   top: 0;
-  padding: 1rem;
-  background-color: #f7faff;
   z-index: 1;
+}
+
+.filters {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -213,10 +261,13 @@ const BASE64PREFIX = 'data:image/png;base64,';
   }
 }
 
+.view-selector .el-select {
+  width: 100px;
+  font-family: inherit;
+}
+
+.gallery-container,
 .dataset-card-container {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
   padding: 1rem;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -224,6 +275,24 @@ const BASE64PREFIX = 'data:image/png;base64,';
   border: solid 1px #e4e7ed;
   border-left: 0;
   background-color: #ffffff;
+}
+
+.gallery-container {
+  :deep(.gallery) {
+    .gallery-strip {
+      padding: 1rem 0;
+    }
+
+    > div {
+      min-height: max-content !important;
+    }
+  }
+}
+
+.dataset-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .dataset-card {
@@ -328,4 +397,16 @@ const BASE64PREFIX = 'data:image/png;base64,';
 .card-button-link {
   text-decoration: none;
 }
+</style>
+
+<style lang="scss">
+  .view-selector-select-popper {
+    font-family: Asap, sans-serif, Helvetica;
+    font-size: 14px;
+    color: #292b66;
+
+    .el-select-dropdown__item.is-selected {
+      color: $app-primary-color;
+    }
+  }
 </style>
