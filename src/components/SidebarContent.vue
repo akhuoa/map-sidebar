@@ -25,6 +25,7 @@
       ref="filtersRef"
       :entry="filterEntry"
       :envVars="envVars"
+      :withImages="imagesFilter"
       @filterResults="filterUpdate"
       @numberPerPage="numberPerPageUpdate"
       @loading="filtersLoading"
@@ -43,6 +44,7 @@
           class="dataset-card"
           :entry="result"
           :envVars="envVars"
+          @biolucida-data-loaded="addBiolucidaData"
           @mouseenter="hoverChanged(result)"
           @mouseleave="hoverChanged(undefined)"
         />
@@ -150,6 +152,7 @@ export default {
         display: 'flex',
       },
       cascaderIsReady: false,
+      imagesFilter: true,
     }
   },
   computed: {
@@ -164,6 +167,9 @@ export default {
   methods: {
     hoverChanged: function (data) {
       this.$emit('hover-changed', data)
+    },
+    addBiolucidaData: function (data) {
+      console.log('biolucida data', data)
     },
     resetSearch: function () {
       this.numberOfHits = 0
@@ -191,6 +197,7 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes()
           this.resetSearch()
         } else if (this.filter) {
+          console.log('%c search algolia 1', 'background: lightgreen')
           this.searchAlgolia(this.filter, search)
           this.$refs.filtersRef.setCascader(this.filter)
         }
@@ -199,6 +206,7 @@ export default {
         //otherwise waith for cascader to be ready
         this.filter = filter
         if (!filter || filter.length == 0) {
+          console.log('%c search algolia 2', 'background: lightgreen')
           this.searchAlgolia(this.filter, search)
         }
       }
@@ -225,12 +233,14 @@ export default {
     clearSearchClicked: function () {
       this.searchInput = ''
       this.resetPageNavigation()
+      console.log('%c search algolia 3', 'background: lightgreen')
       this.searchAlgolia(this.filters, this.searchInput)
       this.$refs.searchHistory.selectValue = 'Full search history'
     },
     searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
         this.resetPageNavigation()
+        console.log('%c search algolia 4', 'background: lightgreen')
         this.searchAlgolia(this.filters, this.searchInput)
         this.$refs.searchHistory.selectValue = 'Full search history'
         this.$refs.searchHistory.addSearchToHistory(
@@ -242,6 +252,7 @@ export default {
     filterUpdate: function (filters) {
       this.filters = [...filters]
       this.resetPageNavigation()
+      console.log('%c search algolia 5', 'background: lightgreen')
       this.searchAlgolia(filters, this.searchInput)
       this.$emit('search-changed', {
         value: filters,
@@ -262,6 +273,33 @@ export default {
       this.algoliaClient
         .search(getFilters(filters), query, this.numberPerPage, this.page)
         .then((searchData) => {
+          console.log('%c searchData', 'background: pink', searchData)
+          if (this.imagesFilter) {
+            this.results = [];
+            searchData.items.forEach((item) => {
+              this.getBiolucidaInfo(item.datasetId).then((data) => {
+                if (data['dataset_images']) {
+                  item['biolucidaImages'] = data;
+                  this.results.push(item)
+                }
+              })
+              this.loadingCards = false
+              this.numberOfHits = searchData.total
+              this.discoverIds = searchData.discoverIds
+              this._dois = searchData.dois
+              this.scrollToTop()
+              this.$emit('search-changed', {
+                value: this.searchInput,
+                type: 'query-update',
+              })
+              if (this._abortController) this._abortController.abort()
+              this._abortController = new AbortController()
+              const signal = this._abortController.signal
+              //Search ongoing, let the current flow progress
+              this.perItemSearch(signal, { count: 0 })
+            });
+            console.log('results', this.results)
+          } else {
           this.numberOfHits = searchData.total
           this.discoverIds = searchData.discoverIds
           this._dois = searchData.dois
@@ -277,7 +315,16 @@ export default {
           const signal = this._abortController.signal
           //Search ongoing, let the current flow progress
           this.perItemSearch(signal, { count: 0 })
+          }
         })
+    },
+    getBiolucidaInfo: async function (id) {
+      const apiLocation = this.envVars.API_LOCATION
+      const endpoint = apiLocation + 'image_search/' + id;
+      // Add parameters if we are sent them
+      const response = await fetch(endpoint);
+      const data = await response.json();
+      return data;
     },
     filtersLoading: function (val) {
       this.loadingCards = val
@@ -289,6 +336,7 @@ export default {
     pageChange: function (page) {
       this.start = (page - 1) * this.numberPerPage
       this.page = page
+      console.log('%c search algolia 6', 'background: lightgreen')
       this.searchAlgolia(
         this.filters,
         this.searchInput,
@@ -450,7 +498,7 @@ export default {
       this.envVars.PENNSIEVE_API_LOCATION
     ))
     this.algoliaClient.initIndex(this.envVars.ALGOLIA_INDEX)
-    this.openSearch(this.filter, this.searchInput)
+    // this.openSearch(this.filter, this.searchInput)
   },
   created: function () {
     //Create non-reactive local variables

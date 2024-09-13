@@ -129,17 +129,17 @@ export default {
   },
   methods: {
     hoverChanged: function (data) {
-      console.log('hoverChanged', data)
+      // console.log('hoverChanged', data)
     },
     searchChanged: function (data) {
-      console.log(data)
+      // console.log(data)
     },
     tabClicked: function (tab) {
       this.activeId = tab.id
     },
     // For connectivity input actions
     action: function (action) {
-      console.log('action fired: ', action)
+      // console.log('action fired: ', action)
       let facets = [];
       facets.push(
         ...action.labels.map(val => ({
@@ -149,7 +149,7 @@ export default {
         }))
       );
       if (this.$refs.sideBar) {
-        console.log('openSearch', facets)
+        // console.log('openSearch', facets)
         this.$refs.sideBar.openSearch(facets, "");
       }
     },
@@ -232,7 +232,7 @@ export default {
     },
     getFacets: async function () {
       let facets = await this.$refs.sideBar.getAlgoliaFacets()
-      console.log('Algolia facets:', facets)
+      // console.log('Algolia facets:', facets)
     },
     showImages: function () {
       if (this.$refs.sideBar) {
@@ -241,19 +241,19 @@ export default {
       }
     },
     onConnectivityInfoClose: function () {
-      console.log('connectivity-info-close');
+      // console.log('connectivity-info-close');
     },
     onImageThumbnailClose: function () {
-      console.log('image-thumbnail-close');
+      // console.log('image-thumbnail-close');
     },
   },
   mounted: function () {
-    console.log('mounted app')
+    // console.log('mounted app')
     EventBus.on('contextUpdate', (payLoad) => {
-      console.log('contextUpdate', payLoad)
+      // console.log('contextUpdate', payLoad)
     });
     EventBus.on('datalink-clicked', (payLoad) => {
-      console.log('datalink-clicked', payLoad)
+      // console.log('datalink-clicked', payLoad)
     });
   },
 }

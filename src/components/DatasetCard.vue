@@ -236,7 +236,8 @@ export default {
             this.discoverId = data.id
             this.version = data.version
             this.dataLocation = `https://sparc.science/datasets/${data.id}?type=dataset`
-            this.getBiolucidaInfo(this.discoverId)
+            // this.getBiolucidaInfo(this.discoverId)
+            this.biolucidaData = this.entry.biolucidaImages;
             this.loading = false
             this.updateCopyContent();
           })

@@ -76,9 +76,14 @@ export default {
       deep: true,
       immediate: true,
       handler: function (biolucidaData) {
-        if ('dataset_images' in biolucidaData) {
+        if (biolucidaData) {
           this.addToCategories(biolucidaData['dataset_images'], 'Images')
+          this.categoryClicked('Images')
+          this.$emit('categoryChanged', 'Images')
         }
+        // if ('dataset_images' in biolucidaData) {
+        //   this.addToCategories(biolucidaData['dataset_images'], 'Images')
+        // }
       },
     },
     entry: {
@@ -116,7 +121,7 @@ export default {
       color: #fff!important;
     }
   }
-  
+
   .tag-button + .tag-button {
     margin-left: 0!important;
   }

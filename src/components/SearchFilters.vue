@@ -153,6 +153,10 @@ export default {
       type: Object,
       default: () => {},
     },
+    withImages: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {
@@ -262,11 +266,30 @@ export default {
                 }
               })
             })
+            if (this.withImages) {
+              this.populatePMRinCascader();
+            }
           })
           .finally(() => {
             resolve()
           })
       })
+    },
+    /**
+     * Add PMR checkbox in filters (cascader)
+    */
+    populatePMRinCascader: function () {
+      for (let i = 0; i < this.options.length; i += 1) {
+        const option = this.options[i];
+        // match with "Data type"'s' key
+        if (option.key === 'item.types.name') {
+          option.children.push({
+            label: 'Images',
+            value: this.createCascaderItemValue("Data type", "Images"),
+          });
+          option.total += 1;
+        }
+      }
     },
     /**
      * Create manual events when cascader tag is closed
@@ -469,7 +492,7 @@ export default {
               facetSubPropPath: facetSubPropPath, // will be used for filters if we are at the third level of the cascader
             }
           })
-        
+
         this.$emit('loading', true) // let sidebarcontent wait for the requests
         this.$emit('filterResults', filters) // emit filters for apps above sidebar
         this.setCascader(filterKeys) //update our cascader v-model if we modified the event
@@ -631,7 +654,7 @@ export default {
           let filters = createFilter(e)
           return filters
         })
-        
+
         // Unforttunately the cascader is very particular about it's v-model
         //   to get around this we create a clone of it and use this clone for adding our boolean information
         this.cascadeSelectedWithBoolean = filterFacets.map((e) => {
