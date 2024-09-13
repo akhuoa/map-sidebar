@@ -37,13 +37,20 @@
       <div class="dataset-card" v-for="imageThumbnail in imageItems">
         <div class="card" :key="imageThumbnail.link">
           <div class="card-left">
-            <a :href="imageThumbnail.link" class="card-image card-button-link" target="_blank">
-              <el-image :src="imageThumbnail.imgSrc" loading="lazy">
-                <template #error>
-                  <div class="image-slot">Loading...</div>
-                </template>
-              </el-image>
-            </a>
+            <div>
+              <a :href="imageThumbnail.link" class="card-image card-button-link" target="_blank">
+                <el-image :src="imageThumbnail.imgSrc" loading="lazy">
+                  <template #error>
+                    <div class="image-slot">Loading...</div>
+                  </template>
+                </el-image>
+              </a>
+            </div>
+            <div>
+              <a class="button el-button el-button--large card-button-link" :href="datasetURL(imageThumbnail.id)" target="_blank">
+                View Dataset {{ imageThumbnail.id }}
+              </a>
+            </div>
           </div>
           <div class="card-right">
             <div class="details">
@@ -383,6 +390,10 @@ const VIEW_OPTIONS = [
 
 .card-left {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
 }
 
 .card-right {
