@@ -46,17 +46,12 @@
                 </el-image>
               </a>
             </div>
-            <div>
-              <a class="button el-button el-button--large card-button-link" :href="datasetURL(imageThumbnail.id)" target="_blank">
-                View Dataset {{ imageThumbnail.id }}
-              </a>
-            </div>
           </div>
           <div class="card-right" v-loading="imageThumbnail.loadingData">
             <div class="details">
-              <div class="title">
+              <a class="title" :href="imageThumbnail.link" target="_blank">
                 <strong>{{ imageThumbnail.name }}</strong>
-              </div>
+              </a>
             </div>
             <div class="details">
               {{ imageThumbnail.contributors }}
@@ -64,8 +59,8 @@
             </div>
             <div class="details">{{ imageThumbnail.samples }}</div>
             <div class="details">
-              <a class="button el-button el-button--large card-button-link" :href="imageThumbnail.link" target="_blank">
-                View {{ imageThumbnail.type }}
+              <a class="button el-button el-button--large card-button-link" :href="datasetURL(imageThumbnail.id)" target="_blank">
+                View Dataset {{ imageThumbnail.id }}
               </a>
             </div>
             <!-- Copy to clipboard button container -->
@@ -539,6 +534,7 @@ const VIEW_OPTIONS = [
   font-style: normal;
   line-height: 1.5;
   letter-spacing: 1.05px;
+  text-decoration: none;
   color: #484848;
 }
 
