@@ -52,17 +52,17 @@
               </a>
             </div>
           </div>
-          <div class="card-right">
+          <div class="card-right" v-loading="imageThumbnail.loadingData">
             <div class="details">
               <div class="title">
-                <strong>{{ imageThumbnail.type }}</strong>
+                <strong>{{ imageThumbnail.name }}</strong>
               </div>
             </div>
             <div class="details">
-              <div>
-                {{ formattedTitle(imageThumbnail) }}
-              </div>
+              {{ imageThumbnail.contributors }}
+              {{ imageThumbnail.publishYear ? `(${imageThumbnail.publishYear})` : '' }}
             </div>
+            <div class="details">{{ imageThumbnail.samples }}</div>
             <div class="details">
               <a class="button el-button el-button--large card-button-link" :href="imageThumbnail.link" target="_blank">
                 View {{ imageThumbnail.type }}
@@ -121,6 +121,10 @@ const VIEW_OPTIONS = [
         type: Array,
         default: [],
       },
+      envVars: {
+        type: Object,
+        default: () => {},
+      },
     },
     data: function () {
       return {
@@ -143,6 +147,7 @@ const VIEW_OPTIONS = [
     mounted: function () {
       this.injectImgSrc();
       this.populateFilterTags();
+      this.populateData();
       this.imageItems = this.imageThumbnails;
     },
     watch: {
@@ -211,6 +216,85 @@ const VIEW_OPTIONS = [
           }
         });
         this.imageItems = filteredImageItems;
+      },
+      populateData: function () {
+        this.imageThumbnails.forEach((imageThumbnail) => {
+          const id = imageThumbnail.id;
+          const version = imageThumbnail.version;
+          imageThumbnail['loadingData'] = true;
+
+          this.fetchData(id, version)
+          .then((response) => {
+            const name = response.name;
+            const contributors = response.contributors;
+            const versionPublishedAt = response.versionPublishedAt;
+            const species = imageThumbnail.species;
+            const sample = response.modelCount.find((m) => m.modelName === 'sample');
+            const subject = response.modelCount.find((m) => m.modelName === 'animal_subject');
+            const numberSamples = sample ? sample.count : 0;
+            const numberSubjects = subject ? subject.count : 0;
+            imageThumbnail['name'] = name;
+            imageThumbnail['contributors'] = this.getContributors(contributors);
+            imageThumbnail['publishYear'] = this.getPublishYear(versionPublishedAt);
+            imageThumbnail['samples'] = this.getSamples(species, numberSamples, numberSubjects);
+            imageThumbnail['loadingData'] = false;
+          });
+        });
+      },
+      fetchData: async function (id, version) {
+        const apiLocation = this.envVars.API_LOCATION;
+        const url = apiLocation + `sim/dataset/${id}/versions/${version}`;
+        try {
+          const response = await fetch(url);
+          const json = await response.json();
+          return json;
+        } catch (error) {
+          console.log('data fetching error', error)
+        }
+      },
+      // TODO: This function is from DatasetCard
+      getContributors: function (contributors) {
+        let text = ''
+        if (contributors) {
+          if (contributors.length === 1) {
+            text = contributors[0].lastName;
+          } else if (contributors.length === 2) {
+            text =
+            contributors[0].lastName +
+              ' & ' +
+              contributors[1].lastName
+          } else if (contributors.length > 2) {
+            text = contributors[0].lastName + ' et al.'
+          }
+        }
+        return text;
+      },
+      // TODO: This function is from DatasetCard
+      getSamples: function (species, numberSamples, numberSubjects) {
+        let text = ''
+        if (species) {
+          text = `${species}`
+        }
+        if (numberSamples > 0) {
+          text += ' ('
+          if (numberSamples === 1) {
+            text += `${numberSamples} sample`
+          } else if (numberSamples > 1) {
+            text += `${numberSamples} samples`
+          }
+          if (numberSubjects === 1) {
+            text += ` from ${numberSubjects} subject`
+          } else if (numberSamples > 1) {
+            text += ` from ${numberSubjects} subjects`
+          }
+          text += ')'
+        }
+
+        return text
+      },
+      // TODO: This function is from DatasetCard
+      getPublishYear: function (publishDate) {
+        return publishDate.split('-')[0]
       },
       populateFilterTags: function () {
         let imageObjects = {};
@@ -430,6 +514,21 @@ const VIEW_OPTIONS = [
     color: var(--el-text-color-secondary);
     font-size: 14px;
   }
+}
+
+.loading-icon {
+  z-index: 20;
+  width: 40px;
+  height: 40px;
+  left: 80px;
+}
+
+.loading-icon :deep(.el-loading-mask) {
+  background-color: rgba(117, 190, 218, 0) !important;
+}
+
+.loading-icon :deep(.el-loading-spinner .path) {
+  stroke: $app-primary-color;
 }
 
 .title {

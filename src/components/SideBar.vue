@@ -45,6 +45,7 @@
               <ImageThumbnails
                 v-if="imageThumbnails.length"
                 v-show="tab.id === activeTabId"
+                :envVars="envVars"
                 :imageThumbnails="imageThumbnails"
               />
             </template>
