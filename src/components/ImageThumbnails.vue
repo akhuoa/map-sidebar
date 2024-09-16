@@ -315,8 +315,23 @@ const VIEW_OPTIONS = [
         // to avoid default formatting on font size and margin
 
         // Title
-        if (imageThumbnail.title) {
-          contentArray.push(`<div><strong>${this.formattedTitle(imageThumbnail)}</strong></div>`);
+        if (imageThumbnail.name) {
+          contentArray.push(`<div><strong>${imageThumbnail.name}</strong></div>`);
+        }
+
+        // Contributors and Publish Date
+        if (imageThumbnail.contributors) {
+          let details = imageThumbnail.contributors;
+
+          if (imageThumbnail.publishYear) {
+            details += ` (${imageThumbnail.publishYear})`;
+          }
+          contentArray.push(`<div>${details}</div>`);
+        }
+
+        // samples
+        if (imageThumbnail.samples) {
+          contentArray.push(`<div>${imageThumbnail.samples}</div>`);
         }
 
         // Type
