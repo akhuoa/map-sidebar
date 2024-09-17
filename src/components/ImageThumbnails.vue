@@ -228,10 +228,14 @@ const VIEW_OPTIONS = [
             const subject = response.modelCount.find((m) => m.modelName === 'animal_subject');
             const numberSamples = sample ? sample.count : 0;
             const numberSubjects = subject ? subject.count : 0;
+            const formattedContributors = this.getContributors(contributors);
+            const publishYear = this.getPublishYear(versionPublishedAt);
+            const samples = this.getSamples(species, numberSamples, numberSubjects);
+
             imageThumbnail['name'] = name;
-            imageThumbnail['contributors'] = this.getContributors(contributors);
-            imageThumbnail['publishYear'] = this.getPublishYear(versionPublishedAt);
-            imageThumbnail['samples'] = this.getSamples(species, numberSamples, numberSubjects);
+            imageThumbnail['contributors'] = formattedContributors;
+            imageThumbnail['publishYear'] = publishYear;
+            imageThumbnail['samples'] = samples;
             imageThumbnail['loadingData'] = false;
           });
         });
