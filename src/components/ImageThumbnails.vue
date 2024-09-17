@@ -52,17 +52,21 @@
             </div>
             <div>
               <a
-                :href="datasetURL(imageThumbnail.id)"
+                :href="imageThumbnail.link"
                 class="button el-button el-button--large card-button-link"
                 target="_blank"
               >
-                View Dataset {{ imageThumbnail.id }}
+                View {{ imageThumbnail.type }}
               </a>
             </div>
           </div>
           <div class="card-right" v-loading="imageThumbnail.loadingData">
             <div class="details">
-              <a class="title" :href="imageThumbnail.link" target="_blank">
+              <a
+                :href="datasetURL(imageThumbnail.id)"
+                class="title"
+                target="_blank"
+              >
                 <strong>{{ imageThumbnail.name }}</strong>
               </a>
             </div>
