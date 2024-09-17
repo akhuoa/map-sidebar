@@ -38,12 +38,25 @@
         <div class="card" :key="imageThumbnail.link">
           <div class="card-left">
             <div>
-              <a :href="imageThumbnail.link" class="card-image card-button-link" target="_blank">
+              <a
+                :href="imageThumbnail.link"
+                class="card-image card-button-link"
+                target="_blank"
+              >
                 <el-image :src="imageThumbnail.imgSrc" loading="lazy">
                   <template #error>
                     <div class="image-slot">Loading...</div>
                   </template>
                 </el-image>
+              </a>
+            </div>
+            <div>
+              <a
+                :href="datasetURL(imageThumbnail.id)"
+                class="button el-button el-button--large card-button-link"
+                target="_blank"
+              >
+                View Dataset {{ imageThumbnail.id }}
               </a>
             </div>
           </div>
@@ -58,11 +71,6 @@
               {{ imageThumbnail.publishYear ? `(${imageThumbnail.publishYear})` : '' }}
             </div>
             <div class="details">{{ imageThumbnail.samples }}</div>
-            <div class="details">
-              <a class="button el-button el-button--large card-button-link" :href="datasetURL(imageThumbnail.id)" target="_blank">
-                View Dataset {{ imageThumbnail.id }}
-              </a>
-            </div>
             <!-- Copy to clipboard button container -->
             <div class="float-button-container">
               <CopyToClipboard :content="getCopyContent(imageThumbnail)" />
@@ -502,7 +510,7 @@ const VIEW_OPTIONS = [
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   align-items: center;
 }
 
