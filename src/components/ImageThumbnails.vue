@@ -213,32 +213,44 @@ const VIEW_OPTIONS = [
         this.imageItems = filteredImageItems;
       },
       populateData: function () {
+        const requests = [];
         this.imageThumbnails.forEach((imageThumbnail) => {
           const id = imageThumbnail.id;
           const version = imageThumbnail.version;
+          const key = `${id}-${version}`;
           imageThumbnail['loadingData'] = true;
 
-          this.fetchData(id, version)
-          .then((response) => {
-            const name = response.name;
-            const contributors = response.contributors;
-            const versionPublishedAt = response.versionPublishedAt;
-            const species = imageThumbnail.species;
-            const sample = response.modelCount.find((m) => m.modelName === 'sample');
-            const subject = response.modelCount.find((m) => m.modelName === 'animal_subject');
-            const numberSamples = sample ? sample.count : 0;
-            const numberSubjects = subject ? subject.count : 0;
-            const formattedContributors = this.getContributors(contributors);
-            const publishYear = this.getPublishYear(versionPublishedAt);
-            const samples = this.getSamples(species, numberSamples, numberSubjects);
-
-            imageThumbnail['name'] = name;
-            imageThumbnail['contributors'] = formattedContributors;
-            imageThumbnail['publishYear'] = publishYear;
-            imageThumbnail['samples'] = samples;
-            imageThumbnail['loadingData'] = false;
-          });
+          const existingReqest = requests.find((item) => item.key === key);
+          if (existingReqest) {
+            existingReqest.api.then((response) => this.bindData(response, imageThumbnail));
+          } else {
+            const newRequest = {
+              key: key,
+              api: this.fetchData(id, version)
+            };
+            newRequest.api.then((response) => this.bindData(response, imageThumbnail));
+            requests.push(newRequest);
+          }
         });
+      },
+      bindData: function (response, imageThumbnail) {
+        const name = response.name;
+        const contributors = response.contributors;
+        const versionPublishedAt = response.versionPublishedAt;
+        const species = imageThumbnail.species;
+        const sample = response.modelCount.find((m) => m.modelName === 'sample');
+        const subject = response.modelCount.find((m) => m.modelName === 'animal_subject');
+        const numberSamples = sample ? sample.count : 0;
+        const numberSubjects = subject ? subject.count : 0;
+        const formattedContributors = this.getContributors(contributors);
+        const publishYear = this.getPublishYear(versionPublishedAt);
+        const samples = this.getSamples(species, numberSamples, numberSubjects);
+
+        imageThumbnail['name'] = name;
+        imageThumbnail['contributors'] = formattedContributors;
+        imageThumbnail['publishYear'] = publishYear;
+        imageThumbnail['samples'] = samples;
+        imageThumbnail['loadingData'] = false;
       },
       fetchData: async function (id, version) {
         const apiLocation = this.envVars.API_LOCATION;
