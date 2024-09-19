@@ -38,26 +38,24 @@
         <div class="card" :key="imageThumbnail.link">
           <div class="card-left">
             <div>
-              <a
-                :href="imageThumbnail.link"
-                class="card-image card-button-link"
-                target="_blank"
+              <div
+                class="card-image"
+                @click="cardButtonClick(imageThumbnail)"
               >
                 <el-image :src="imageThumbnail.imgSrc" loading="lazy">
                   <template #error>
                     <div class="image-slot">Loading...</div>
                   </template>
                 </el-image>
-              </a>
+              </div>
             </div>
             <div>
-              <a
-                :href="imageThumbnail.link"
-                class="button el-button el-button--large card-button-link"
-                target="_blank"
+              <button
+                class="button el-button el-button--large"
+                @click="cardButtonClick(imageThumbnail)"
               >
                 View {{ imageThumbnail.type }}
-              </a>
+              </button>
             </div>
           </div>
           <div class="card-right" v-loading="imageThumbnail.loadingData">
@@ -97,6 +95,7 @@ import { CopyToClipboard } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
 import Gallery from "@abi-software/gallery";
 import "@abi-software/gallery/dist/style.css";
+import EventBus from './EventBus.js'
 
 const BASE64PREFIX = 'data:image/png;base64,';
 const VIEW_OPTIONS = [
@@ -275,6 +274,17 @@ const VIEW_OPTIONS = [
           console.log('data fetching error', error)
         }
       },
+      fetchBiolucidaData: async function (id) {
+        const apiLocation = this.envVars.API_LOCATION;
+        const url = apiLocation + 'image_search/' + id;
+        try {
+          const response = await fetch(url);
+          const json = await response.json();
+          return json;
+        } catch (error) {
+          console.warn('Biolucida data fetching error', error)
+        }
+      },
       // TODO: This function is from DatasetCard
       getContributors: function (contributors) {
         let text = ''
@@ -335,6 +345,43 @@ const VIEW_OPTIONS = [
           }
         });
         this.speciesFilterTags = Object.values(imageObjects);
+      },
+      cardButtonClick: function (imageThumbnail) {
+        const id = imageThumbnail.id;
+        const biolucidaData = this.fetchBiolucidaData(id);
+
+        biolucidaData.then((data) => {
+          if (data.status === 'success') {
+            const biolucidaImage = data.dataset_images.find((datasetImg) =>
+              datasetImg.image_id === imageThumbnail.biolucida_id
+            );
+
+            if (biolucidaImage) {
+              // TODO: to update label and name
+              const dataToEmit = {
+                "label": imageThumbnail.name,
+                "name": imageThumbnail.name,
+                "datasetId": id,
+                "title": "View " + imageThumbnail.type,
+                "type": "Biolucida",
+                "resource": {
+                    "share_link": biolucidaImage.share_link,
+                    "id": biolucidaImage.image_id,
+                    "itemId": biolucidaImage.sourcepkg_id,
+                }
+              };
+              this.propogateCardAction(dataToEmit);
+            } else {
+              console.warn('Image not found!', data);
+            }
+
+          }
+        });
+      },
+      // TODO: This function is from DatasetCard
+      propogateCardAction: function (action) {
+        EventBus.emit('PopoverActionClick', action)
+        EventBus.emit('contextUpdate', action) // Pass to mapintegratedvuer
       },
       getCopyContent: function (imageThumbnail) {
         const contentArray = [];
@@ -613,10 +660,6 @@ const VIEW_OPTIONS = [
     background: #ac76c5 !important;
     border: 1px solid #ac76c5 !important;
   }
-}
-
-.card-button-link {
-  text-decoration: none;
 }
 
 .float-button-container {
