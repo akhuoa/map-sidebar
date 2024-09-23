@@ -50,6 +50,7 @@
               </div>
             </div>
             <div>
+              <p>{{ formattedTitle(imageThumbnail) }}</p>
               <button
                 class="button el-button el-button--large"
                 @click="cardButtonClick(imageThumbnail)"
@@ -123,7 +124,7 @@ const VIEW_OPTIONS = [
       /**
        * The image thumbnails data to show in sidebar.
        */
-       imageThumbnails: {
+      imageThumbnails: {
         type: Array,
         default: [],
       },
@@ -151,24 +152,25 @@ const VIEW_OPTIONS = [
       },
     },
     mounted: function () {
-      this.injectImgSrc();
-      this.populateFilterTags();
-      this.populateData();
-      this.imageItems = this.imageThumbnails;
+      this.prepareImages();
     },
     watch: {
       imageThumbnails: {
         handler: function (value) {
           if (value) {
-            this.injectImgSrc();
-            this.populateFilterTags();
-            this.imageItems = this.imageThumbnails;
+            this.prepareImages();
           }
         },
         deep: true,
       },
     },
     methods: {
+      prepareImages: function() {
+        this.imageItems = this.imageThumbnails;
+        this.injectImgSrc();
+        this.populateFilterTags();
+        this.populateData();
+      },
       injectImgSrc: function() {
         this.imageThumbnails.forEach((imageThumbnail) => {
           return this.mapImage(imageThumbnail);
@@ -181,7 +183,7 @@ const VIEW_OPTIONS = [
         if (type !== 'jpg') {
           formattedTitle = title.replace('.' + type, '');
         }
-        formattedTitle = formattedTitle.replaceAll('_', ' ');
+        // formattedTitle = formattedTitle.replaceAll('_', ' ');
         return formattedTitle;
       },
       datasetURL: function(id) {
@@ -563,6 +565,15 @@ const VIEW_OPTIONS = [
   flex-direction: column;
   gap: 1.5rem;
   align-items: center;
+
+  > div {
+    text-align: center;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
 }
 
 .card-right {
