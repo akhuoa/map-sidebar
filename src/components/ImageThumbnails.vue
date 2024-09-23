@@ -226,12 +226,14 @@ const BASE64PREFIX = 'data:image/png;base64,';
         const formattedContributors = this.getContributors(contributors);
         const publishYear = this.getPublishYear(versionPublishedAt);
         const samples = this.getSamples(species, numberSamples, numberSubjects);
+        const s3uri = response.uri;
 
         imageThumbnail['name'] = name;
         imageThumbnail['contributors'] = formattedContributors;
         imageThumbnail['publishYear'] = publishYear;
         imageThumbnail['samples'] = samples;
         imageThumbnail['loadingData'] = false;
+        imageThumbnail['s3uri'] = s3uri;
       },
       fetchData: async function (id, version) {
         const apiLocation = this.envVars.API_LOCATION;
@@ -327,10 +329,10 @@ const BASE64PREFIX = 'data:image/png;base64,';
             this.emitSegmentationData(imageThumbnail);
             break;
           case 'scaffold':
-          console.log('scaffold')
+            this.emitScaffoldData(imageThumbnail);
             break;
           case 'plot':
-            console.log('plot')
+            this.emitPlotData(imageThumbnail);
             break;
 
           default:
@@ -377,15 +379,101 @@ const BASE64PREFIX = 'data:image/png;base64,';
         const resource = {
           share_link: `${prefix}/dataviewer?${pathQuery}`,
         };
-        let dataToEmit = {
+        const dataToEmit = {
           label: imageThumbnail.name,
           resource: resource,
           datasetId: Number(imageThumbnail.id),
-          s3uri: '', // TODO: to find s3URI
+          s3uri: imageThumbnail.s3uri,
           title: 'View segmentation',
           type: 'Segmentation',
         };
         this.propogateCardAction(dataToEmit);
+      },
+      emitScaffoldData: function (imageThumbnail) {
+        const s3uri = imageThumbnail.s3uri;
+        const filePath = imageThumbnail.link.split('files/')[1];
+        const resourcePath = `${this.envVars.API_LOCATION}s3-resource/${this.getS3Prefix(s3uri)}files/${filePath}${this.getS3Args(s3uri)}`;
+        const dataToEmit = {
+          label: imageThumbnail.name,
+          resource: resourcePath,
+          title: "View 3D scaffold",
+          type: "Scaffold",
+          discoverId: Number(imageThumbnail.id),
+          apiLocation: this.envVars.API_LOCATION,
+          version: imageThumbnail.version,
+          banner: imageThumbnail.thumbnail,
+          s3uri: s3uri,
+          contextCardUrl: '', // TODO: to find context card URL
+        };
+        this.propogateCardAction(dataToEmit);
+      },
+      emitPlotData: function (imageThumbnail) {
+        const s3uri = imageThumbnail.s3uri;
+        const filePath = imageThumbnail.link.split('files/')[1];
+        const filePathPrefix = `${this.envVars.API_LOCATION}/s3-resource/${this.getS3Prefix(s3uri)}files/`;
+        const sourceUrl = filePathPrefix + filePath + this.getS3Args(s3uri);
+        let metadata = {};
+        // TODO: to find out metadata
+        // try {
+        //   metadata = JSON.parse(
+        //     plotAnnotation.supplemental_json_metadata.description
+        //   )
+        // } catch (error) {
+        //   console.warn(error)
+        // }
+        let supplementalData = [];
+        // TODO: to find out supplementalData
+        // if (plotAnnotation.isDescribedBy) {
+        //   supplementalData.push({
+        //     url: filePathPrefix + plotAnnotation.isDescribedBy.path,
+        //   })
+        // }
+        const resource = {
+          dataSource: { url: sourceUrl },
+          metadata,
+          supplementalData,
+        };
+        const dataToEmit = {
+          label: imageThumbnail.name,
+          resource: resource,
+          s3uri: s3uri,
+          title: 'View plot',
+          type: 'Plot',
+          discoverId: Number(imageThumbnail.id),
+          version: imageThumbnail.version,
+        };
+        this.propogateCardAction(dataToEmit);
+      },
+      // TODO: to combine with s3Bucket mixin
+      getS3Prefix: function (s3uri) {
+        let s3Prefix = '';
+        if (s3uri) {
+          const substring = s3uri.split("//")[1];
+          if (substring) {
+            const n = substring.indexOf('/');
+            s3Prefix = substring.substring(n + 1);
+          }
+        }
+        return s3Prefix;
+      },
+      // TODO: to combine with s3Bucket mixin
+      getS3Args: function(s3uri) {
+        const s3Bucket = this.getS3Bucket(s3uri);
+        if (s3Bucket) {
+          return `?s3BucketName=${s3Bucket}`;
+        }
+        return '';
+      },
+      // TODO: to combine with s3Bucket mixin
+      getS3Bucket: function(s3uri) {
+        let s3Bucket = '';
+        if (s3uri) {
+          const substring = s3uri.split("//")[1];
+          if (substring) {
+            s3Bucket = substring.split("/")[0];
+          }
+        }
+        return s3Bucket;
       },
       // TODO: This function is from DatasetCard
       propogateCardAction: function (action) {
