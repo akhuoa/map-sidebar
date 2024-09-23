@@ -15,25 +15,9 @@
           {{ species.name }} ({{ species.count }})
         </el-tag>
       </div>
-      <div class="view-selector">
-        <el-select
-          v-model="viewOption"
-          placeholder="Select view"
-          popper-class="view-selector-select-popper"
-        >
-          <el-option
-            v-for="item in viewOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </div>
     </div>
-    <div class="gallery-container" v-if="viewOption === 'gallery'">
-      <Gallery :items="imageItems" :imageStyle="imageStyle" />
-    </div>
-    <div class="dataset-card-container" v-if="viewOption === 'list'">
+
+    <div class="dataset-card-container">
       <div class="dataset-card" v-for="imageThumbnail in imageItems">
         <div class="card" :key="imageThumbnail.link">
           <div class="card-left">
@@ -94,21 +78,9 @@ import {
 } from 'element-plus';
 import { CopyToClipboard } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
-import Gallery from "@abi-software/gallery";
-import "@abi-software/gallery/dist/style.css";
 import EventBus from './EventBus.js'
 
 const BASE64PREFIX = 'data:image/png;base64,';
-const VIEW_OPTIONS = [
-  {
-    value: 'list',
-    label: 'List'
-  },
-  {
-    value: 'gallery',
-    label: 'Gallery'
-  }
-];
 
   export default {
     name: 'ImageThumbnails',
@@ -117,7 +89,6 @@ const VIEW_OPTIONS = [
       Option,
       Select,
       ElImage,
-      Gallery,
       CopyToClipboard,
     },
     props: {
@@ -138,9 +109,6 @@ const VIEW_OPTIONS = [
         activeSpecies: { name: "" },
         speciesFilterTags: [],
         imageItems: [],
-        showImageGallery: false,
-        viewOption: 'list',
-        viewOptions: VIEW_OPTIONS,
       };
     },
     computed: {
@@ -507,12 +475,6 @@ const VIEW_OPTIONS = [
   }
 }
 
-.view-selector .el-select {
-  width: 100px;
-  font-family: $font-family;
-}
-
-.gallery-container,
 .dataset-card-container {
   margin: 1rem;
   margin-top: 0;
@@ -524,18 +486,6 @@ const VIEW_OPTIONS = [
   border: solid 1px #e4e7ed;
   background-color: #ffffff;
   border-radius: var(--el-border-radius-base);
-}
-
-.gallery-container {
-  :deep(.gallery) {
-    .gallery-strip {
-      padding: 1rem 0;
-    }
-
-    > div {
-      min-height: max-content !important;
-    }
-  }
 }
 
 .dataset-card-container {
@@ -685,16 +635,4 @@ const VIEW_OPTIONS = [
     visibility: visible;
   }
 }
-</style>
-
-<style lang="scss">
-  .view-selector-select-popper {
-    font-family: $font-family;
-    font-size: 14px;
-    color: #292b66;
-
-    .el-select-dropdown__item.is-selected {
-      color: $app-primary-color;
-    }
-  }
 </style>
