@@ -317,6 +317,28 @@ const BASE64PREFIX = 'data:image/png;base64,';
         this.speciesFilterTags = Object.values(imageObjects);
       },
       cardButtonClick: function (imageThumbnail) {
+        const imageType = imageThumbnail.type.toLowerCase();
+
+        switch (imageType) {
+          case 'image':
+            this.emitBiolucidaData(imageThumbnail);
+            break;
+          case 'segmentation':
+            this.emitSegmentationData(imageThumbnail);
+            break;
+          case 'scaffold':
+          console.log('scaffold')
+            break;
+          case 'plot':
+            console.log('plot')
+            break;
+
+          default:
+            console.warn('Image type not founnd!', imageType)
+            break;
+        }
+      },
+      emitBiolucidaData: function (imageThumbnail) {
         const id = imageThumbnail.id;
         const biolucidaData = this.fetchBiolucidaData(id);
 
@@ -344,9 +366,26 @@ const BASE64PREFIX = 'data:image/png;base64,';
             } else {
               console.warn('Image not found!', data);
             }
-
+          } else {
+            console.warn('Image not found!', data);
           }
         });
+      },
+      emitSegmentationData: function (imageThumbnail) {
+        const prefix = this.envVars.NL_LINK_PREFIX;
+        const pathQuery = imageThumbnail.link.split('?')[1];
+        const resource = {
+          share_link: `${prefix}/dataviewer?${pathQuery}`,
+        };
+        let dataToEmit = {
+          label: imageThumbnail.name,
+          resource: resource,
+          datasetId: Number(imageThumbnail.id),
+          s3uri: '', // TODO: to find s3URI
+          title: 'View segmentation',
+          type: 'Segmentation',
+        };
+        this.propogateCardAction(dataToEmit);
       },
       // TODO: This function is from DatasetCard
       propogateCardAction: function (action) {
@@ -538,6 +577,7 @@ const BASE64PREFIX = 'data:image/png;base64,';
   display: block;
   text-decoration: none;
   outline: none;
+  cursor: pointer;
 
   .el-image {
     display: block;
