@@ -1,5 +1,26 @@
 <template>
   <div class="image-thumbnails-container">
+    <div class="el-card__header">
+      <div class="header">
+        <el-input
+          class="search-input"
+          placeholder="Search"
+          v-model="searchInput"
+          @keyup="searchEvent"
+          clearable
+          @clear="clearSearchClicked"
+        ></el-input>
+        <el-button
+          type="primary"
+          class="button"
+          @click="searchEvent"
+          size="large"
+        >
+          Search
+        </el-button>
+      </div>
+    </div>
+
     <div class="toolbar">
       <div class="filters">
         <el-tag
@@ -106,6 +127,7 @@ const BASE64PREFIX = 'data:image/png;base64,';
     },
     data: function () {
       return {
+        searchInput: '',
         activeSpecies: { name: "" },
         speciesFilterTags: [],
         imageItems: [],
@@ -178,6 +200,24 @@ const BASE64PREFIX = 'data:image/png;base64,';
       removeSpeciesFilterTag: function () {
         this.activeSpecies = { name: "" };
         this.imageItems = this.imageThumbnails;
+      },
+      searchEvent: function (event = false) {
+        // TODO: to perform search
+        // if (event.keyCode === 13 || event instanceof MouseEvent) {
+        //   this.resetPageNavigation()
+        //   this.searchAlgolia(this.filters, this.searchInput)
+        //   this.$refs.searchHistory.selectValue = 'Full search history'
+        //   this.$refs.searchHistory.addSearchToHistory(
+        //     this.filters,
+        //     this.searchInput
+        //   )
+        // }
+      },
+      clearSearchClicked: function () {
+        // TODO: to clear search
+        this.searchInput = '';
+        // this.resetPageNavigation()
+        // this.searchAlgolia(this.filters, this.searchInput)
       },
       filterBySpecies: function (tagInfo) {
         this.activeSpecies = tagInfo;
@@ -570,12 +610,39 @@ const BASE64PREFIX = 'data:image/png;base64,';
   font-family: $font-family;
   font-weight: 400;
   background-color: #f7faff;
-  border-left: 1px solid var(--el-border-color);
-  border-top: 1px solid var(--el-border-color);
+  box-shadow: var(--el-box-shadow-light);
   display: flex;
   flex-direction: column;
   height: calc(100% - 30px); // minus tabs height
   z-index: 1;
+}
+
+// TODO: to combine with sidebarConntent
+.header {
+  border: solid 1px #292b66;
+  background-color: #292b66;
+  text-align: left;
+
+  .el-button {
+    &:hover,
+    &:focus {
+      background: $app-primary-color;
+      box-shadow: -3px 2px 4px #00000040;
+      color: #fff;
+    }
+  }
+}
+// TODO: to combine with sidebarConntent
+.image-thumbnails-container .el-card__header {
+  background-color: #292b66;
+  padding: 1rem;
+}
+// TODO: to combine with sidebarConntent
+.search-input {
+  width: 298px !important;
+  height: 40px;
+  padding-right: 14px;
+  align-items: left;
 }
 
 .toolbar {
