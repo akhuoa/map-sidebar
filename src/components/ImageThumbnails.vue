@@ -23,7 +23,23 @@
 
     <div class="toolbar">
       <div class="filters">
-        <el-tag
+        <el-cascader
+          :options="speciesFilterOptions"
+          :props="cascaderProps"
+          collapse-tags
+          collapse-tags-tooltip
+          :max-collapse-tags="1"
+          class="cascader"
+          popper-class="sidebar-cascader-popper"
+          ref="cascader"
+          v-model="cascadeSelected"
+          size="large"
+          placeholder="Filters"
+          @change="cascadeEvent($event)"
+          @expand-change="cascadeExpandChange"
+          show-all-levels
+        />
+        <!-- <el-tag
           v-for="(species, index) in speciesFilterTags"
           :key="index"
           type="info"
@@ -34,7 +50,7 @@
           @click="filterBySpecies(species)"
         >
           {{ species.name }} ({{ species.count }})
-        </el-tag>
+        </el-tag> -->
       </div>
     </div>
 
@@ -96,6 +112,7 @@ import {
   ElTag as Tag,
   ElOption as Option,
   ElSelect as Select,
+  ElCascader as Cascader,
 } from 'element-plus';
 import { CopyToClipboard } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
@@ -110,6 +127,7 @@ const BASE64PREFIX = 'data:image/png;base64,';
       Option,
       Select,
       ElImage,
+      Cascader,
       CopyToClipboard,
     },
     props: {
@@ -128,8 +146,11 @@ const BASE64PREFIX = 'data:image/png;base64,';
     data: function () {
       return {
         searchInput: '',
+        cascaderProps: { multiple: true },
+        cascadeSelected: [],
         activeSpecies: { name: "" },
         speciesFilterTags: [],
+        speciesFilterOptions: [],
         imageItems: [],
       };
     },
@@ -219,13 +240,29 @@ const BASE64PREFIX = 'data:image/png;base64,';
         // this.resetPageNavigation()
         // this.searchAlgolia(this.filters, this.searchInput)
       },
+      cascadeEvent: function (event) {
+        // TODO: to update cascade event
+        console.log('cascadeEvent', event)
+        this.filterBySpecies();
+      },
+      cascadeExpandChange: function (event) {
+        // TODO: to update cascade event
+      },
       filterBySpecies: function (tagInfo) {
-        this.activeSpecies = tagInfo;
+        let speciesValue = '';
+        if (tagInfo) {
+          this.activeSpecies = tagInfo;
+          speciesValue = tagInfo.name;
+        } else if (this.cascadeSelected.length) {
+          speciesValue = this.cascadeSelected[0][1]; // TODO: to update
+        } else if (!this.cascadeSelected.length) {
+          this.removeSpeciesFilterTag();
+        }
         let filteredImageItems = [];
         this.imageThumbnails.forEach((image) => {
           if (image.species && image.species.length) {
             image.species.forEach((species) => {
-              if (species === tagInfo.name) {
+              if (species === speciesValue) {
                 filteredImageItems.push(image);
               }
             });
@@ -357,6 +394,20 @@ const BASE64PREFIX = 'data:image/png;base64,';
           }
         });
         this.speciesFilterTags = Object.values(imageObjects);
+        const speciesChildren = [];
+        this.speciesFilterTags.forEach((filterTag) => {
+          speciesChildren.push({
+            value: filterTag.name,
+            label: filterTag.name,
+          });
+        });
+        this.speciesFilterOptions = [
+          {
+            value: 'species',
+            label: 'Species',
+            children: speciesChildren
+          }
+        ];
       },
       cardButtonClick: function (imageThumbnail) {
         const imageType = imageThumbnail.type.toLowerCase();
@@ -644,6 +695,38 @@ const BASE64PREFIX = 'data:image/png;base64,';
   padding-right: 14px;
   align-items: left;
 }
+// TODO: to combine with searchFilters
+.cascader {
+  font-family: $font-family;
+  font-size: 14px;
+  font-weight: 500;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #292b66;
+  text-align: center;
+  padding-bottom: 6px;
+
+  .el-cascader__tags .el-tag {
+    font-family: $font-family;
+    font-size: 12px;
+    color: #303133 !important;
+    background-color: #fff;
+    border-color: #dcdfe6 !important;
+  }
+
+  .el-input .el-input__inner::placeholder {
+    font-family: $font-family;
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #292b66;
+  }
+}
 
 .toolbar {
   display: flex;
@@ -829,5 +912,12 @@ const BASE64PREFIX = 'data:image/png;base64,';
     opacity: 1;
     visibility: visible;
   }
+}
+</style>
+
+<style lang="scss">
+.sidebar-cascader-popper .el-checkbox__input.is-indeterminate > .el-checkbox__inner {
+  background-color: $app-primary-color;
+  border-color: $app-primary-color;
 }
 </style>
