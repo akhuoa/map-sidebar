@@ -109,7 +109,7 @@ export default {
       tabArray: [
         { title: 'Flatmap', id: 1, type: 'search'},
         { title: 'Connectivity', id: 2, type: 'connectivity' },
-        { title: 'Images', id: 3, type: 'images' },
+        // { title: 'Images', id: 3, type: 'images' },
       ],
       sideBarVisibility: true,
       envVars: {
@@ -236,7 +236,8 @@ export default {
     },
     showImages: function () {
       if (this.$refs.sideBar) {
-        this.tabClicked({id: 3, type: 'images'});
+        // this.tabClicked({id: 1, type: 'images'});
+        this.$refs.sideBar.searchType = 'images';
         this.$refs.sideBar.setDrawerOpen(true);
       }
     },

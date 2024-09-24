@@ -50,7 +50,15 @@
               />
             </template>
             <template v-else>
+            <ImageThumbnails
+              v-if="imageThumbnails.length && searchType === 'images'"
+              v-show="tab.id === activeTabId"
+              :envVars="envVars"
+              :imageThumbnails="imageThumbnails"
+              @update-search-type="onUpdateSearchType"
+            />
             <SidebarContent
+              v-if="searchType !== 'images'"
               class="sidebar-content-container"
               v-show="tab.id === activeTabId"
               :contextCardEntry="tab.contextCard"
@@ -121,7 +129,7 @@ export default {
       default: () => [
         { id: 1, title: 'Search', type: 'search' },
         { id: 2, title: 'Connectivity', type: 'connectivity' },
-        { id: 3, title: 'Images', type: 'images' }, // Temporary
+        // { id: 3, title: 'Images', type: 'images' }, // Temporary
       ],
     },
     /**
@@ -156,6 +164,7 @@ export default {
   data: function () {
     return {
       drawerOpen: false,
+      searchType: '',
       availableAnatomyFacets: []
     }
   },
@@ -286,6 +295,9 @@ export default {
       } else if (closedTab.type === 'images') {
         this.$emit('image-thumbnail-close');
       }
+    },
+    onUpdateSearchType: function () {
+      this.searchType = '';
     },
   },
   created: function () {

@@ -10,14 +10,14 @@
           clearable
           @clear="clearSearchClicked"
         ></el-input>
-        <el-button
-          type="primary"
-          class="button"
-          @click="searchEvent"
-          size="large"
-        >
-          Search
-        </el-button>
+        <el-dropdown split-button type="primary" class="button" @click="handleDropdownClick" size="large">
+          Search Images
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="switchToDataset">Search Dataset</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </div>
 
@@ -113,7 +113,9 @@ import {
   ElOption as Option,
   ElSelect as Select,
   ElCascader as Cascader,
+  ElDropdown as Dropdown,
 } from 'element-plus';
+import { ArrowDown } from '@element-plus/icons-vue'
 import { CopyToClipboard } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
 import EventBus from './EventBus.js'
@@ -128,6 +130,8 @@ const BASE64PREFIX = 'data:image/png;base64,';
       Select,
       ElImage,
       Cascader,
+      Dropdown,
+      ArrowDown,
       CopyToClipboard,
     },
     props: {
@@ -221,6 +225,12 @@ const BASE64PREFIX = 'data:image/png;base64,';
       removeSpeciesFilterTag: function () {
         this.activeSpecies = { name: "" };
         this.imageItems = this.imageThumbnails;
+      },
+      handleDropdownClick: function () {
+
+      },
+      switchToDataset: function () {
+        this.$emit('update-search-type', '');
       },
       searchEvent: function (event = false) {
         // TODO: to perform search
