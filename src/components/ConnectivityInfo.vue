@@ -173,18 +173,21 @@
           Explore destination data
         </el-button>
       </div>
-
-      <el-button
+      <div
         v-show="
           entry.componentsWithDatasets &&
           entry.componentsWithDatasets.length > 0 &&
           shouldShowExploreButton(entry.componentsWithDatasets)
         "
-        class="button"
-        @click="openAll"
+        class="block"
       >
-        Search for data on components
-      </el-button>
+        <el-button
+          class="button"
+          @click="openAll"
+        >
+          Search for data on components
+        </el-button>
+      </div>
     </div>
     <div class="content-container">
       <div class="attribute-title-container">
