@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/map-side-bar",
-  "version": "2.4.2-beta.7",
+  "version": "2.4.2-beta.8",
   "files": [
     "dist/*",
     "src/*",
