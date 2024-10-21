@@ -196,6 +196,7 @@
       <connectivity-graph
         :entry="entry.featureId[0]"
         :mapServer="envVars.FLATMAPAPI_LOCATION"
+        @tap-node="onTapNode"
         ref="connectivityGraphRef"
       />
     </div>
@@ -387,6 +388,12 @@ export default {
           behavior: 'smooth',
         });
       }
+    },
+    onTapNode: function (data) {
+      /**
+       * This event is triggered by connectivity-graph's `tap-node` event.
+       */
+      this.$emit('connectivity-component-click', data);
     },
     getUpdateCopyContent: function () {
       if (!this.entry) {

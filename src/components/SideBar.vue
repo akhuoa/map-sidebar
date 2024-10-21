@@ -38,6 +38,7 @@
                 :envVars="envVars"
                 :ref="'connectivityTab_' + tab.id"
                 @show-connectivity="showConnectivity"
+                @connectivity-component-click="onConnectivityComponentClick"
               />
             </template>
             <template v-else>
@@ -154,6 +155,13 @@ export default {
      */
     showConnectivity: function (featureIds) {
       this.$emit('show-connectivity', featureIds);
+    },
+    /**
+     * This function is triggered after a connectivity component is clicked.
+     * @arg data
+     */
+    onConnectivityComponentClick: function (data) {
+      this.$emit('connectivity-component-click', data);
     },
     /**
      * This event is emitted when the search filters are changed.
