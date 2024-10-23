@@ -272,6 +272,13 @@ export default {
     tabClose: function (id) {
       this.$emit('connectivity-info-close');
     },
+    /**
+     * To receive error message for connectivity graph
+     * @param {String} errorMessage
+     */
+    updateConnectivityGraphError: function (errorMessage) {
+      EventBus.emit('connectivity-graph-error', errorMessage);
+    },
   },
   created: function () {
     this.drawerOpen = this.openAtStart

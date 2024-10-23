@@ -490,6 +490,15 @@ export default {
       return contentArray.join('\n\n<br>');
     },
   },
+  mounted: function () {
+    EventBus.on('connectivity-graph-error', (errorMessage) => {
+      const connectivityGraphRef = this.$refs.connectivityGraphRef;
+
+      if (connectivityGraphRef) {
+        connectivityGraphRef.showErrorMessage(errorMessage);
+      }
+    });
+  },
 }
 </script>
 
