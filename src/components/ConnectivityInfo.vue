@@ -694,13 +694,18 @@ export default {
 
   &:hover {
     color: #fff !important;
-    background: #ac76c5 !important;
+    background-color: #ac76c5 !important;
     border: 1px solid #ac76c5 !important;
   }
 
   & + .button {
     margin-top: 10px !important;
   }
+}
+
+.el-button-secondary {
+  border-color: transparent;
+  background-color: transparent;
 }
 
 .buttons-row {
