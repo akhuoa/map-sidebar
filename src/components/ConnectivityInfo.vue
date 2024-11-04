@@ -38,14 +38,6 @@
         <div class="block" v-if="resources.length">
           <external-resource-card :resources="resources"></external-resource-card>
         </div>
-        <div class="block">
-          <el-button
-            class="button"
-            @click="goToConnectivityGraph()"
-          >
-            Show connectivity graph
-          </el-button>
-        </div>
       </div>
       <div class="title-buttons">
         <el-popover
@@ -68,7 +60,28 @@
         <CopyToClipboard :content="updatedCopyContent" />
       </div>
     </div>
-    <div class="content-container">
+
+    <div class="content-container population-display">
+      <div class="block attribute-title-container">
+        <span class="attribute-title">Population Display</span>
+      </div>
+      <div class="block buttons-row">
+        <el-button
+          :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
+          @click="switchConnectivityView('listView')"
+        >
+          List view
+        </el-button>
+        <el-button
+          :class="activeView === 'graphView' ? 'button' : 'el-button-secondary'"
+          @click="switchConnectivityView('graphView')"
+        >
+          Graph view
+        </el-button>
+      </div>
+    </div>
+
+    <div class="content-container" v-if="activeView === 'listView'">
       {{ entry.paths }}
       <div v-if="entry.origins && entry.origins.length > 0" class="block">
         <div class="attribute-title-container">
@@ -189,10 +202,8 @@
         </el-button>
       </div>
     </div>
-    <div class="content-container">
-      <div class="attribute-title-container">
-        <span class="attribute-title">Connectivity Graph</span>
-      </div>
+
+    <div class="content-container" v-if="activeView === 'graphView'">
       <connectivity-graph
         :entry="entry.featureId[0]"
         :mapServer="envVars.FLATMAPAPI_LOCATION"
@@ -273,6 +284,7 @@ export default {
       activeSpecies: undefined,
       pubmedSearchUrl: '',
       loading: false,
+      activeView: 'listView',
       facetList: [],
       showToolip: false,
       showDetails: false,
@@ -381,12 +393,16 @@ export default {
       // connected to flatmapvuer > moveMap(featureIds) function
       this.$emit('show-connectivity', featureIds);
     },
-    goToConnectivityGraph: function () {
-      const connectivityGraphRef = this.$refs.connectivityGraphRef;
-      if (connectivityGraphRef && connectivityGraphRef.$el) {
-        connectivityGraphRef.$el.scrollIntoView({
-          behavior: 'smooth',
-        });
+    switchConnectivityView: function (val) {
+      this.activeView = val;
+
+      if (val === 'graphView') {
+        const connectivityGraphRef = this.$refs.connectivityGraphRef;
+        if (connectivityGraphRef && connectivityGraphRef.$el) {
+          connectivityGraphRef.$el.scrollIntoView({
+            behavior: 'smooth',
+          });
+        }
       }
     },
     onTapNode: function (data) {
@@ -675,14 +691,35 @@ export default {
   font-size: 14px !important;
   background-color: $app-primary-color;
   color: #fff;
-  & + .button {
-    margin-top: 10px !important;
-  }
+
   &:hover {
     color: #fff !important;
     background: #ac76c5 !important;
     border: 1px solid #ac76c5 !important;
   }
+
+  & + .button {
+    margin-top: 10px !important;
+  }
+}
+
+.buttons-row {
+  text-align: right;
+
+  .el-button + .el-button {
+    margin-top: 0 !important;
+    margin-left: 10px !important;
+  }
+}
+
+.population-display {
+  display: flex;
+  flex: 1 1 auto !important;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid $app-primary-color;
+  padding-bottom: 0.5rem !important;
 }
 
 .tooltip-container {
