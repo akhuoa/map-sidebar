@@ -95,6 +95,7 @@ var handleErrors = async function (response) {
 }
 
 var initial_state = {
+  filters: [],
   searchInput: '',
   lastSearch: '',
   results: [],
@@ -172,7 +173,7 @@ export default {
       this.results = []
       this.loadingCards = false
     },
-    openSearch: function (filter, search = '') {
+    openSearch: function (filter, search = '', option = { withSearch: true }) {
       this.searchInput = search
       this.resetPageNavigation()
       //Proceed normally if cascader is ready
@@ -191,14 +192,16 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes()
           this.resetSearch()
         } else if (this.filter) {
-          this.searchAlgolia(this.filter, search)
+          if (option.withSearch) {
+            this.searchAlgolia(this.filter, search)
+          }
           this.$refs.filtersRef.setCascader(this.filter)
         }
       } else {
         //cascader is not ready, perform search if no filter is set,
         //otherwise waith for cascader to be ready
         this.filter = filter
-        if (!filter || filter.length == 0) {
+        if ((!filter || filter.length == 0) && option.withSearch) {
           this.searchAlgolia(this.filter, search)
         }
       }
@@ -223,30 +226,48 @@ export default {
       this.openSearch(this.filter, this.searchInput)
     },
     clearSearchClicked: function () {
-      this.searchInput = ''
-      this.resetPageNavigation()
-      this.searchAlgolia(this.filters, this.searchInput)
-      this.$refs.searchHistory.selectValue = 'Full search history'
+      this.searchInput = '';
+      this.searchAndFilterUpdate();
     },
     searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
-        this.resetPageNavigation()
-        this.searchAlgolia(this.filters, this.searchInput)
-        this.$refs.searchHistory.selectValue = 'Full search history'
-        this.$refs.searchHistory.addSearchToHistory(
-          this.filters,
-          this.searchInput
-        )
+        this.searchInput = this.searchInput.trim();
+        this.searchAndFilterUpdate();
       }
     },
     filterUpdate: function (filters) {
       this.filters = [...filters]
-      this.resetPageNavigation()
-      this.searchAlgolia(filters, this.searchInput)
+      this.searchAndFilterUpdate();
       this.$emit('search-changed', {
         value: filters,
         type: 'filter-update',
       })
+    },
+    /**
+     * Transform filters for third level items to perform search
+     * because cascader keeps adding it back.
+     */
+    transformFiltersBeforeSearch: function (filters) {
+      return filters.map((filter) => {
+        if (filter.facet2) {
+          filter.facet = filter.facet2;
+          delete filter.facet2;
+        }
+        return filter;
+      });
+    },
+    searchAndFilterUpdate: function () {
+      this.resetPageNavigation();
+      const transformedFilters = this.transformFiltersBeforeSearch(this.filters);
+      this.searchAlgolia(transformedFilters, this.searchInput);
+      this.$refs.searchHistory.selectValue = 'Search history';
+      // save history only if there has value
+      if (this.filters.length || this.searchInput?.trim()) {
+        this.$refs.searchHistory.addSearchToHistory(
+          this.filters,
+          this.searchInput
+        );
+      }
     },
     searchAlgolia(filters, query = '') {
       // Algolia search
@@ -439,7 +460,9 @@ export default {
     searchHistorySearch: function (item) {
       this.searchInput = item.search
       this.filters = item.filters
-      this.openSearch(item.filters, item.search)
+      this.searchAndFilterUpdate();
+      // withSearch: false to prevent algoliaSearch in openSearch
+      this.openSearch([...item.filters], item.search, { withSearch: false });
     },
   },
   mounted: function () {
@@ -487,6 +510,9 @@ export default {
   height: 100%;
   flex-flow: column;
   display: flex;
+  border: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .step-item {
@@ -499,15 +525,16 @@ export default {
   width: 298px !important;
   height: 40px;
   padding-right: 14px;
-  align-items: left;
+
+  :deep(.el-input__inner) {
+    font-family: inherit;
+  }
 }
 
 .header {
-  border: solid 1px #292b66;
-  background-color: #292b66;
-  text-align: left;
-
   .el-button {
+    font-family: inherit;
+
     &:hover,
     &:focus {
       background: $app-primary-color;
@@ -560,6 +587,7 @@ export default {
   background-color: #ffffff;
   overflow-y: scroll;
   scrollbar-width: thin;
+  border-radius: var(--el-border-radius-base);
 }
 
 .content :deep(.el-loading-spinner .path) {
