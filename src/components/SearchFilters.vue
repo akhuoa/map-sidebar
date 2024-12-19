@@ -489,7 +489,7 @@ export default {
         this.filterTimeout = setTimeout(() => {
           this.$emit('filterResults', filters) // emit filters for apps above sidebar
           this.cssMods() // update css for the cascader
-        }, 400);
+        }, 600);
       }
     },
     //this fucntion is needed as we previously stored booleans in the array of event that
