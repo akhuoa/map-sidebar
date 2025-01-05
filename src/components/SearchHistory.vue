@@ -98,7 +98,7 @@
                   </el-button>
                 </template>
                 <span v-if="savedSearchHistory.length > 1 && !item.saved">
-                  Please unsave one before adding another.
+                  Limit 2: Please remove a saved search before adding another.
                 </span>
                 <span v-else-if="item.saved">
                   Remove from saved searches.
