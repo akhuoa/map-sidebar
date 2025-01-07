@@ -13,6 +13,7 @@
             <el-popover
               width="auto"
               trigger="hover"
+              :teleported="false"
               :show-after="200"
               :persistent="false"
               popper-class="popover-dropdown"
@@ -32,7 +33,13 @@
     <div v-else>
       <span class="empty-saved-search">No Saved Searches</span>
     </div>
-    <el-dropdown trigger="click" :hide-on-click="false">
+    <el-dropdown
+      trigger="click"
+      :hide-on-click="false"
+      :teleported="false"
+      class="search-history-dropdown"
+      popper-class="search-history-dropdown__popper"
+    >
       <span class="el-dropdown-select">
         Search history
         <el-icon class="el-icon--right">
@@ -47,6 +54,7 @@
                 <el-popover
                   width="auto"
                   trigger="hover"
+                  :teleported="false"
                   :show-after="200"
                   :persistent="false"
                   popper-class="popover-dropdown"
@@ -69,7 +77,7 @@
               <el-popover
                 width="auto"
                 trigger="hover"
-                :teleported="true"
+                :teleported="false"
                 :show-after="200"
                 :persistent="false"
                 popper-class="popover-dropdown"
@@ -110,7 +118,7 @@
               <el-popover
                 width="auto"
                 trigger="hover"
-                :teleported="true"
+                :teleported="false"
                 :show-after="200"
                 :persistent="false"
                 popper-class="popover-dropdown"
@@ -422,6 +430,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding-bottom: 6px;
+  z-index: 2;
 }
 
 .empty-saved-search {
@@ -539,6 +548,10 @@ export default {
     margin: 0;
   }
 }
+
+:deep(.search-history-dropdown__popper) {
+  position: fixed !important;
+}
 </style>
 
 <style lang="scss">
@@ -595,9 +608,11 @@ export default {
   max-width: 240px;
   font-family: Asap;
   font-size: 12px;
+  white-space: normal;
   word-break: break-word;
   text-align: left;
   color: inherit;
+  position: fixed !important;
   background: #f3ecf6 !important;
   border: 1px solid $app-primary-color;
 
