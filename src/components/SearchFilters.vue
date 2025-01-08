@@ -1050,15 +1050,15 @@ export default {
 
 .el-popover.cascade-tags-popper {
   background: #f3ecf6 !important;
-  border: 1px solid $app-primary-color;
-  border-radius: 4px;
+  border: 1px solid $app-primary-color !important;
+  border-radius: 4px !important;
   color: #303133 !important;
-  font-size: 12px;
-  line-height: 18px;
+  font-size: 12px !important;
+  line-height: 18px !important;
 }
 
 .el-popover.cascade-tags-popper .el-popper__arrow::before {
-  background: #f3ecf6;
-  border-color: $app-primary-color;
+  background: #f3ecf6 !important;
+  border-color: $app-primary-color !important;
 }
 </style>
