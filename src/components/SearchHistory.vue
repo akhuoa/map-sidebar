@@ -444,6 +444,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 6px;
+  transform: translateZ(0);
 }
 
 .search-tag.el-tag {

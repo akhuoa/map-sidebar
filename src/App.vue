@@ -7,8 +7,9 @@
     <div class="options-container">
       <div>Click arrow to open sidebar</div>
       <el-button @click="openSearch">search Uberon from refs</el-button>
-      <el-button @click="singleFacets">Add heart to Filter</el-button>
+      <el-button @click="singleFacets">Add heart to Filter (facet2 set)</el-button>
       <el-button @click="addStomach">Add stomach to Filter</el-button>
+      <el-button @click="addInferiorVagus">Add inferior vagus to Filter (incorrect case)</el-button>
       <el-button @click="addInvalidTerm">Add invalid term to Filter</el-button>
       <el-button @click="multiFacets">multiple facets</el-button>
       <el-button @click="neuronSearch">open neuron search</el-button>
@@ -182,6 +183,14 @@ export default {
     addStomach: function () {
       this.$refs.sideBar.addFilter({
         facet: 'Stomach',
+        term: 'Anatomical structure',
+        facetPropPath: 'anatomy.organ.category.name',
+        AND: true,
+      })
+    },
+    addInferiorVagus: function () {
+      this.$refs.sideBar.addFilter({
+        facet: 'Inferior vagus X ganglion',
         term: 'Anatomical structure',
         facetPropPath: 'anatomy.organ.category.name',
         AND: true,

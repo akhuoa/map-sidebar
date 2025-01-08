@@ -16,8 +16,9 @@
         :width="200"
         trigger="hover"
         :teleported="false"
-        popper-class="cascade-tags-popover"
         ref="cascadeTagsPopover"
+        :persistent="false"
+        popper-class="cascade-tags-popper"
         @show="onCascadeTagsPopoverShown"
       >
         <template #default>
@@ -752,19 +753,25 @@ export default {
      */
     validateAndConvertFilterToHierarchical: function (filter) {
       if (filter && filter.facet && filter.term) {
+        // Convert terms to lower case.
+        // Flatmap gives us Inferior vagus X ganglion but the term in Algolia
+        // is Inferior vagus x ganglion (there are other cases as well)
+        const lowercase = filter.facet.toLowerCase()
         if (filter.facet2) {
           return filter // if it has a second term we will assume it is hierarchical and return it as is
         } else {
           for (const firstLayer of this.options) {
             if (firstLayer.value === filter.facetPropPath) {
               for (const secondLayer of firstLayer.children) {
-                if (secondLayer.label === filter.facet) {
+                if (secondLayer.label?.toLowerCase() === lowercase) {
                   // if we find a match on the second level, the filter will already be correct
+                  // Make sure the case matches the one from Algolia
+                  filter.facet = secondLayer.label
                   return filter
                 } else {
                   if (secondLayer.children && secondLayer.children.length > 0) {
                     for (const thirdLayer of secondLayer.children) {
-                      if (thirdLayer.label === filter.facet) {
+                      if (thirdLayer.label?.toLowerCase() === lowercase) {
                         // If we find a match on the third level, we need to switch facet1 to facet2
                         //   and populate facet1 with its parents label.
                         filter.facet2 = thirdLayer.label
@@ -799,6 +806,7 @@ export default {
     },
     onCascadeTagsPopoverShown: function () {
       const cascadeTagsPopover = this.$refs.cascadeTagsPopover;
+      const fullscreenContainer = document.querySelector('.mapcontent');
       const cascader = this.$refs.cascader;
 
       if (cascader && cascadeTagsPopover) {
@@ -807,9 +815,34 @@ export default {
         const cascadeTagsPopoverContentRef = cascadeTagsPopover.popperRef?.contentRef;
 
         if (cascadeTagsPopoverContentRef) {
-          const cascaderTag = cascadeTagsPopoverContentRef.closest('.cascader-tag');
           cascadeTagsPopoverContentRef.style.zIndex = cascaderTagZIndex;
-          cascaderTag.style.zIndex = cascaderTagZIndex;
+
+          if (fullscreenContainer) {
+            fullscreenContainer.append(cascadeTagsPopoverContentRef);
+          } else {
+            document.body.append(cascadeTagsPopoverContentRef);
+          }
+
+          // Work around to fix the first time replacement position
+          window.dispatchEvent(new Event('resize'));
+        }
+      }
+    },
+    /**
+     * Move the cascader(panel) under map container
+     * so that it will work on fulscreen mode
+     */
+    replaceCascader: function () {
+      const fullscreenContainer = document.querySelector('.mapcontent');
+      const cascader = this.$refs.cascader;
+
+      if (cascader) {
+        const cascaderEl = cascader.contentRef;
+
+        if (fullscreenContainer) {
+          fullscreenContainer.append(cascaderEl);
+        } else {
+          document.body.append(cascaderEl);
         }
       }
     },
@@ -827,6 +860,7 @@ export default {
       this.setCascader(this.entry.filterFacets)
       this.cssMods()
       this.$emit('cascaderReady')
+      this.replaceCascader();
     })
   },
 }
@@ -958,10 +992,6 @@ export default {
   background: #f3ecf6;
   border-color: $app-primary-color;
 }
-
-:deep(.cascade-tags-popover) {
-  position: fixed !important;
-}
 </style>
 
 <style lang="scss">
@@ -976,7 +1006,6 @@ export default {
   color: #292b66;
   text-align: center;
   padding-bottom: 6px;
-  position: fixed !important;
 }
 
 .sidebar-cascader-popper .el-cascader-node.is-active {
@@ -1016,6 +1045,20 @@ export default {
   --el-checkbox-checked-bg-color: #{$app-primary-color};
   --el-checkbox-checked-input-border-color: #{$app-primary-color};
   background-color: $app-primary-color;
+  border-color: $app-primary-color;
+}
+
+.el-popover.cascade-tags-popper {
+  background: #f3ecf6 !important;
+  border: 1px solid $app-primary-color;
+  border-radius: 4px;
+  color: #303133 !important;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.el-popover.cascade-tags-popper .el-popper__arrow::before {
+  background: #f3ecf6;
   border-color: $app-primary-color;
 }
 </style>
