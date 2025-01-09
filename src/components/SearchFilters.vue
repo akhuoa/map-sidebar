@@ -1061,4 +1061,9 @@ export default {
   background: #f3ecf6 !important;
   border-color: $app-primary-color !important;
 }
+
+.cascade-tags-popper.el-popper[data-popper-placement^=bottom] .el-popper__arrow:before {
+  border-bottom-color: transparent !important;
+  border-right-color: transparent !important;
+}
 </style>
