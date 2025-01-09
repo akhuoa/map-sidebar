@@ -588,7 +588,6 @@ export default {
   overflow-y: scroll;
   scrollbar-width: thin;
   border-radius: var(--el-border-radius-base);
-  z-index: 1;
 }
 
 .content :deep(.el-loading-spinner .path) {

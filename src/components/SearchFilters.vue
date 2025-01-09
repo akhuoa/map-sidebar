@@ -15,11 +15,7 @@
         placement="bottom-start"
         :width="200"
         trigger="hover"
-        :teleported="false"
-        ref="cascadeTagsPopover"
-        :persistent="false"
-        popper-class="cascade-tags-popper"
-        @show="onCascadeTagsPopoverShown"
+        popper-class="cascade-tags-popover"
       >
         <template #default>
           <div class="el-tags-container">
@@ -64,15 +60,13 @@
           @expand-change="cascadeExpandChange"
           :show-all-levels="true"
           popper-class="sidebar-cascader-popper"
-          :teleported="false"
         />
         <div v-if="showFiltersText" class="filter-default-value">Filters</div>
         <el-popover
           title="How do filters work?"
           width="250"
           trigger="hover"
-          popper-class="popover"
-          :teleported="false"
+          popper-class="filter-help-popover"
         >
           <template #reference>
             <MapSvgIcon icon="help" class="help" />
@@ -97,7 +91,6 @@
         v-model="numberShown"
         placeholder="10"
         @change="numberShownChanged($event)"
-        :teleported="false"
       >
         <el-option
           v-for="item in numberDatasetsShown"
@@ -804,48 +797,6 @@ export default {
       }
       return []
     },
-    onCascadeTagsPopoverShown: function () {
-      const cascadeTagsPopover = this.$refs.cascadeTagsPopover;
-      const fullscreenContainer = document.querySelector('.mapcontent');
-      const cascader = this.$refs.cascader;
-
-      if (cascader && cascadeTagsPopover) {
-        const cascaderZIndex = cascader.contentRef?.style.zIndex;
-        const cascaderTagZIndex = (cascaderZIndex * 1) + 1;
-        const cascadeTagsPopoverContentRef = cascadeTagsPopover.popperRef?.contentRef;
-
-        if (cascadeTagsPopoverContentRef) {
-          cascadeTagsPopoverContentRef.style.zIndex = cascaderTagZIndex;
-
-          if (fullscreenContainer) {
-            fullscreenContainer.append(cascadeTagsPopoverContentRef);
-          } else {
-            document.body.append(cascadeTagsPopoverContentRef);
-          }
-
-          // Work around to fix the first time replacement position
-          window.dispatchEvent(new Event('resize'));
-        }
-      }
-    },
-    /**
-     * Move the cascader(panel) under map container
-     * so that it will work on fulscreen mode
-     */
-    replaceCascader: function () {
-      const fullscreenContainer = document.querySelector('.mapcontent');
-      const cascader = this.$refs.cascader;
-
-      if (cascader) {
-        const cascaderEl = cascader.contentRef;
-
-        if (fullscreenContainer) {
-          fullscreenContainer.append(cascaderEl);
-        } else {
-          document.body.append(cascaderEl);
-        }
-      }
-    },
   },
   mounted: function () {
     this.algoliaClient = markRaw(new AlgoliaClient(
@@ -1048,22 +999,31 @@ export default {
   border-color: $app-primary-color;
 }
 
-.el-popover.cascade-tags-popper {
+.filter-help-popover {
+  color: rgb(48, 49, 51);
+  font-family: Asap;
+  margin: 12px;
+}
+
+.filter-help-popover,
+.cascade-tags-popover {
   background: #f3ecf6 !important;
   border: 1px solid $app-primary-color !important;
   border-radius: 4px !important;
   color: #303133 !important;
   font-size: 12px !important;
   line-height: 18px !important;
+
+  .el-popper__arrow::before {
+    background: #f3ecf6 !important;
+    border-color: $app-primary-color !important;
+  }
+
+  &[data-popper-placement^=bottom] .el-popper__arrow:before {
+    border-bottom-color: transparent !important;
+    border-right-color: transparent !important;
+  }
 }
 
-.el-popover.cascade-tags-popper .el-popper__arrow::before {
-  background: #f3ecf6 !important;
-  border-color: $app-primary-color !important;
-}
 
-.cascade-tags-popper.el-popper[data-popper-placement^=bottom] .el-popper__arrow:before {
-  border-bottom-color: transparent !important;
-  border-right-color: transparent !important;
-}
 </style>
