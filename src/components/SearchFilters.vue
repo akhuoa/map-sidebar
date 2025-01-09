@@ -1024,6 +1024,4 @@ export default {
     border-right-color: transparent !important;
   }
 }
-
-
 </style>
