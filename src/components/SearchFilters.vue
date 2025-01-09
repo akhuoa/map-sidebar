@@ -999,14 +999,9 @@ export default {
   border-color: $app-primary-color;
 }
 
-.filter-help-popover {
-  color: rgb(48, 49, 51);
-  font-family: Asap;
-  margin: 12px;
-}
-
 .filter-help-popover,
 .cascade-tags-popover {
+  font-family: 'Asap', sans-serif;
   background: #f3ecf6 !important;
   border: 1px solid $app-primary-color !important;
   border-radius: 4px !important;

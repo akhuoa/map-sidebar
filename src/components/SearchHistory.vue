@@ -490,6 +490,7 @@ export default {
   .el-icon {
     transform: rotate(0deg);
     transition: transform 0.25s linear;
+    color: var(--el-text-color-placeholder);
   }
 
   &[aria-expanded="true"] {
