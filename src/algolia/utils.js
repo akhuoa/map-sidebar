@@ -40,6 +40,12 @@ export const facetPropPathMapping = [
     facetPropPath: 'attributes.subject.ageCategory.value',
     facetSubpropPath: 'attributes.subject.ageCategory.subcategory.name'
   },
+  {
+    label: 'Funding Program',
+    id: 'pennsieve.organization',
+    facetPropPath: 'pennsieve.organization.name',
+    facetSubpropPath: 'pennsieve.organization.subcategory.name'
+  },
 ]
 
 // Same as above, but these show on the sidebar filters
@@ -48,6 +54,7 @@ export const shownFilters = {
   'organisms.primary.species.name' : 'Species',
   'attributes.subject.sex.value' : 'Sex',
   'attributes.subject.ageCategory.value' : 'Age Categories',
+  'pennsieve.organization.name' : 'Funding Program',
   'item.types.name' : 'Data type',
 }
 
@@ -60,9 +67,9 @@ export function getFilters(selectedFacetArray=undefined) {
     return 'NOT item.published.status:embargo'
   }
 
-  // Switch the 'term' attribute to 'label' if 'label' does not exist 
+  // Switch the 'term' attribute to 'label' if 'label' does not exist
   selectedFacetArray.forEach(f=>f.label=f.facet)
-  
+
 
   let facets = removeShowAllFacets(selectedFacetArray)
 

@@ -241,9 +241,12 @@ export default {
 
               // populate second level of options
               this.options[i].children.forEach((facetItem, j) => {
-                this.options[i].children[j].label = convertReadableLabel(
-                  facetItem.label
-                )
+                // Format labels except funding program
+                if (this.options[i].children[j].facetPropPath !== 'pennsieve.organization.name') {
+                  this.options[i].children[j].label = convertReadableLabel(
+                    facetItem.label
+                  )
+                }
                 this.options[i].children[j].value =
                   this.createCascaderItemValue(facet.label, facetItem.label)
                 if (
