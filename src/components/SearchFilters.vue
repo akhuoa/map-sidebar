@@ -814,7 +814,6 @@ export default {
       this.setCascader(this.entry.filterFacets)
       this.cssMods()
       this.$emit('cascaderReady')
-      this.replaceCascader();
     })
   },
 }
