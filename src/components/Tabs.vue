@@ -61,6 +61,8 @@ $tab-height: 30px;
   height: $tab-height;
   display: flex;
   flex-direction: row;
+  position: relative;
+  z-index: 1;
 }
 
 .title {
