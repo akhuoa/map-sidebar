@@ -33,7 +33,7 @@ import GalleryHelper from '@abi-software/gallery/src/mixins/GalleryHelpers.js'
 import Gallery from "@abi-software/gallery";
 import "@abi-software/gallery/dist/style.css";
 //provide the s3Bucket related methods and data.
-import S3Bucket from '../mixins/S3Bucket.vue'
+import S3Bucket from '../mixins/S3Bucket.vue';
 
 export default {
   name: 'ImageGallery',

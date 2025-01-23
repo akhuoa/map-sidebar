@@ -285,5 +285,6 @@ export default {
         "Homo sapiens",
         "Canis lupus familiaris",
         "Domestic Pig"
-    ]
+    ],
+    "knowledge-source": "sckan-2024-03-26-npo",
 }
