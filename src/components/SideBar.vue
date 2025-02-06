@@ -39,6 +39,7 @@
                 :ref="'connectivityTab_' + tab.id"
                 :useDOIFormatter="useDOIFormatter"
                 @show-connectivity="showConnectivity"
+                @show-reference-connectivities="onShowReferenceConnectivities"
                 @connectivity-component-click="onConnectivityComponentClick"
               />
             </template>
@@ -197,6 +198,13 @@ export default {
      */
     showConnectivity: function (featureIds) {
       this.$emit('show-connectivity', featureIds);
+    },
+    /**
+     * This event is emitted when the show related connectivities button in reference is clicked.
+     * @param refSource
+     */
+    onShowReferenceConnectivities: function (refSource) {
+      this.$emit('show-reference-connectivities', refSource);
     },
     /**
      * This function is triggered after a connectivity component is clicked.

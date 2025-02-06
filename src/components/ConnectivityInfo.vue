@@ -219,7 +219,11 @@
     </div>
 
     <div class="content-container content-container-references" v-if="resources.length">
-      <external-resource-card :resources="resources" :useDOIFormatter="useDOIFormatter" @references-loaded="onReferencesLoaded"></external-resource-card>
+      <external-resource-card
+        :resources="resources"
+        @references-loaded="onReferencesLoaded"
+        @show-reference-connectivities="onShowReferenceConnectivities"
+      ></external-resource-card>
     </div>
   </div>
 </template>
@@ -429,6 +433,9 @@ export default {
       // save selected state for list view
       const name = data.map(t => t.label).join(', ');
       this.toggleConnectivityTooltip(name, {show: true});
+    },
+    onShowReferenceConnectivities: function (refSource) {
+      this.$emit('show-reference-connectivities', refSource);
     },
     onReferencesLoaded: function (references) {
       this.updatedCopyContent = this.getUpdateCopyContent(references);
