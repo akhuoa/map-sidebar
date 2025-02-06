@@ -451,11 +451,23 @@ export default {
       // to avoid default formatting on font size and margin
 
       // Title
-      if (this.entry.title) {
-        contentArray.push(`<div><strong>${capitalise(this.entry.title)}</strong></div>`);
-      } else {
-        contentArray.push(`<div><strong>${this.entry.featureId}</strong></div>`);
+      let title = this.entry.title;
+      let featureId = this.entry.featureId;
+      const titleContent = [];
+
+      if (title) {
+        titleContent.push(`<strong>${capitalise(this.entry.title)}</strong>`);
       }
+
+      if (featureId?.length) {
+        if (typeof featureId === 'object') {
+          titleContent.push(`(${featureId[0]})`);
+        } else {
+          titleContent.push(`(${featureId})`);
+        }
+      }
+
+      contentArray.push(`<div>${titleContent.join(' ')}</div>`);
 
       // Description
       if (this.entry.provenanceTaxonomyLabel?.length) {
