@@ -209,6 +209,7 @@
     <div class="content-container" v-show="activeView === 'graphView'">
       <template v-if="graphViewLoaded">
         <connectivity-graph
+          :key="entry.featureId[0]"
           :entry="entry.featureId[0]"
           :mapServer="envVars.FLATMAPAPI_LOCATION"
           :sckanVersion="sckanVersion"
