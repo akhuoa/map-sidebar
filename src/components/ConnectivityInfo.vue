@@ -232,6 +232,15 @@ export default {
       flatmapApi: '',
     }
   },
+  watch: {
+    entry: {
+      handler: function (val) {
+        this.onConnectivitySourceChange();
+      },
+      immediate: true,
+      deep: true,
+    }
+  },
   computed: {
     resources: function () {
       let resources = [];
