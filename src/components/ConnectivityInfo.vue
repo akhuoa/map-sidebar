@@ -92,7 +92,8 @@
 
     <div class="content-container content-container-connectivity" v-show="activeView === 'listView'">
       <connectivity-list
-        :key="entry.featureId[0]"
+        v-loading="connectivityLoading"
+        :key="connectivityListKey"
         :entry="entry"
         :origins="origins"
         :components="components"
@@ -110,7 +111,8 @@
     <div class="content-container" v-show="activeView === 'graphView'">
       <template v-if="graphViewLoaded">
         <connectivity-graph
-          :key="entry.featureId[0]"
+          v-loading="connectivityLoading"
+          :key="connectivityGraphKey"
           :entry="entry.featureId[0]"
           :mapServer="flatmapApi"
           :sckanVersion="sckanVersion"
@@ -147,7 +149,6 @@ import {
   ExternalResourceCard,
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
-import { processConnectivity } from './flatmapQueries.js';
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => {
@@ -177,12 +178,12 @@ export default {
     entry: {
       type: Object,
       default: () => ({
-        destinations: [],
         origins: [],
         components: [],
-        destinationsWithDatasets: [],
+        destinations: [],
         originsWithDatasets: [],
         componentsWithDatasets: [],
+        destinationsWithDatasets: [],
         resource: undefined,
         featuresAlert: undefined,
       }),
@@ -230,15 +231,20 @@ export default {
       mapId: '',
       dualConnectionSource: false,
       flatmapApi: '',
+      connectivityListKey: '',
+      connectivityGraphKey: '',
+      connectivityLoading: false,
     }
   },
   watch: {
-    entry: {
-      handler: function (val) {
-        this.onConnectivitySourceChange();
-      },
-      immediate: true,
-      deep: true,
+    entry: function (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.connectivityLoading = true;
+        this.updateKeys();
+        this.updateGraphConnectivity();
+        this.updateConnectionsData(newVal);
+        this.connectivityLoading = false;
+      }
     }
   },
   computed: {
@@ -285,6 +291,7 @@ export default {
     },
     switchConnectivityView: function (val) {
       this.activeView = val;
+      this.setState();
 
       if (val === 'graphView' && !this.graphViewLoaded) {
         // to load the connectivity graph only after the container is in view
@@ -496,27 +503,34 @@ export default {
 
       this.updatedCopyContent = this.getUpdateCopyContent();
     },
-    onConnectivitySourceChange: function (val) {
+    onConnectivitySourceChange: function (connectivitySource) {
+      const { featureId } = this.entry;
+
+      this.connectivityLoading = true;
+      this.setState();
+
+      if (this.activeView !== 'graphView') {
+        this.graphViewLoaded = false;
+      }
+
+      this.updateGraphConnectivity();
+      this.updateKeys();
+
+      EventBus.emit('connectivity-source-change', {
+        featureId: featureId,
+        connectivitySource: connectivitySource,
+      });
+    },
+    updateGraphConnectivity: function () {
       if (this.connectivitySource === 'map') {
         this.getConnectionsFromMap(this.mapuuid, this.entry.featureId[0])
           .then((response) => {
             this.connectivityFromMap = response;
-            processConnectivity(this.flatmapApi, this.sckanVersion, response)
-              .then((result) => {
-                const mapSource = {
-                  origins: result.labels.origins,
-                  components: result.labels.components,
-                  destinations: result.labels.destinations,
-                  originsWithDatasets: result.withDatasets.originsWithDatasets,
-                  componentsWithDatasets: result.withDatasets.componentsWithDatasets,
-                  destinationsWithDatasets: result.withDatasets.destinationsWithDatasets,
-                }
-                this.updateConnectionsData(mapSource);
-              })
+            this.connectivityLoading = false;
           });
       } else {
         this.connectivityFromMap = null;
-        this.updateConnectionsData(this.entry);
+        this.connectivityLoading = false
       }
     },
     getConnectionsFromMap: async function (mapuuid, pathId) {
@@ -540,12 +554,50 @@ export default {
     onConnectivityActionClick: function (data) {
       EventBus.emit('onConnectivityActionClick', data);
     },
+    /**
+     * Using two different keys for List and Graph
+     * because the graph needs to be in view to update
+     */
+    updateKeys: function () {
+      if (this.activeView === 'graphView') {
+        this.connectivityGraphKey = this.entry.featureId[0] + this.connectivitySource;
+      }
+      this.connectivityListKey = this.entry.featureId[0] + this.connectivitySource;
+    },
+    /**
+     * store active view and connectivity source
+     * to keep view between switching tabs
+     */
+    setState: function () {
+      localStorage.setItem('connectivity-active-view', this.activeView);
+      localStorage.setItem('connectivity-source', this.connectivitySource);
+    },
+    updateSettingsFromState: function () {
+      const activeView = localStorage.getItem('connectivity-active-view');
+      const connectivitySource = localStorage.getItem('connectivity-source');
+
+      if (activeView) {
+        this.activeView = activeView;
+      }
+
+      if (this.activeView === 'graphView') {
+        this.graphViewLoaded = true;
+      }
+
+      if (connectivitySource) {
+        this.connectivitySource = connectivitySource;
+      }
+    },
   },
   mounted: function () {
     this.sckanVersion = this.entry['knowledge-source'];
     this.mapuuid = this.entry['mapuuid'];
     this.mapId = this.entry['mapId'];
     this.flatmapApi = this.envVars.FLATMAPAPI_LOCATION;
+
+    this.updateSettingsFromState();
+    this.updateKeys();
+    this.updateGraphConnectivity();
     this.updateConnectionsData(this.entry);
 
     // TODO: only rat flatmap has dual connections now
