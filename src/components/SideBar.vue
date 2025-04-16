@@ -431,6 +431,8 @@ export default {
         this.storeAvailableAnatomyFacets(this.availableAnatomyFacets);
     })
 
+    // clear connectivity view states on first load
+    this.clearConnectivityState();
   },
 }
 </script>
