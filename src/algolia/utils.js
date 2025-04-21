@@ -68,7 +68,7 @@ export function getFilters(selectedFacetArray=undefined) {
   }
 
   // Switch the 'term' attribute to 'label' if 'label' does not exist
-  selectedFacetArray.forEach(f=>f.label=f.facet)
+  selectedFacetArray.forEach(f=>f.label = f.facet2 ? f.facet2 : f.facet)
 
 
   let facets = removeShowAllFacets(selectedFacetArray)

@@ -213,10 +213,11 @@ export default {
             facetPropPath: 'attributes.subject.sex.value',
           },
           {
-            facet: 'Cardiovascular system',
-            facet2: 'Heart',
+            facet: 'Heart',
             term: 'Anatomical structure',
+            facetSubPropPath: "anatomy.organ.name",
             facetPropPath: 'anatomy.organ.category.name',
+            label :'Heart',
             AND: true,
           },
           {
