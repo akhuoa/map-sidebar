@@ -196,6 +196,7 @@ export default {
             this.searchAlgolia(this.filter, search)
           }
           this.$refs.filtersRef.setCascader(this.filter)
+          this.searchHistoryUpdate(this.filter, search);
         }
       } else {
         //cascader is not ready, perform search if no filter is set,
@@ -203,6 +204,7 @@ export default {
         this.filter = filter
         if ((!filter || filter.length == 0) && option.withSearch) {
           this.searchAlgolia(this.filter, search)
+          this.searchHistoryUpdate(this.filter, search);
         }
       }
     },
@@ -260,12 +262,16 @@ export default {
       this.resetPageNavigation();
       const transformedFilters = this.transformFiltersBeforeSearch(this.filters);
       this.searchAlgolia(transformedFilters, this.searchInput);
+      this.searchHistoryUpdate(this.filters, this.searchInput);
+    },
+    searchHistoryUpdate: function (filters, search) {
       this.$refs.searchHistory.selectValue = 'Search history';
       // save history only if there has value
-      if (this.filters.length || this.searchInput?.trim()) {
+      if (filters.length || search?.trim()) {
+        const transformedFilters = this.transformFiltersBeforeSearch(filters);
         this.$refs.searchHistory.addSearchToHistory(
-          this.filters,
-          this.searchInput
+          transformedFilters,
+          search
         );
       }
     },

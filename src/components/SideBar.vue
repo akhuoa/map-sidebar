@@ -32,6 +32,7 @@
             <!-- Connectivity Info -->
             <template v-if="tab.type === 'connectivity' && connectivityInfo">
               <connectivity-info
+                :key="connectivityInfo.title"
                 :entry="connectivityInfo"
                 :availableAnatomyFacets="availableAnatomyFacets"
                 v-if="tab.id === activeTabId"
