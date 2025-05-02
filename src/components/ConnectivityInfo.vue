@@ -252,6 +252,7 @@ export default {
       if (newVal !== oldVal) {
         this.connectivityLoading = true;
         this.updateKeys();
+        this.checkAndUpdateDualConnection();
         this.updateGraphConnectivity();
         this.updateConnectionsData(newVal);
         this.connectivityLoading = false;
@@ -524,6 +525,7 @@ export default {
         this.graphViewLoaded = false;
       }
 
+      this.checkAndUpdateDualConnection();
       this.updateGraphConnectivity();
       this.updateKeys();
 
@@ -599,10 +601,14 @@ export default {
         this.connectivitySource = connectivitySource;
       }
     },
-    checkDualConnectionSource: function () {
-      // TODO: only rat flatmap has dual connections now
-      if (this.mapId === 'rat-flatmap') {
+    checkAndUpdateDualConnection: async function () {
+      const response = await this.getConnectionsFromMap(this.mapuuid, this.entry.featureId[0])
+
+      if (response?.connectivity?.length) {
         this.dualConnectionSource = true;
+      } else {
+        this.dualConnectionSource = false;
+        this.connectivitySource = 'sckan';
       }
     },
   },
@@ -614,9 +620,9 @@ export default {
 
     this.updateSettingsFromState();
     this.updateKeys();
+    this.checkAndUpdateDualConnection();
     this.updateGraphConnectivity();
     this.updateConnectionsData(this.entry);
-    this.checkDualConnectionSource();
 
     EventBus.on('connectivity-graph-error', (errorInfo) => {
       this.pushConnectivityError(errorInfo);
