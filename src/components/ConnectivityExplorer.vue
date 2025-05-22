@@ -66,7 +66,7 @@
         <ConnectivityCard
           class="dataset-card"
           :entry="result"
-          @connectivity-explorer-clicked="onConnectivityExplorerClicked"
+          @connectivity-card-clicked="onConnectivityExplorerClicked"
         />
         <ConnectivityInfo
           v-if="expanded === result.id"
@@ -80,7 +80,7 @@
           @connectivity-clicked="onConnectivityClicked"
           @connectivity-hovered="$emit('connectivity-hovered', $event)"
           @loaded="onConnectivityInfoLoaded(result)"
-          @close-connectivity="toggleConnectivityOpen(result)"
+          @close-connectivity="closeConnectivity(result)"
         />
       </div>
       <el-pagination
@@ -212,7 +212,10 @@ export default {
     },
   },
   watch: {
-    connectivityKnowledge: function (value) {
+    connectivityKnowledge: function (value, oldValue) {
+      if (JSON.stringify(value) === JSON.stringify(oldValue)) {
+        return;
+      }
       this.expanded = "";
       this.results = value.map((item) => {
         return {
@@ -239,19 +242,20 @@ export default {
       this.filters = data.filter;
       this.searchAndFilterUpdate();
     },
-    toggleConnectivityOpen: function (data) {
-      if (this.expanded === data.id) {
-        this.expanded = "";
-      } else {
-        this.expanded = data.id;
-      }
+    openConnectivity: function (data) {
+      this.expanded = data.id;
+    },
+    closeConnectivity: function (data) {
+      this.expanded = '';
     },
     onConnectivityExplorerClicked: function (data) {
-      data.loaded = false; // reset loading
-      this.toggleConnectivityOpen(data);
-      const entry = this.connectivityEntry.filter(entry => entry.featureId[0] === data.id);
-      if (entry.length === 0) {
-        this.$emit("connectivity-explorer-clicked", data);
+      if (this.expanded !== data.id) {
+        data.loaded = false; // reset loading
+        this.openConnectivity(data);
+        const entry = this.connectivityEntry.filter(entry => entry.featureId[0] === data.id);
+        if (entry.length === 0) {
+          this.$emit("connectivity-explorer-clicked", data);
+        }
       }
     },
     hoverChanged: function (data) {

@@ -39,9 +39,7 @@
       <div class="title-content">
         <div class="block" v-if="entry.title">
           <div class="title">
-            <span @click="onConnectivityClicked(entry.title)">
-              {{ capitalise(entry.title) }}
-            </span>
+            <span>{{ capitalise(entry.title) }}</span>
             <template v-if="entry.featuresAlert">
               <el-popover
                 width="250"
@@ -58,6 +56,7 @@
               </el-popover>
             </template>
           </div>
+          <div class="subtitle"><strong>id: </strong>{{ entry.featureId[0] }}</div>
           <div v-if="hasProvenanceTaxonomyLabel" class="subtitle">
             {{ provSpeciesDescription }}
           </div>
@@ -105,10 +104,7 @@
       </div>
     </div>
 
-    <div
-      class="content-container population-display"
-      :class="dualConnectionSource ? 'population-display-toolbar' : ''"
-    >
+    <div class="content-container population-display">
       <div class="block attribute-title-container">
         <span class="attribute-title">Population Display</span>
         <el-popover
@@ -128,27 +124,23 @@
         </el-popover>
       </div>
       <div class="block buttons-row">
-        <div v-if="dualConnectionSource">
-          <span>Connectivity from:</span>
-          <el-radio-group v-model="connectivitySource" @change="onConnectivitySourceChange">
-            <el-radio value="map">Map</el-radio>
-            <el-radio value="sckan">SCKAN</el-radio>
-          </el-radio-group>
-        </div>
-        <div>
-          <el-button
-            :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
-            @click="switchConnectivityView('listView')"
-          >
-            List view
-          </el-button>
-          <el-button
-            :class="activeView === 'graphView' ? 'button' : 'el-button-secondary'"
-            @click="switchConnectivityView('graphView')"
-          >
-            Graph view
-          </el-button>
-        </div>
+        <span>Connectivity from:</span>
+        <el-radio-group v-model="connectivitySource" @change="onConnectivitySourceChange">
+          <el-radio value="map">Map</el-radio>
+          <el-radio value="sckan">SCKAN</el-radio>
+        </el-radio-group>
+        <el-button
+          :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
+          @click="switchConnectivityView('listView')"
+        >
+          List view
+        </el-button>
+        <el-button
+          :class="activeView === 'graphView' ? 'button' : 'el-button-secondary'"
+          @click="switchConnectivityView('graphView')"
+        >
+          Graph view
+        </el-button>
       </div>
     </div>
 
@@ -180,8 +172,8 @@
           :mapServer="flatmapApi"
           :sckanVersion="sckanVersion"
           :connectivityFromMap="connectivityFromMap"
+          :connectivityError="connectivityError"
           @tap-node="onTapNode"
-          ref="connectivityGraphRef"
         />
       </template>
     </div>
@@ -229,8 +221,6 @@ const capitalise = function (str) {
   return ''
 }
 
-const ERROR_TIMEOUT = 3000; // 3 seconds
-
 export default {
   name: 'ConnectivityInfo',
   components: {
@@ -272,11 +262,9 @@ export default {
       entryIndex: 0,
       updatedCopyContent: '',
       activeView: 'listView',
-      timeoutID: undefined,
       connectivityLoading: false,
-      dualConnectionSource: false,
       connectivitySource: 'sckan',
-      connectivityError: null,
+      connectivityError: {},
       graphViewLoaded: false,
       connectivityFromMap: null,
     };
@@ -355,16 +343,19 @@ export default {
       handler: function (newVal, oldVal) {
         if (newVal !== oldVal) {
           this.connectivityLoading = true;
-          this.activeView = localStorage.getItem('connectivity-active-view') || this.activeView;
+          this.activeView =
+            localStorage.getItem('connectivity-active-view') ||
+            this.activeView;
           if (this.activeView === 'graphView') {
             this.graphViewLoaded = true;
           }
-
-          this.checkAndUpdateDualConnection();
           this.connectivitySource = this.entry.connectivitySource;
           this.updateGraphConnectivity();
           this.connectivityLoading = false;
-          this.$emit('loaded');
+          // only emit to scroll when entire entry content changes
+          if (!oldVal || newVal?.featureId[0] !== oldVal?.featureId[0]) {
+            this.$emit('loaded');
+          }
         }
       },
     },
@@ -546,30 +537,8 @@ export default {
       this.$emit('connectivity-hovered', payload);
     },
     onConnectivityClicked: function (label) {
-      const payload = {
-        query: label,
-        filter: []
-      };
+      const payload = { query: label, filter: [] };
       this.$emit('connectivity-clicked', payload);
-    },
-    getErrorConnectivities: function (errorData) {
-      const errorDataToEmit = [...new Set(errorData)];
-      let errorConnectivities = '';
-
-      errorDataToEmit.forEach((connectivity, i) => {
-        const { label } = connectivity;
-        errorConnectivities += (i === 0) ? capitalise(label) : label;
-
-        if (errorDataToEmit.length > 1) {
-          if ((i + 2) === errorDataToEmit.length) {
-            errorConnectivities += ' and ';
-          } else if ((i + 1) < errorDataToEmit.length) {
-            errorConnectivities += ', ';
-          }
-        }
-      });
-
-      return errorConnectivities;
     },
     /**
      * Function to show error message.
@@ -579,32 +548,15 @@ export default {
      */
     getConnectivityError: function (errorInfo) {
       const { errorData, errorMessage } = errorInfo;
-      const errorConnectivities = this.getErrorConnectivities(errorData);
+      const errorConnectivities = errorData
+        .map((connectivity) => capitalise(connectivity.label))
+        .join(', ')
+        .replace(/, ([^,]*)$/, ' and $1');
 
       return {
         errorConnectivities,
         errorMessage,
       };
-    },
-    pushConnectivityError: function (errorInfo) {
-      const connectivityError = this.getConnectivityError(errorInfo);
-      const connectivityGraphRef = this.$refs.connectivityGraphRef;
-
-      // error for graph view
-      if (connectivityGraphRef) {
-        connectivityGraphRef.showErrorMessage(connectivityError);
-      }
-
-      // error for list view
-      this.connectivityError = {...connectivityError};
-
-      if (this.timeoutID) {
-        clearTimeout(this.timeoutID);
-      }
-
-      this.timeoutID = setTimeout(() => {
-        this.connectivityError = null;
-      }, ERROR_TIMEOUT);
     },
     onConnectivitySourceChange: function (connectivitySource) {
       const { featureId } = this.entry;
@@ -615,7 +567,6 @@ export default {
         this.graphViewLoaded = false;
       }
 
-      this.checkAndUpdateDualConnection();
       this.updateGraphConnectivity();
 
       EventBus.emit('connectivity-source-change', {
@@ -626,7 +577,11 @@ export default {
     updateGraphConnectivity: function () {
       if (this.connectivitySource === "map") {
         this.getConnectionsFromMap().then((response) => {
-          this.connectivityFromMap = response;
+          // show sckan source graph if map source not exist
+          this.connectivityFromMap = null;
+          if (response?.connectivity?.length) {
+            this.connectivityFromMap = response;
+          }
           this.connectivityLoading = false;
         });
       } else {
@@ -658,22 +613,13 @@ export default {
     closeConnectivity: function () {
       this.$emit('close-connectivity');
     },
-    checkAndUpdateDualConnection: async function () {
-      const response = await this.getConnectionsFromMap()
-
-      if (response?.connectivity?.length) {
-        this.dualConnectionSource = true;
-      } else {
-        this.dualConnectionSource = false;
-        this.connectivitySource = 'sckan';
-      }
-    },
   },
   mounted: function () {
     this.updatedCopyContent = this.getUpdateCopyContent();
 
-    EventBus.on('connectivity-graph-error', (errorInfo) => {
-      this.pushConnectivityError(errorInfo);
+    EventBus.on('connectivity-error', (errorInfo) => {
+      const connectivityError = this.getConnectivityError(errorInfo);
+      this.connectivityError = { ...connectivityError };
     });
   },
 }
@@ -706,17 +652,11 @@ export default {
 
 .title {
   text-align: left;
-  // width: 16em;
   line-height: 1.3em !important;
   font-size: 18px;
-  // font-family: Helvetica;
   font-weight: bold;
   padding-bottom: 8px;
   color: $app-primary-color;
-
-  span:hover {
-    cursor: pointer;
-  }
 }
 
 .block + .block {
@@ -895,17 +835,15 @@ export default {
   border-bottom: 1px solid $app-primary-color;
   padding-bottom: 0.5rem !important;
 
-  &.population-display-toolbar {
-    flex-direction: column !important;
-    align-items: start;
+  flex-direction: column !important;
+  align-items: start;
 
-    .buttons-row {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-    }
+  .buttons-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
 
   .el-radio {
