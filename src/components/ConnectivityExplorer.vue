@@ -213,21 +213,21 @@ export default {
   },
   watch: {
     connectivityKnowledge: function (value, oldValue) {
+      this.expanded = '';
+      this.initLoading = false;
+      this.loadingCards = false;
+
       if (JSON.stringify(value) === JSON.stringify(oldValue)) {
         return;
       }
-      this.expanded = "";
+
       this.results = value.map((item) => {
         return {
           ...item,
           loaded: false,
         };
       });
-
       this.numberOfHits = this.results.length;
-      this.initLoading = false;
-      this.loadingCards = false;
-
       if (this.numberOfHits === 1) {
         this.onConnectivityExplorerClicked(this.results[0]);
       }
