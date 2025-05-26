@@ -267,6 +267,9 @@ export default {
       this.results = [];
       this.loadingCards = false;
     },
+    resetSearchIfNoActiveSearch: function() {
+      if (!this.searchInput) this.openSearch([], '');
+    },
     openSearch: function (filter, search = "", option = { withSearch: true }) {
       this.searchInput = search;
       this.resetPageNavigation();
