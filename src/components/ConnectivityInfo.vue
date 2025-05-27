@@ -559,8 +559,6 @@ export default {
       };
     },
     onConnectivitySourceChange: function (connectivitySource) {
-      const { featureId } = this.entry;
-
       this.connectivityLoading = true;
 
       if (this.activeView !== 'graphView') {
@@ -570,7 +568,7 @@ export default {
       this.updateGraphConnectivity();
 
       EventBus.emit('connectivity-source-change', {
-        featureId: featureId,
+        entry: this.entry,
         connectivitySource: connectivitySource,
       });
     },
