@@ -332,6 +332,9 @@ export default {
     storeAvailableAnatomyFacets: function (availableAnatomyFacets) {
       localStorage.setItem('available-anatomy-facets', JSON.stringify(availableAnatomyFacets))
     },
+    closeConnectivity: function () {
+      EventBus.emit('close-connectivity');
+    },
   },
   computed: {
     // This should respect the information provided by the property
