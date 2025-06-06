@@ -1,5 +1,9 @@
 <template>
-  <el-card :body-style="bodyStyle" class="content-card">
+  <el-card
+    :body-style="bodyStyle"
+    class="content-card"
+    @mouseleave="hoverChanged(undefined)"
+  >
     <template #header>
       <div class="header">
         <el-input
@@ -57,21 +61,20 @@
         :key="result.id"
         :ref="'stepItem-'  + result.id"
         class="step-item"
-        :class="{
-          'is-active': expanded === result.id && result.loaded,
-          'is-loading': expanded === result.id && !result.loaded,
-        }"
         @mouseenter="hoverChanged(result)"
       >
         <ConnectivityCard
-          class="dataset-card"
+          v-show="expanded !== result.id"
+          class="connectivity-card"
           :entry="result"
-          @connectivity-card-clicked="onConnectivityExplorerClicked"
+          :connectivityEntry="connectivityEntry"
+          @open-connectivity="onConnectivityCollapseChange"
         />
         <ConnectivityInfo
           v-if="expanded === result.id"
-          :connectivityEntry="connectivityEntry"
+          class="connectivity-info"
           :entryId="result.id"
+          :connectivityEntry="connectivityEntry"
           :availableAnatomyFacets="availableAnatomyFacets"
           :envVars="envVars"
           :withCloseButton="true"
@@ -80,7 +83,7 @@
           @connectivity-clicked="onConnectivityClicked"
           @connectivity-hovered="$emit('connectivity-hovered', $event)"
           @loaded="onConnectivityInfoLoaded(result)"
-          @close-connectivity="closeConnectivity(result)"
+          @close-connectivity="onConnectivityCollapseChange(result)"
         />
       </div>
       <el-pagination
@@ -212,24 +215,31 @@ export default {
     },
   },
   watch: {
-    connectivityKnowledge: function (value, oldValue) {
-      this.expanded = '';
-      this.initLoading = false;
+    connectivityKnowledge: function (newVal, oldVal) {
+      this.expanded = ""; // reset expanded state
       this.loadingCards = false;
-
-      if (JSON.stringify(value) === JSON.stringify(oldValue)) {
-        return;
+      if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+        this.results = newVal;
+        this.initLoading = false;
+        this.numberOfHits = this.results.length;
+        // knowledge is from the neuron click if there is 'ready' property
+        if (this.numberOfHits === 1 && !('ready' in this.results[0])) {
+          this.onConnectivityCollapseChange(this.results[0]);
+        }
       }
-
-      this.results = value.map((item) => {
-        return {
-          ...item,
-          loaded: false,
-        };
-      });
-      this.numberOfHits = this.results.length;
-      if (this.numberOfHits === 1) {
-        this.onConnectivityExplorerClicked(this.results[0]);
+    },
+    // watch for connectivityEntry changes
+    // card should be expanded if there is only one entry and it is ready
+    connectivityEntry: function (newVal, oldVal) {
+      if (newVal.length === 1 && newVal[0].ready) {
+        // if the changed property is connectivity source, do not collapse
+        if (
+          (newVal[0].connectivitySource !== oldVal[0].connectivitySource) &&
+          oldVal[0].ready
+        ) {
+          return;
+        }
+        this.collapseChange(newVal[0]);
       }
     },
     paginatedResults: function () {
@@ -242,20 +252,19 @@ export default {
       this.filters = data.filter;
       this.searchAndFilterUpdate();
     },
-    openConnectivity: function (data) {
-      this.expanded = data.id;
+    collapseChange:function (data) {
+      this.expanded = this.expanded === data.id ? "" : data.id;
     },
-    closeConnectivity: function (data) {
-      this.expanded = '';
-    },
-    onConnectivityExplorerClicked: function (data) {
-      if (this.expanded !== data.id) {
-        data.loaded = false; // reset loading
-        this.openConnectivity(data);
-        const entry = this.connectivityEntry.filter(entry => entry.featureId[0] === data.id);
-        if (entry.length === 0) {
-          this.$emit("connectivity-explorer-clicked", data);
-        }
+    onConnectivityCollapseChange: function (data) {
+      // close connectivity event will not trigger emit
+      if (this.connectivityEntry.find(entry => entry.featureId[0] === data.id)) {
+        this.collapseChange(data);
+      } else {
+        this.expanded = "";
+        // Make sure to emit the change after the next DOM update
+        this.$nextTick(() => {
+          this.$emit("connectivity-collapse-change", data);
+        });
       }
     },
     hoverChanged: function (data) {
@@ -412,7 +421,6 @@ export default {
       this.searchAndFilterUpdate();
     },
     onConnectivityInfoLoaded: function (result) {
-      result.loaded = true;
       const stepItemRef = this.$refs['stepItem-' + result.id];
       const contentRef = this.$refs['content'];
       this.$nextTick(() => {
@@ -432,7 +440,7 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/pagination.scss';
 
-.dataset-card {
+.connectivity-card {
   position: relative;
 
   &::before {
@@ -472,51 +480,15 @@ export default {
   font-size: 14px;
   margin-bottom: 18px;
   text-align: left;
-  max-height: 200px;
   transition: all 0.3s ease;
 
-  .dataset-card {
-    opacity: 1;
-    visibility: visible;
-    transition: all 0.3s ease;
+  .connectivity-card {
+    max-height: 200px;
   }
-
-  &.is-active {
-    max-height: 9999px;
+  .connectivity-info {
     background-color: #f7faff;
     border: 2px solid $app-primary-color;
     border-radius: var(--el-border-radius-base);
-
-    .dataset-card {
-      pointer-events: none;
-
-      &::before {
-        display: none;
-      }
-
-      + .main {
-        border: 0 none;
-      }
-    }
-
-    &:not(.is-loading) {
-      .dataset-card {
-        opacity: 0;
-        visibility: hidden;
-        height: 0;
-      }
-    }
-  }
-
-  &.is-loading {
-    opacity: 0.5;
-    pointer-events: none;
-
-    :deep(.connectivity-card .title) {
-      color: $app-primary-color;
-      font-size: 18px;
-      letter-spacing: normal;
-    }
   }
 }
 
