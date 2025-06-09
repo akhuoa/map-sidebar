@@ -1,7 +1,11 @@
 <template>
-  <el-card :body-style="bodyStyle" class="content-card">
+  <el-card
+    :body-style="bodyStyle"
+    class="content-card"
+    @mouseleave="hoverChanged(undefined)"
+  >
     <template #header>
-      <div class="header">
+      <div class="header" @mouseleave="hoverChanged(undefined)">
         <el-input
           class="search-input"
           placeholder="Search"
@@ -26,6 +30,10 @@
         >
           Reset
         </el-button>
+        <el-radio-group v-model="filterVisibility">
+          <el-radio :value="true">Focused</el-radio>
+          <el-radio :value="false">Contextual</el-radio>
+        </el-radio-group>
       </div>
     </template>
     <SearchFilters
@@ -57,30 +65,29 @@
         :key="result.id"
         :ref="'stepItem-'  + result.id"
         class="step-item"
-        :class="{
-          'is-active': expanded === result.id && result.loaded,
-          'is-loading': expanded === result.id && !result.loaded,
-        }"
         @mouseenter="hoverChanged(result)"
       >
         <ConnectivityCard
-          class="dataset-card"
+          v-show="expanded !== result.id"
+          class="connectivity-card"
           :entry="result"
-          @connectivity-card-clicked="onConnectivityExplorerClicked"
+          :connectivityEntry="connectivityEntry"
+          @open-connectivity="onConnectivityCollapseChange"
         />
         <ConnectivityInfo
           v-if="expanded === result.id"
-          :connectivityEntry="connectivityEntry"
+          class="connectivity-info"
           :entryId="result.id"
+          :connectivityEntry="connectivityEntry"
           :availableAnatomyFacets="availableAnatomyFacets"
           :envVars="envVars"
           :withCloseButton="true"
-          @show-connectivity="$emit('show-connectivity', $event)"
-          @show-reference-connectivities="$emit('show-reference-connectivities', $event)"
+          @show-connectivity="onShowConnectivity"
+          @show-reference-connectivities="onShowReferenceConnectivities"
           @connectivity-clicked="onConnectivityClicked"
           @connectivity-hovered="$emit('connectivity-hovered', $event)"
           @loaded="onConnectivityInfoLoaded(result)"
-          @close-connectivity="closeConnectivity(result)"
+          @close-connectivity="onConnectivityCollapseChange(result)"
         />
       </div>
       <el-pagination
@@ -112,7 +119,6 @@ import ConnectivityCard from "./ConnectivityCard.vue";
 import ConnectivityInfo from "./ConnectivityInfo.vue";
 
 var initial_state = {
-  filters: [],
   searchInput: "",
   lastSearch: "",
   results: [],
@@ -158,6 +164,10 @@ export default {
       type: Object,
       default: [],
     },
+    connectivityFilterOptions: {
+      type: Array,
+      default: [],
+    },
   },
   data: function () {
     return {
@@ -167,34 +177,12 @@ export default {
         "flex-flow": "column",
         display: "flex",
       },
-      filterOptions: [
-        {
-          id: 3,
-          key: "flatmap.connectivity.source",
-          label: "Connectivity",
-          children: [
-            {
-              facetPropPath: "flatmap.connectivity.source",
-              id: 0,
-              label: "Origins",
-            },
-            {
-              facetPropPath: "flatmap.connectivity.source",
-              id: 1,
-              label: "Components",
-            },
-            {
-              facetPropPath: "flatmap.connectivity.source",
-              id: 2,
-              label: "Destinations",
-            },
-          ],
-        },
-      ],
       cascaderIsReady: false,
-      displayConnectivity: false,
+      freezeTimeout: undefined,
+      freezed: false,
       initLoading: true,
-      expanded: ""
+      expanded: "",
+      filterVisibility: true
     };
   },
   computed: {
@@ -203,8 +191,8 @@ export default {
       return {
         numberOfHits: this.numberOfHits,
         filterFacets: this.filter,
-        options: this.filterOptions,
-        showFilters: false
+        options: this.connectivityFilterOptions,
+        showFilters: true
       };
     },
     paginatedResults: function () {
@@ -212,55 +200,85 @@ export default {
     },
   },
   watch: {
-    connectivityKnowledge: function (value, oldValue) {
-      this.expanded = '';
-      this.initLoading = false;
+    connectivityKnowledge: function (newVal, oldVal) {
+      this.expanded = ""; // reset expanded state
       this.loadingCards = false;
-
-      if (JSON.stringify(value) === JSON.stringify(oldValue)) {
-        return;
+      if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+        this.results = newVal;
+        this.initLoading = false;
+        this.numberOfHits = this.results.length;
+        // knowledge is from the neuron click if there is 'ready' property
+        if (this.numberOfHits === 1 && !('ready' in this.results[0])) {
+          this.onConnectivityCollapseChange(this.results[0]);
+        }
       }
-
-      this.results = value.map((item) => {
-        return {
-          ...item,
-          loaded: false,
-        };
-      });
-      this.numberOfHits = this.results.length;
-      if (this.numberOfHits === 1) {
-        this.onConnectivityExplorerClicked(this.results[0]);
+    },
+    // watch for connectivityEntry changes
+    // card should be expanded if there is only one entry and it is ready
+    connectivityEntry: function (newVal, oldVal) {
+      if (newVal.length === 1 && newVal[0].ready) {
+        // if the changed property is connectivity source, do not collapse
+        if (
+          (newVal[0].connectivitySource !== oldVal[0].connectivitySource) &&
+          oldVal[0].ready
+        ) {
+          return;
+        }
+        this.collapseChange(newVal[0]);
       }
     },
     paginatedResults: function () {
       this.loadingCards = false;
     },
+    filterVisibility: function (state) {
+      this.filterVisibility = state;
+      this.$emit('filter-visibility', this.filterVisibility);
+    },
   },
   methods: {
+    freezeHoverChange: function () {
+      this.freezed = true;
+      if (this.freezeTimeout) {
+        clearTimeout(this.freezeTimeout);
+      }
+      this.freezeTimeout = setTimeout(() => {
+        this.freezed = false;
+      }, 3000)
+    },
+    onShowConnectivity: function (data) {
+      this.freezeHoverChange();
+      this.$emit('show-connectivity', data);
+    },
+    onShowReferenceConnectivities: function (data) {
+      this.freezeHoverChange();
+      this.$emit('show-reference-connectivities', data);
+    },
     onConnectivityClicked: function (data) {
       this.searchInput = data.query;
-      this.filters = data.filter;
+      this.filter = data.filter;
       this.searchAndFilterUpdate();
     },
-    openConnectivity: function (data) {
-      this.expanded = data.id;
+    collapseChange:function (data) {
+      this.expanded = this.expanded === data.id ? "" : data.id;
     },
-    closeConnectivity: function (data) {
-      this.expanded = '';
-    },
-    onConnectivityExplorerClicked: function (data) {
-      if (this.expanded !== data.id) {
-        data.loaded = false; // reset loading
-        this.openConnectivity(data);
-        const entry = this.connectivityEntry.filter(entry => entry.featureId[0] === data.id);
-        if (entry.length === 0) {
-          this.$emit("connectivity-explorer-clicked", data);
-        }
+    onConnectivityCollapseChange: function (data) {
+      // close connectivity event will not trigger emit
+      if (this.connectivityEntry.find(entry => entry.featureId[0] === data.id)) {
+        this.collapseChange(data);
+      } else {
+        this.expanded = "";
+        // Make sure to emit the change after the next DOM update
+        this.$nextTick(() => {
+          this.$emit("connectivity-collapse-change", data);
+        });
       }
     },
     hoverChanged: function (data) {
-      const payload = data ? { ...data, type: "connectivity" } : data;
-      this.$emit("hover-changed", payload);
+      // disable hover changes when show connectivity is clicked
+      if (!this.freezed) {
+        const payload = data ? { ...data, tabType: "connectivity" } : { tabType: "connectivity" };
+        this.$emit("hover-changed", payload);
+      }
     },
     resetSearch: function () {
       this.numberOfHits = 0;
@@ -268,9 +286,12 @@ export default {
       this.loadingCards = false;
     },
     resetSearchIfNoActiveSearch: function() {
-      if (!this.searchInput) this.openSearch([], '');
+      const hasValidFacet = this.filter.some(f => f.facet !== "Show all");
+      if (!this.searchInput && !hasValidFacet) {
+        this.openSearch([], '');
+      }
     },
-    openSearch: function (filter, search = "", option = { withSearch: true }) {
+    openSearch: function (filter, search = "") {
       this.searchInput = search;
       this.resetPageNavigation();
       //Proceed normally if cascader is ready
@@ -289,17 +310,17 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes();
           this.resetSearch();
         } else if (this.filter) {
-          if (option.withSearch) {
-            this.searchKnowledge(this.filter, search);
-          }
+          this.searchKnowledge(this.filter, search);
           this.$refs.filtersRef.setCascader(this.filter);
+          this.searchHistoryUpdate(this.filter, search);
         }
       } else {
         //cascader is not ready, perform search if no filter is set,
         //otherwise waith for cascader to be ready
         this.filter = filter;
-        if ((!filter || filter.length == 0) && option.withSearch) {
+        if (!filter || filter.length == 0) {
           this.searchKnowledge(this.filter, search);
+          this.searchHistoryUpdate(this.filter, search);
         }
       }
     },
@@ -325,63 +346,44 @@ export default {
     clearSearchClicked: function () {
       this.searchInput = "";
       this.searchAndFilterUpdate();
-      this.$refs.filtersRef.checkShowAllBoxes();
     },
     searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
         this.searchInput = this.searchInput.trim();
         this.searchAndFilterUpdate();
-        if (!this.searchInput) {
-          this.$refs.filtersRef.checkShowAllBoxes();
-        }
       }
     },
     filterUpdate: function (filters) {
-      this.filters = [...filters];
+      this.filter = [...filters];
       this.searchAndFilterUpdate();
-      this.$emit("search-changed", {
-        value: filters,
-        type: "filter-update",
-      });
-    },
-    /**
-     * Transform filters for third level items to perform search
-     * because cascader keeps adding it back.
-     */
-    transformFiltersBeforeSearch: function (filters) {
-      return filters.map((filter) => {
-        if (filter.facet2) {
-          filter.facet = filter.facet2;
-          delete filter.facet2;
-        }
-        return filter;
-      });
+      // this.$emit("search-changed", {
+      //   value: filters,
+      //   tabType: "connectivity",
+      //   type: "filter-update",
+      // });
     },
     searchAndFilterUpdate: function () {
       this.resetPageNavigation();
-      const transformedFilters = this.transformFiltersBeforeSearch(
-        this.filters
-      );
-      this.searchKnowledge(transformedFilters, this.searchInput);
+      this.searchKnowledge(this.filter, this.searchInput);
+      this.searchHistoryUpdate(this.filter, this.searchInput);
     },
     searchHistoryUpdate: function (filters, search) {
       this.$refs.searchHistory.selectValue = 'Search history';
       // save history only if there has value
-      if (search?.trim()) {
-        this.$refs.searchHistory.addSearchToHistory(
-          filters,
-          search
-        );
+      if (filters.length || search?.trim()) {
+        this.$refs.searchHistory.addSearchToHistory(this.filter, search);
       }
     },
     searchKnowledge: function (filters, query = "") {
       this.expanded = "";
-      this.searchHistoryUpdate(filters, query);
       this.loadingCards = true;
       this.scrollToTop();
       this.$emit("search-changed", {
-        value: this.searchInput,
-        type: "query-update",
+        // value: this.searchInput,
+        // type: "query-update",
+        query: query,
+        filter: filters,
+        tabType: "connectivity",
       });
       this.lastSearch = query;
     },
@@ -395,7 +397,7 @@ export default {
     pageChange: function (page) {
       this.start = (page - 1) * this.numberPerPage;
       this.page = page;
-      this.searchKnowledge(this.filters, this.searchInput);
+      this.searchKnowledge(this.filter, this.searchInput);
     },
     scrollToTop: function () {
       if (this.$refs.content) {
@@ -408,11 +410,10 @@ export default {
     },
     searchHistorySearch: function (item) {
       this.searchInput = item.search;
-      this.filters = item.filters;
-      this.searchAndFilterUpdate();
+      this.filter = item.filters;
+      this.openSearch([...item.filters], item.search);
     },
     onConnectivityInfoLoaded: function (result) {
-      result.loaded = true;
       const stepItemRef = this.$refs['stepItem-' + result.id];
       const contentRef = this.$refs['content'];
       this.$nextTick(() => {
@@ -432,7 +433,7 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/pagination.scss';
 
-.dataset-card {
+.connectivity-card {
   position: relative;
 
   &::before {
@@ -472,51 +473,15 @@ export default {
   font-size: 14px;
   margin-bottom: 18px;
   text-align: left;
-  max-height: 200px;
   transition: all 0.3s ease;
 
-  .dataset-card {
-    opacity: 1;
-    visibility: visible;
-    transition: all 0.3s ease;
+  .connectivity-card {
+    max-height: 200px;
   }
-
-  &.is-active {
-    max-height: 9999px;
+  .connectivity-info {
     background-color: #f7faff;
     border: 2px solid $app-primary-color;
     border-radius: var(--el-border-radius-base);
-
-    .dataset-card {
-      pointer-events: none;
-
-      &::before {
-        display: none;
-      }
-
-      + .main {
-        border: 0 none;
-      }
-    }
-
-    &:not(.is-loading) {
-      .dataset-card {
-        opacity: 0;
-        visibility: hidden;
-        height: 0;
-      }
-    }
-  }
-
-  &.is-loading {
-    opacity: 0.5;
-    pointer-events: none;
-
-    :deep(.connectivity-card .title) {
-      color: $app-primary-color;
-      font-size: 18px;
-      letter-spacing: normal;
-    }
   }
 }
 
@@ -531,6 +496,9 @@ export default {
 }
 
 .header {
+  display: flex;
+  align-items: center;
+
   .el-button {
     font-family: inherit;
 
@@ -538,7 +506,19 @@ export default {
     &:focus {
       background: $app-primary-color;
       box-shadow: -3px 2px 4px #00000040;
-      color: #fff;
+      color: #ffffff;
+    }
+  }
+
+  .el-radio-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .el-radio {
+      color: #ffffff;
+      margin-left: 20px;
+      height: 20px;
     }
   }
 }

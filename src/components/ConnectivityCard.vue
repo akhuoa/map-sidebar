@@ -2,10 +2,10 @@
   <div class="connectivity-card-container" ref="container">
     <div class="connectivity-card" ref="card">
       <div class="seperator-path"></div>
-      <div v-loading="loading" class="card" @click="cardClicked(entry)">
-        <div class="title">{{ capitalise(entry.label) }}</div>
+      <div v-loading="loading" class="card-content" @click="cardClicked(entry)">
+        <div class="card-title">{{ capitalise(entry.label) }}</div>
         <template v-for="field in displayFields" :key="field">
-          <div class="details" v-if="entry[field]">
+          <div class="card-details" v-if="entry[field]">
             <strong>{{ field }}:</strong> {{ entry[field] }}
           </div>
         </template>
@@ -31,12 +31,23 @@ export default {
       type: Object,
       default: () => {},
     },
+    connectivityEntry: {
+      type: Array,
+      default: () => [],
+    },
   },
   computed: {
     loading: function () {
-      // Only when click on overlay paths
-      if ("detailsReady" in this.entry) {
-        return !this.entry.detailsReady;
+      // for clicking on the flatmap neuron
+      if ("ready" in this.entry) {
+        return !this.entry.ready;
+      }
+      // for clicking on the explorer card
+      const cEntry = this.connectivityEntry.find(
+        (entry) => entry.id === this.entry.id
+      );
+      if (cEntry) {
+        return !cEntry.ready;
       }
       return false;
     },
@@ -48,7 +59,7 @@ export default {
     },
     cardClicked: function (data) {
       if (!this.loading) {
-        this.$emit("connectivity-card-clicked", data);
+        this.$emit("open-connectivity", data);
       }
     },
   },
@@ -62,32 +73,21 @@ export default {
   min-height: 5rem;
 }
 
-.card {
+.card-content {
   padding-top: 18px;
   padding-left: 6px;
   cursor: pointer;
 }
 
-.title {
+.card-title {
   padding-bottom: 0.75rem;
   font-weight: bold;
   line-height: 1.5;
   letter-spacing: 1.05px;
 }
 
-.details {
+.card-details {
   line-height: 1.5;
   letter-spacing: 1.05px;
-}
-
-.button {
-  margin-right: 3.5rem;
-  font-family: Asap;
-  font-size: 14px;
-  font-weight: normal;
-  background-color: $app-primary-color;
-  border: $app-primary-color;
-  color: white;
-  margin-top: 8px;
 }
 </style>
