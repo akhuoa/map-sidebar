@@ -5,7 +5,7 @@
     @mouseleave="hoverChanged(undefined)"
   >
     <template #header>
-      <div class="header">
+      <div class="header" @mouseleave="hoverChanged(undefined)">
         <el-input
           class="search-input"
           placeholder="Search"
@@ -30,6 +30,10 @@
         >
           Reset
         </el-button>
+        <el-radio-group v-model="filterVisibility">
+          <el-radio :value="true">Focused</el-radio>
+          <el-radio :value="false">Contextual</el-radio>
+        </el-radio-group>
       </div>
     </template>
     <SearchFilters
@@ -78,8 +82,8 @@
           :availableAnatomyFacets="availableAnatomyFacets"
           :envVars="envVars"
           :withCloseButton="true"
-          @show-connectivity="$emit('show-connectivity', $event)"
-          @show-reference-connectivities="$emit('show-reference-connectivities', $event)"
+          @show-connectivity="onShowConnectivity"
+          @show-reference-connectivities="onShowReferenceConnectivities"
           @connectivity-clicked="onConnectivityClicked"
           @connectivity-hovered="$emit('connectivity-hovered', $event)"
           @loaded="onConnectivityInfoLoaded(result)"
@@ -174,9 +178,11 @@ export default {
         display: "flex",
       },
       cascaderIsReady: false,
-      displayConnectivity: false,
+      freezeTimeout: undefined,
+      freezed: false,
       initLoading: true,
-      expanded: ""
+      expanded: "",
+      filterVisibility: true
     };
   },
   computed: {
@@ -224,8 +230,29 @@ export default {
     paginatedResults: function () {
       this.loadingCards = false;
     },
+    filterVisibility: function (state) {
+      this.filterVisibility = state;
+      this.$emit('filter-visibility', this.filterVisibility);
+    },
   },
   methods: {
+    freezeHoverChange: function () {
+      this.freezed = true;
+      if (this.freezeTimeout) {
+        clearTimeout(this.freezeTimeout);
+      }
+      this.freezeTimeout = setTimeout(() => {
+        this.freezed = false;
+      }, 3000)
+    },
+    onShowConnectivity: function (data) {
+      this.freezeHoverChange();
+      this.$emit('show-connectivity', data);
+    },
+    onShowReferenceConnectivities: function (data) {
+      this.freezeHoverChange();
+      this.$emit('show-reference-connectivities', data);
+    },
     onConnectivityClicked: function (data) {
       this.searchInput = data.query;
       this.filter = data.filter;
@@ -247,8 +274,11 @@ export default {
       }
     },
     hoverChanged: function (data) {
-      const payload = data ? { ...data, tabType: "connectivity" } : { tabType: "connectivity" };
-      this.$emit("hover-changed", payload);
+      // disable hover changes when show connectivity is clicked
+      if (!this.freezed) {
+        const payload = data ? { ...data, tabType: "connectivity" } : { tabType: "connectivity" };
+        this.$emit("hover-changed", payload);
+      }
     },
     resetSearch: function () {
       this.numberOfHits = 0;
@@ -466,6 +496,9 @@ export default {
 }
 
 .header {
+  display: flex;
+  align-items: center;
+
   .el-button {
     font-family: inherit;
 
@@ -473,7 +506,19 @@ export default {
     &:focus {
       background: $app-primary-color;
       box-shadow: -3px 2px 4px #00000040;
-      color: #fff;
+      color: #ffffff;
+    }
+  }
+
+  .el-radio-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .el-radio {
+      color: #ffffff;
+      margin-left: 20px;
+      height: 20px;
     }
   }
 }
