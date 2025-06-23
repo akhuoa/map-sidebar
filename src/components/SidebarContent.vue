@@ -167,7 +167,11 @@ export default {
       return {
         numberOfHits: this.numberOfHits,
         filterFacets: this.filter,
-        showFilters: true
+        showFilters: true,
+        helper: {
+          within: "'heart' OR 'colon'",
+          between: "'rat' AND 'lung'"
+        }
       }
     },
   },

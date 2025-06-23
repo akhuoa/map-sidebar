@@ -39,6 +39,7 @@
                 @confirm-create="$emit('confirm-create', $event)"
                 @cancel-create="$emit('cancel-create')"
                 @confirm-delete="$emit('confirm-delete', $event)"
+                @hover-changed="hoverChanged(tab.id, $event)"
               />
             </template>
             <template v-else-if="tab.type === 'connectivityExplorer'">
@@ -57,6 +58,7 @@
                 @show-reference-connectivities="onShowReferenceConnectivities"
                 @connectivity-hovered="onConnectivityHovered"
                 @connectivity-collapse-change="onConnectivityCollapseChange"
+                @connectivity-item-close="onConnectivityItemClose"
               />
             </template>
             <template v-else>
@@ -176,6 +178,8 @@ export default {
       drawerOpen: false,
       availableAnatomyFacets: [],
       activeTabId: 1,
+      activeAnnotationData: { tabType: "annotation" },
+      activeConnectivityData: { tabType: "connectivity" },
     }
   },
   methods: {
@@ -183,11 +187,28 @@ export default {
       this.$emit('connectivity-collapse-change', data)
     },
     /**
+     * This event is emitted when
+     * the close button of the opened connectivity card
+     * in connectivity explorer is clicked.
+     */
+    onConnectivityItemClose: function () {
+      this.$emit('connectivity-item-close');
+    },
+    /**
      * This event is emitted when the mouse hover are changed.
      * @arg data
      */
     hoverChanged: function (id, data) {
       this.$emit('hover-changed', {...data,  tabId: id })
+
+      const activeTabType = this.getActiveTabTypeById(id);
+      // save the last highlighted data for connectivity and annotation tabs
+      if (activeTabType === 'connectivityExplorer') {
+        this.activeConnectivityData = data;
+      }
+      if (activeTabType === 'annotation') {
+        this.activeAnnotationData = data;
+      }
     },
     /**
      * This event is emitted when the show connectivity button is clicked.
@@ -309,9 +330,41 @@ export default {
       const tabInfo = matchedTab.length ? matchedTab : this.tabEntries;
       this.activeTabId = tabInfo[0].id;
     },
+    getActiveTabTypeById: function (id) {
+      const foundTab = this.tabs.find((tab) => tab.id === id);
+      if (foundTab) {
+        return foundTab.type;
+      }
+      return '';
+    },
+    highlightActiveTabData: function (tab) {
+      let data = null;
+
+      if (tab.type === 'connectivityExplorer') {
+        const connectivityExplorerTabRef = this.getTabRef(undefined, 'connectivityExplorer', true);
+        // check if any opened item
+        // if no opened item, highlight items will be based on the results in explorer
+        if (connectivityExplorerTabRef && !connectivityExplorerTabRef.expanded) {
+          data = { tabType: 'connectivity' };
+        } else {
+          data = {...this.activeConnectivityData};
+        }
+      } else if (tab.type === 'annotation') {
+        data = {...this.activeAnnotationData};
+      } else {
+        // switching to dataset explorer tab will not highlight
+        // the highlight is from the last tab
+        // if needed, to update it here
+      }
+
+      if (data) {
+        this.$emit('hover-changed', {...data,  tabId: tab.id })
+      }
+    },
     tabClicked: function (tab) {
       this.setActiveTab(tab);
       this.$emit('tabClicked', tab);
+      this.highlightActiveTabData(tab);
     },
     tabClosed: function (tab) {
       this.$emit('tabClosed', tab);
@@ -328,6 +381,9 @@ export default {
      */
     storeAvailableAnatomyFacets: function (availableAnatomyFacets) {
       localStorage.setItem('available-anatomy-facets', JSON.stringify(availableAnatomyFacets))
+    },
+    closeConnectivity: function () {
+      EventBus.emit('close-connectivity');
     },
   },
   computed: {
