@@ -9,7 +9,7 @@
           closable
           @close="cascadeTagClose(presentTags[0])"
         >
-          <p class="tag-text">{{ presentTags[0] }}</p>
+          <span class="tag-text">{{ presentTags[0] }}</span>
         </el-tag>
         <el-popover
           v-if="presentTags.length > 1"
@@ -61,7 +61,20 @@
             @expand-change="cascadeExpandChange"
             :show-all-levels="true"
             popper-class="sidebar-cascader-popper"
-          />
+          >
+            <template #default="{ node, data }">
+              <el-row>
+                <el-col :span="4" v-if="hasLineStyles(data)">
+                  <div class="path-visual" :style="getLineStyles(data)"></div>
+                </el-col>
+                <el-col :span="20">
+                  <div :style="getBackgroundStyles(data)">
+                    {{ data.label }}
+                  </div>
+                </el-col>
+              </el-row>
+            </template>
+          </el-cascader>
           <div v-if="showFiltersText" class="filter-default-value">Filters</div>
           <el-popover
             title="How do filters work?"
@@ -75,12 +88,12 @@
             <div>
               <strong>Within categories:</strong> OR
               <br />
-              example: 'heart' OR 'colon'
+              example: {{ entry.helper.within }}
               <br />
               <br />
               <strong>Between categories:</strong> AND
               <br />
-              example: 'rat' AND 'lung'
+              example: {{ entry.helper.between }}
             </div>
           </el-popover>
         </span>
@@ -834,8 +847,8 @@ export default {
               result.push(validatedFilter)
               terms.push(validatedFilter.term)
             }
-          })         
-          // make sure unused filter terms' show all checkbox is always checked 
+          })
+          // make sure unused filter terms' show all checkbox is always checked
           this.options.forEach((option)=>{
             if (!terms.includes(option.label)) {
               result.push({
@@ -850,6 +863,26 @@ export default {
         } else return filters
       }
       return []
+    },
+    hasLineStyles: function(item) {
+      return 'colour' in item && item.colourStyle === 'line'
+    },
+    getLineStyles: function (item) {
+      if ('colour' in item && item.colourStyle === 'line') {
+        if ('dashed' in item && item.dashed === true) {
+          const background = `repeating-linear-gradient(90deg,${item.colour},${item.colour} 6px,transparent 0,transparent 9px)`
+          return { background }
+        } else {
+          return { background: item.colour }
+        }
+      }
+      return { display: 'None' }
+    },
+    getBackgroundStyles: function (item) {
+      if ('colour' in item && item.colourStyle === 'background') {
+        return { background: item.colour }
+      }
+      return {}
     },
   },
   mounted: function () {
@@ -886,6 +919,7 @@ export default {
 }
 
 .tag-text {
+  display: block;
   max-width: 75px;
   white-space: nowrap;
   overflow: hidden;
@@ -1078,5 +1112,12 @@ export default {
     border-bottom-color: transparent !important;
     border-right-color: transparent !important;
   }
+}
+.path-visual {
+  margin: 3px 0;
+  height: 3px;
+  width: 25px;
+  margin-right: 5px;
+  display: inline-block;
 }
 </style>

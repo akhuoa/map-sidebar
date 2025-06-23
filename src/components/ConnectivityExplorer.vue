@@ -1,9 +1,5 @@
 <template>
-  <el-card
-    :body-style="bodyStyle"
-    class="content-card"
-    @mouseleave="hoverChanged(undefined)"
-  >
+  <el-card :body-style="bodyStyle" class="content-card">
     <template #header>
       <div class="header" @mouseleave="hoverChanged(undefined)">
         <el-input
@@ -55,7 +51,7 @@
       class="content scrollbar"
       v-loading="loadingCards || initLoading"
       ref="content"
-      @mouseleave="hoverChanged(undefined)"
+      @mouseleave="onHoverChanged($event, undefined)"
     >
       <div class="error-feedback" v-if="results.length === 0 && !loadingCards">
         No results found - Please change your search / filter criteria.
@@ -65,7 +61,7 @@
         :key="result.id"
         :ref="'stepItem-'  + result.id"
         class="step-item"
-        @mouseenter="hoverChanged(result)"
+        @mouseenter="onHoverChanged($event, result)"
       >
         <ConnectivityCard
           v-show="expanded !== result.id"
@@ -113,6 +109,7 @@ import {
   ElInput as Input,
   ElPagination as Pagination,
 } from "element-plus";
+import EventBus from './EventBus.js'
 import SearchFilters from "./SearchFilters.vue";
 import SearchHistory from "./SearchHistory.vue";
 import ConnectivityCard from "./ConnectivityCard.vue";
@@ -182,7 +179,8 @@ export default {
       freezed: false,
       initLoading: true,
       expanded: "",
-      filterVisibility: true
+      filterVisibility: true,
+      expandedData: null,
     };
   },
   computed: {
@@ -192,7 +190,11 @@ export default {
         numberOfHits: this.numberOfHits,
         filterFacets: this.filter,
         options: this.connectivityFilterOptions,
-        showFilters: true
+        showFilters: true,
+        helper: {
+          within: "'CNS' OR 'Local circuit neuron'",
+          between: "'Somatic lower motor' AND 'Human'"
+        }
       };
     },
     paginatedResults: function () {
@@ -202,6 +204,7 @@ export default {
   watch: {
     connectivityKnowledge: function (newVal, oldVal) {
       this.expanded = ""; // reset expanded state
+      this.expandedData = null;
       this.loadingCards = false;
       if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
         this.results = newVal;
@@ -210,6 +213,11 @@ export default {
         // knowledge is from the neuron click if there is 'ready' property
         if (this.numberOfHits === 1 && !('ready' in this.results[0])) {
           this.onConnectivityCollapseChange(this.results[0]);
+        }
+        if (this.numberOfHits > 0 && ('ready' in this.results[0])) {
+          this.$refs.filtersRef.checkShowAllBoxes();
+          this.searchInput = '';
+          this.filter = [];
         }
       }
     },
@@ -260,23 +268,47 @@ export default {
     },
     collapseChange:function (data) {
       this.expanded = this.expanded === data.id ? "" : data.id;
+      this.expandedData = this.expanded ? data : null;
+    },
+    closeConnectivity: function () {
+      if (!this.expanded) {
+        this.$emit('connectivity-item-close');
+      }
     },
     onConnectivityCollapseChange: function (data) {
       // close connectivity event will not trigger emit
       if (this.connectivityEntry.find(entry => entry.featureId[0] === data.id)) {
         this.collapseChange(data);
+        this.closeConnectivity();
       } else {
         this.expanded = "";
+        this.expandedData = null;
         // Make sure to emit the change after the next DOM update
         this.$nextTick(() => {
           this.$emit("connectivity-collapse-change", data);
         });
       }
     },
+    onHoverChanged: function (event, data) {
+      const { target } = event;
+
+      // mouseleave event won't trigger if the connectivity explorer tab is not in view
+      // e.g., switching to annotation tab on item click
+      if (data || (target && target.checkVisibility())) {
+        this.hoverChanged(data)
+      }
+    },
     hoverChanged: function (data) {
       // disable hover changes when show connectivity is clicked
       if (!this.freezed) {
-        const payload = data ? { ...data, tabType: "connectivity" } : { tabType: "connectivity" };
+        let payload = { tabType: "connectivity" };
+  
+        if (data) {
+          payload = {...payload, ...data};
+        } else if (this.expandedData) {
+          payload = {...payload, ...this.expandedData};
+        }
+  
         this.$emit("hover-changed", payload);
       }
     },
@@ -287,7 +319,7 @@ export default {
     },
     resetSearchIfNoActiveSearch: function() {
       const hasValidFacet = this.filter.some(f => f.facet !== "Show all");
-      if (!this.searchInput && !hasValidFacet) {
+      if ((!this.searchInput && !hasValidFacet) || this.numberOfHits === 0) {
         this.openSearch([], '');
       }
     },
@@ -376,6 +408,7 @@ export default {
     },
     searchKnowledge: function (filters, query = "") {
       this.expanded = "";
+      this.expandedData = null;
       this.loadingCards = true;
       this.scrollToTop();
       this.$emit("search-changed", {
@@ -426,6 +459,11 @@ export default {
   mounted: function () {
     localStorage.removeItem('connectivity-active-view');
     this.openSearch(this.filter, this.searchInput);
+
+    EventBus.on('close-connectivity', () => {
+      this.expanded = '';
+      this.expandedData = null;
+    });
   },
 };
 </script>
