@@ -1,7 +1,8 @@
 <template>
   <el-card :body-style="bodyStyle" class="content-card">
+    <MapSvgSpriteColor />
     <template #header>
-      <div class="header" @mouseleave="hoverChanged(undefined)">
+      <div class="header">
         <el-input
           class="search-input"
           placeholder="Search"
@@ -26,10 +27,33 @@
         >
           Reset
         </el-button>
-        <el-radio-group v-model="filterVisibility">
-          <el-radio :value="true">Focused</el-radio>
-          <el-radio :value="false">Contextual</el-radio>
-        </el-radio-group>
+        <div v-if="showVisibilityFilter" class="visibility-filter">
+          <el-checkbox
+            v-model="filterVisibility"
+          >
+          Focused
+          </el-checkbox>
+          <el-popover
+            title="How does focused checkbox work?"
+            width="250"
+            trigger="hover"
+            popper-class="filter-help-popover"
+          >
+            <template #reference>
+              <MapSvgIcon icon="help" class="help" />
+            </template>
+            <div>
+              <strong>Checked:</strong>
+              <br />
+              Display listed or highlighted items only.
+              <br />
+              <br />
+              <strong>Unchecked:</strong>
+              <br />
+              Display listed or highlighted items in full colour and non-listed items in greyscale.
+            </div>
+          </el-popover>
+        </div>
       </div>
     </template>
     <SearchFilters
@@ -105,6 +129,7 @@
 import {
   ElButton as Button,
   ElCard as Card,
+  ElCheckbox as Checkbox,
   ElIcon as Icon,
   ElInput as Input,
   ElPagination as Pagination,
@@ -114,6 +139,7 @@ import SearchFilters from "./SearchFilters.vue";
 import SearchHistory from "./SearchHistory.vue";
 import ConnectivityCard from "./ConnectivityCard.vue";
 import ConnectivityInfo from "./ConnectivityInfo.vue";
+import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 
 var initial_state = {
   searchInput: "",
@@ -135,9 +161,12 @@ export default {
     ConnectivityInfo,
     Button,
     Card,
+    Checkbox,
     Icon,
     Input,
     Pagination,
+    MapSvgIcon,
+    MapSvgSpriteColor
   },
   name: "ConnectivityExplorer",
   props: {
@@ -165,6 +194,10 @@ export default {
       type: Array,
       default: [],
     },
+    showVisibilityFilter: {
+      type: Boolean,
+      default: false,
+    }
   },
   data: function () {
     return {
@@ -559,18 +592,6 @@ export default {
       color: #ffffff;
     }
   }
-
-  .el-radio-group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-
-    .el-radio {
-      color: #ffffff;
-      margin-left: 20px;
-      height: 20px;
-    }
-  }
 }
 
 .error-feedback {
@@ -652,10 +673,54 @@ export default {
   background-color: transparent !important;
   padding: 2px !important;
   height: auto !important;
+  margin-left: 4px!important;
 
   &:hover {
     text-decoration-color: transparent;
     box-shadow: none !important;
+  }
+}
+
+.visibility-filter {
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+
+  :deep(.el-checkbox__label) {
+    padding-left: 4px !important;
+    color: #fff !important;
+  }
+
+  :deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
+    color: #f9f2fc !important;
+  }
+}
+
+.help {
+  width: 24px !important;
+  height: 24px;
+  transform: scale(1.1);
+  cursor: pointer;
+  color: #ffffff !important;
+}
+
+.filter-help-popover {
+  font-family: 'Asap', sans-serif;
+  background: #f3ecf6 !important;
+  border: 1px solid $app-primary-color !important;
+  border-radius: 4px !important;
+  color: #303133 !important;
+  font-size: 12px !important;
+  line-height: 18px !important;
+
+  .el-popper__arrow::before {
+    background: #f3ecf6 !important;
+    border-color: $app-primary-color !important;
+  }
+
+  &[data-popper-placement^=bottom] .el-popper__arrow:before {
+    border-bottom-color: transparent !important;
+    border-right-color: transparent !important;
   }
 }
 </style>
