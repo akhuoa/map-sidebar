@@ -12,6 +12,7 @@
       class="annotation-popup"
       :annotationEntry="annotationEntry"
       @annotation="$emit('annotation', $event)"
+      @hover-changed="$emit('hover-changed', $event)"
     />
     <div v-if="createData && createData.toBeDeleted" class="delete-container">
       <el-row>
@@ -75,6 +76,7 @@ export default {
   data: function () {
     return {
       ElIconDelete: shallowRef(ElIconDelete),
+      annotationPopupData: null,
     };
   },
 }

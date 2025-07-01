@@ -1,11 +1,7 @@
 <template>
-  <el-card
-    :body-style="bodyStyle"
-    class="content-card"
-    @mouseleave="hoverChanged(undefined)"
-  >
+  <el-card :body-style="bodyStyle" class="content-card">
     <template #header>
-      <div class="header">
+      <div class="header" @mouseleave="hoverChanged(undefined)">
         <el-input
           class="search-input"
           placeholder="Search"
@@ -30,6 +26,10 @@
         >
           Reset
         </el-button>
+        <el-radio-group v-model="filterVisibility">
+          <el-radio :value="true">Focused</el-radio>
+          <el-radio :value="false">Contextual</el-radio>
+        </el-radio-group>
       </div>
     </template>
     <SearchFilters
@@ -51,7 +51,7 @@
       class="content scrollbar"
       v-loading="loadingCards || initLoading"
       ref="content"
-      @mouseleave="hoverChanged(undefined)"
+      @mouseleave="onHoverChanged($event, undefined)"
     >
       <div class="error-feedback" v-if="results.length === 0 && !loadingCards">
         No results found - Please change your search / filter criteria.
@@ -61,7 +61,7 @@
         :key="result.id"
         :ref="'stepItem-'  + result.id"
         class="step-item"
-        @mouseenter="hoverChanged(result)"
+        @mouseenter="onHoverChanged($event, result)"
       >
         <ConnectivityCard
           v-show="expanded !== result.id"
@@ -78,8 +78,8 @@
           :availableAnatomyFacets="availableAnatomyFacets"
           :envVars="envVars"
           :withCloseButton="true"
-          @show-connectivity="$emit('show-connectivity', $event)"
-          @show-reference-connectivities="$emit('show-reference-connectivities', $event)"
+          @show-connectivity="onShowConnectivity"
+          @show-reference-connectivities="onShowReferenceConnectivities"
           @connectivity-clicked="onConnectivityClicked"
           @connectivity-hovered="$emit('connectivity-hovered', $event)"
           @loaded="onConnectivityInfoLoaded(result)"
@@ -116,7 +116,6 @@ import ConnectivityCard from "./ConnectivityCard.vue";
 import ConnectivityInfo from "./ConnectivityInfo.vue";
 
 var initial_state = {
-  filters: [],
   searchInput: "",
   lastSearch: "",
   results: [],
@@ -162,6 +161,10 @@ export default {
       type: Object,
       default: [],
     },
+    connectivityFilterOptions: {
+      type: Array,
+      default: [],
+    },
   },
   data: function () {
     return {
@@ -171,34 +174,13 @@ export default {
         "flex-flow": "column",
         display: "flex",
       },
-      filterOptions: [
-        {
-          id: 3,
-          key: "flatmap.connectivity.source",
-          label: "Connectivity",
-          children: [
-            {
-              facetPropPath: "flatmap.connectivity.source",
-              id: 0,
-              label: "Origins",
-            },
-            {
-              facetPropPath: "flatmap.connectivity.source",
-              id: 1,
-              label: "Components",
-            },
-            {
-              facetPropPath: "flatmap.connectivity.source",
-              id: 2,
-              label: "Destinations",
-            },
-          ],
-        },
-      ],
       cascaderIsReady: false,
-      displayConnectivity: false,
+      freezeTimeout: undefined,
+      freezed: false,
       initLoading: true,
-      expanded: ""
+      expanded: "",
+      filterVisibility: true,
+      expandedData: null,
     };
   },
   computed: {
@@ -207,8 +189,12 @@ export default {
       return {
         numberOfHits: this.numberOfHits,
         filterFacets: this.filter,
-        options: this.filterOptions,
-        showFilters: false
+        options: this.connectivityFilterOptions,
+        showFilters: true,
+        helper: {
+          within: "'CNS' OR 'Local circuit neuron'",
+          between: "'Somatic lower motor' AND 'Human'"
+        }
       };
     },
     paginatedResults: function () {
@@ -218,6 +204,7 @@ export default {
   watch: {
     connectivityKnowledge: function (newVal, oldVal) {
       this.expanded = ""; // reset expanded state
+      this.expandedData = null;
       this.loadingCards = false;
       if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
         this.results = newVal;
@@ -226,6 +213,11 @@ export default {
         // knowledge is from the neuron click if there is 'ready' property
         if (this.numberOfHits === 1 && !('ready' in this.results[0])) {
           this.onConnectivityCollapseChange(this.results[0]);
+        }
+        if (this.numberOfHits > 0 && ('ready' in this.results[0])) {
+          this.$refs.filtersRef.checkShowAllBoxes();
+          this.searchInput = '';
+          this.filter = [];
         }
       }
     },
@@ -246,35 +238,79 @@ export default {
     paginatedResults: function () {
       this.loadingCards = false;
     },
+    filterVisibility: function (state) {
+      this.filterVisibility = state;
+      this.$emit('filter-visibility', this.filterVisibility);
+    },
   },
   methods: {
+    freezeHoverChange: function () {
+      this.freezed = true;
+      if (this.freezeTimeout) {
+        clearTimeout(this.freezeTimeout);
+      }
+      this.freezeTimeout = setTimeout(() => {
+        this.freezed = false;
+      }, 3000)
+    },
+    onShowConnectivity: function (data) {
+      this.freezeHoverChange();
+      this.$emit('show-connectivity', data);
+    },
+    onShowReferenceConnectivities: function (data) {
+      this.freezeHoverChange();
+      this.$emit('show-reference-connectivities', data);
+    },
     onConnectivityClicked: function (data) {
       this.searchInput = data.query;
-      this.filters = data.filter;
+      this.filter = data.filter;
       this.searchAndFilterUpdate();
     },
     collapseChange:function (data) {
       this.expanded = this.expanded === data.id ? "" : data.id;
+      this.expandedData = this.expanded ? data : null;
     },
-    closeConnectivity: function (data) {
-      this.expanded = '';
-      this.$emit('connectivity-item-close');
+    closeConnectivity: function () {
+      if (!this.expanded) {
+        this.$emit('connectivity-item-close');
+      }
     },
     onConnectivityCollapseChange: function (data) {
       // close connectivity event will not trigger emit
       if (this.connectivityEntry.find(entry => entry.featureId[0] === data.id)) {
         this.collapseChange(data);
+        this.closeConnectivity();
       } else {
         this.expanded = "";
+        this.expandedData = null;
         // Make sure to emit the change after the next DOM update
         this.$nextTick(() => {
           this.$emit("connectivity-collapse-change", data);
         });
       }
     },
+    onHoverChanged: function (event, data) {
+      const { target } = event;
+
+      // mouseleave event won't trigger if the connectivity explorer tab is not in view
+      // e.g., switching to annotation tab on item click
+      if (data || (target && target.checkVisibility())) {
+        this.hoverChanged(data)
+      }
+    },
     hoverChanged: function (data) {
-      const payload = data ? { ...data, type: "connectivity" } : data;
-      this.$emit("hover-changed", payload);
+      // disable hover changes when show connectivity is clicked
+      if (!this.freezed) {
+        let payload = { tabType: "connectivity" };
+  
+        if (data) {
+          payload = {...payload, ...data};
+        } else if (this.expandedData) {
+          payload = {...payload, ...this.expandedData};
+        }
+  
+        this.$emit("hover-changed", payload);
+      }
     },
     resetSearch: function () {
       this.numberOfHits = 0;
@@ -282,9 +318,12 @@ export default {
       this.loadingCards = false;
     },
     resetSearchIfNoActiveSearch: function() {
-      if (!this.searchInput) this.openSearch([], '');
+      const hasValidFacet = this.filter.some(f => f.facet !== "Show all");
+      if ((!this.searchInput && !hasValidFacet) || this.numberOfHits === 0) {
+        this.openSearch([], '');
+      }
     },
-    openSearch: function (filter, search = "", option = { withSearch: true }) {
+    openSearch: function (filter, search = "") {
       this.searchInput = search;
       this.resetPageNavigation();
       //Proceed normally if cascader is ready
@@ -303,17 +342,17 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes();
           this.resetSearch();
         } else if (this.filter) {
-          if (option.withSearch) {
-            this.searchKnowledge(this.filter, search);
-          }
+          this.searchKnowledge(this.filter, search);
           this.$refs.filtersRef.setCascader(this.filter);
+          this.searchHistoryUpdate(this.filter, search);
         }
       } else {
         //cascader is not ready, perform search if no filter is set,
         //otherwise waith for cascader to be ready
         this.filter = filter;
-        if ((!filter || filter.length == 0) && option.withSearch) {
+        if (!filter || filter.length == 0) {
           this.searchKnowledge(this.filter, search);
+          this.searchHistoryUpdate(this.filter, search);
         }
       }
     },
@@ -339,63 +378,45 @@ export default {
     clearSearchClicked: function () {
       this.searchInput = "";
       this.searchAndFilterUpdate();
-      this.$refs.filtersRef.checkShowAllBoxes();
     },
     searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
         this.searchInput = this.searchInput.trim();
         this.searchAndFilterUpdate();
-        if (!this.searchInput) {
-          this.$refs.filtersRef.checkShowAllBoxes();
-        }
       }
     },
     filterUpdate: function (filters) {
-      this.filters = [...filters];
+      this.filter = [...filters];
       this.searchAndFilterUpdate();
-      this.$emit("search-changed", {
-        value: filters,
-        type: "filter-update",
-      });
-    },
-    /**
-     * Transform filters for third level items to perform search
-     * because cascader keeps adding it back.
-     */
-    transformFiltersBeforeSearch: function (filters) {
-      return filters.map((filter) => {
-        if (filter.facet2) {
-          filter.facet = filter.facet2;
-          delete filter.facet2;
-        }
-        return filter;
-      });
+      // this.$emit("search-changed", {
+      //   value: filters,
+      //   tabType: "connectivity",
+      //   type: "filter-update",
+      // });
     },
     searchAndFilterUpdate: function () {
       this.resetPageNavigation();
-      const transformedFilters = this.transformFiltersBeforeSearch(
-        this.filters
-      );
-      this.searchKnowledge(transformedFilters, this.searchInput);
+      this.searchKnowledge(this.filter, this.searchInput);
+      this.searchHistoryUpdate(this.filter, this.searchInput);
     },
     searchHistoryUpdate: function (filters, search) {
       this.$refs.searchHistory.selectValue = 'Search history';
       // save history only if there has value
-      if (search?.trim()) {
-        this.$refs.searchHistory.addSearchToHistory(
-          filters,
-          search
-        );
+      if (filters.length || search?.trim()) {
+        this.$refs.searchHistory.addSearchToHistory(this.filter, search);
       }
     },
     searchKnowledge: function (filters, query = "") {
       this.expanded = "";
-      this.searchHistoryUpdate(filters, query);
+      this.expandedData = null;
       this.loadingCards = true;
       this.scrollToTop();
       this.$emit("search-changed", {
-        value: this.searchInput,
-        type: "query-update",
+        // value: this.searchInput,
+        // type: "query-update",
+        query: query,
+        filter: filters,
+        tabType: "connectivity",
       });
       this.lastSearch = query;
     },
@@ -409,7 +430,7 @@ export default {
     pageChange: function (page) {
       this.start = (page - 1) * this.numberPerPage;
       this.page = page;
-      this.searchKnowledge(this.filters, this.searchInput);
+      this.searchKnowledge(this.filter, this.searchInput);
     },
     scrollToTop: function () {
       if (this.$refs.content) {
@@ -422,8 +443,8 @@ export default {
     },
     searchHistorySearch: function (item) {
       this.searchInput = item.search;
-      this.filters = item.filters;
-      this.searchAndFilterUpdate();
+      this.filter = item.filters;
+      this.openSearch([...item.filters], item.search);
     },
     onConnectivityInfoLoaded: function (result) {
       const stepItemRef = this.$refs['stepItem-' + result.id];
@@ -440,7 +461,8 @@ export default {
     this.openSearch(this.filter, this.searchInput);
 
     EventBus.on('close-connectivity', () => {
-      this.closeConnectivity();
+      this.expanded = '';
+      this.expandedData = null;
     });
   },
 };
@@ -512,6 +534,9 @@ export default {
 }
 
 .header {
+  display: flex;
+  align-items: center;
+
   .el-button {
     font-family: inherit;
 
@@ -519,7 +544,19 @@ export default {
     &:focus {
       background: $app-primary-color;
       box-shadow: -3px 2px 4px #00000040;
-      color: #fff;
+      color: #ffffff;
+    }
+  }
+
+  .el-radio-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .el-radio {
+      color: #ffffff;
+      margin-left: 20px;
+      height: 20px;
     }
   }
 }
