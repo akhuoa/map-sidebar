@@ -54,6 +54,7 @@
                 @filter-visibility="$emit('filter-visibility', $event)"
                 @search-changed="searchChanged(tab.id, $event)"
                 @hover-changed="hoverChanged(tab.id, $event)"
+                @connectivity-explorer-reset="onConnectivityExplorerReset"
                 @show-connectivity="showConnectivity"
                 @show-reference-connectivities="onShowReferenceConnectivities"
                 @connectivity-hovered="onConnectivityHovered"
@@ -209,6 +210,12 @@ export default {
       if (activeTabType === 'annotation') {
         this.activeAnnotationData = data;
       }
+    },
+    /**
+     * This event is emitted after clicking reset button in connectivity explorer
+     */
+    onConnectivityExplorerReset: function () {
+      this.$emit('connectivity-explorer-reset');
     },
     /**
      * This event is emitted when the show connectivity button is clicked.

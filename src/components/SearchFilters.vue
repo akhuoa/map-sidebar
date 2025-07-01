@@ -63,16 +63,32 @@
             popper-class="sidebar-cascader-popper"
           >
             <template #default="{ node, data }">
-              <el-row>
-                <el-col :span="4" v-if="hasLineStyles(data)">
-                  <div class="path-visual" :style="getLineStyles(data)"></div>
-                </el-col>
-                <el-col :span="20">
-                  <div :style="getBackgroundStyles(data)">
-                    {{ data.label }}
+              <div v-if="isFlatmapConnectionsFilterNode(node)">
+                <div class="el-input">
+                  <div class="el-input__wrapper">
+                    <input
+                      class="el-input__inner"
+                      :value="searchInputs[node.value]"
+                      @input="searchInputChange($event, node)"
+                      style="width: 100%"
+                      autocomplete="off"
+                      placeholder="Search"
+                    />
                   </div>
-                </el-col>
-              </el-row>
+                </div>
+              </div>
+              <div v-else>
+                <el-row>
+                  <el-col :span="4" v-if="hasLineStyles(data)">
+                    <div class="path-visual" :style="getLineStyles(data)"></div>
+                  </el-col>
+                  <el-col :span="20">
+                    <div :style="getBackgroundStyles(data)">
+                      {{ data.label }}
+                    </div>
+                  </el-col>
+                </el-row>
+              </div>
             </template>
           </el-cascader>
           <div v-if="showFiltersText" class="filter-default-value">Filters</div>
@@ -199,6 +215,7 @@ export default {
         },
       ],
       presentTags:[],
+      searchInputs: {},
     }
   },
   setup() {
@@ -254,6 +271,14 @@ export default {
         )
       return value
     },
+    isFlatmapConnectionsFilterNode: function (node) {
+      return (
+        node.pathValues[0].includes('flatmap.connectivity.source') &&
+        node.pathLabels.includes('Filters') &&
+        node.isDisabled &&
+        node.isLeaf
+      )
+    },
     processOptions: function () {
       // create top level of options in cascader
       this.options.forEach((facet, i) => {
@@ -271,6 +296,14 @@ export default {
             value: this.createCascaderItemValue('Show all'),
             label: 'Show all',
           })
+        }
+
+        if (facet.key.includes('flatmap.connectivity.source')) {
+          this.options[i].children.unshift({
+            value: this.createCascaderItemValue('ConnectivityFilters'),
+            label: 'Filters',
+            disabled: true,
+          });
         }
 
         // populate second level of options
@@ -648,6 +681,24 @@ export default {
       //work around as the expand item may change on modifying the cascade props
       this.__expandItem__ = event
       this.cssMods()
+    },
+    searchInputChange: function (event, node) {
+      event.preventDefault();
+      const { target } = event;
+      if (target) {
+        const value = target.value;
+        const ul = target.closest('.el-cascader-menu__list');
+        ul.querySelectorAll('.el-cascader-node').forEach((li, index) => {
+          if (index > 0) {
+            const content = li.querySelector('.el-cascader-node__label').textContent;
+            if (content.toLowerCase().includes(value.toLowerCase())) {
+              li.classList.remove('hide');
+            } else {
+              li.classList.add('hide');
+            }
+          }
+        })
+      }
     },
     numberShownChanged: function (event) {
       this.$emit('numberPerPage', parseInt(event))
@@ -1091,6 +1142,36 @@ export default {
   --el-checkbox-checked-input-border-color: #{$app-primary-color};
   background-color: $app-primary-color;
   border-color: $app-primary-color;
+}
+
+.sidebar-cascader-popper .el-cascader-menu:last-child .el-cascader-node {
+  &.is-disabled {
+    border-bottom: 1px solid #e4e7ed;
+    padding-bottom: 0.5rem;
+    position: sticky;
+    top: 0.5rem;
+    background-color: white;
+    z-index: 20;
+    box-shadow: 0px -6px 0px 6px white;
+
+    .el-checkbox.is-disabled {
+      display: none;
+    }
+
+    .el-cascader-node__label {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    // hide show all for connection filters
+    + .el-cascader-node {
+      display: none;
+    }
+  }
+
+  &.hide {
+    display: none;
+  }
 }
 
 .filter-help-popover,
