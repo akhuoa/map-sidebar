@@ -219,8 +219,8 @@ export default {
     /**
      * This event is emitted after clicking reset button in connectivity explorer
      */
-    onConnectivityExplorerReset: function () {
-      this.$emit('connectivity-explorer-reset');
+    onConnectivityExplorerReset: function (payload) {
+      this.$emit('connectivity-explorer-reset', payload);
     },
     /**
      * This event is emitted when the show connectivity button is clicked.
