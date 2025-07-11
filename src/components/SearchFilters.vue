@@ -737,7 +737,9 @@ export default {
     cascadeExpandChange: function (event) {
       //work around as the expand item may change on modifying the cascade props
       this.__expandItem__ = event
-      this.updateListFilters()
+      if (this.__expandItem__) {
+        this.updateListFilters(this.__expandItem__[0])
+      }
       this.updateListStyleOrder()
       this.cssMods()
     },
@@ -769,9 +771,10 @@ export default {
       const { target } = event;
       if (target) {
         const value = target.value;
+        const expandItem = node.pathValues[0];
 
-        this.searchInputs[node.pathValues[0]] = value;
-        this.updateListFilters();
+        this.searchInputs[expandItem] = value;
+        this.updateListFilters(expandItem);
       }
     },
     searchInputFocusToggle: function (event, option) {
@@ -785,8 +788,7 @@ export default {
         inputWrapper.classList.remove('is-focus');
       }
     },
-    updateListFilters: function () {
-      const expandItem = this.__expandItem__[0];
+    updateListFilters: function (expandItem) {
       const searchValue = this.searchInputs[expandItem] || '';
 
       this.$nextTick(() => {

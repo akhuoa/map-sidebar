@@ -228,7 +228,7 @@ export default {
       updatedCopyContent: '',
       activeView: 'listView',
       connectivityLoading: false,
-      connectivitySource: 'sckan',
+      connectivitySource: 'map', // sckan
       connectivityError: {},
       graphViewLoaded: false,
       connectivityFromMap: null,
