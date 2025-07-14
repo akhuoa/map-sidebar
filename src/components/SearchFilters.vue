@@ -9,7 +9,7 @@
           closable
           @close="cascadeTagClose(presentTags[0])"
         >
-          <span class="tag-text">{{ presentTags[0] }}</span>
+          <span class="tag-text" :class="modifyCascaderTagStyle(presentTags[0])">{{ presentTags[0] }}</span>
         </el-tag>
         <el-popover
           v-if="presentTags.length > 1"
@@ -24,6 +24,7 @@
                 v-for="(tag, i) in presentTags.slice(1)"
                 :key="i"
                 class="ml-2"
+                :class="modifyCascaderTagStyle(tag)"
                 type="info"
                 closable
                 @close="cascadeTagClose(tag)"
@@ -382,10 +383,26 @@ export default {
           })
       })
     },
+    isConnectivityTag: function (tag) {
+      const regex = /^[A-Za-z]:/; // starts with O: D: V:
+      return regex.test(tag);
+    },
+    getConnectivityTag: function (tag) {
+      const index = tag.indexOf(":");
+      const result = index !== -1 ? tag.substring(index + 1) : tag;
+      return result;
+    },
+    modifyCascaderTagStyle: function (tag) {
+      if (this.isConnectivityTag(tag)) {
+        return 'connectivity-tag';
+      }
+      return '';
+    },
     /**
      * Create manual events when cascader tag is closed
      */
-    cascadeTagClose: function (tag) {
+    cascadeTagClose: function (_tag) {
+      const tag = this.isConnectivityTag(_tag) ? this.getConnectivityTag(_tag) : _tag;
       let manualEvent = []
 
       Object.entries(this.cascaderTags).map((entry) => {
@@ -444,27 +461,37 @@ export default {
       }
 
       this.cascaderTags = {}
+      this.cascaderTagsClone = {}
       this.presentTags = []
       event.map((item) => {
         const { facet, facet2, term, tagLabel, facetPropPath } = item
         let facetLabel = facet;
+        let termId = '';
 
         // Connectivity filter has different value and label,
         // value is used for filter logic
         // label is used for user interface (and this cascader tag is just user interface)
         if (facetPropPath && facetPropPath.includes('flatmap.connectivity.source.') && tagLabel) {
           facetLabel = tagLabel;
+          termId = term.charAt(0);
         }
 
         if (this.correctnessCheck.term.has(term) && this.correctnessCheck.facet.has(facetLabel)) {
           if (facet2) {
             if (this.correctnessCheck.facet2.has(facet2)) {
               if (term in this.cascaderTags) {
-                if (facet in this.cascaderTags[term]) this.cascaderTags[term][facet].push(facet2)
-                else this.cascaderTags[term][facet] = [facet2]
+                if (facet in this.cascaderTags[term]) {
+                  this.cascaderTags[term][facet].push(facet2)
+                  this.cascaderTagsClone[term][facet].push(facet2)
+                } else {
+                  this.cascaderTags[term][facet] = [facet2]
+                  this.cascaderTagsClone[term][facet] = [facet2]
+                }
               } else {
                 this.cascaderTags[term] = {}
                 this.cascaderTags[term][facet] = [facet2]
+                this.cascaderTagsClone[term] = {}
+                this.cascaderTagsClone[term][facet] = [facet2]
               }
             }
           } else {
@@ -473,18 +500,31 @@ export default {
             // in this case 'push' action will not available.
             if (term in this.cascaderTags && term !== 'Anatomical structure') {
               this.cascaderTags[term].push(facetLabel)
+              // connectivity exploration mode tags
+              if (termId) {
+                this.cascaderTagsClone[term].push(termId + ':' + facetLabel);
+              } else {
+                this.cascaderTagsClone[term].push(facetLabel);
+              }
             } else {
               if (facet.toLowerCase() !== "show all") {
                 this.cascaderTags[term] = [facetLabel]
+                // connectivity exploration mode tags
+                if (termId) {
+                  this.cascaderTagsClone[term] = [termId + ':' + facetLabel];
+                } else {
+                  this.cascaderTagsClone[term] = [facetLabel]
+                }
               } else {
                 this.cascaderTags[term] = []
+                this.cascaderTagsClone[term] = []
               }
             }
           }
         }
       })
 
-      Object.values(this.cascaderTags).map((value) => {
+      Object.values(this.cascaderTagsClone).map((value) => {
         const extend = Array.isArray(value) ? value : Object.values(value).flat(1)
         this.presentTags = [...this.presentTags, ...extend]
       })
@@ -1112,6 +1152,18 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.connectivity-tag::first-letter,
+:deep(.connectivity-tag .el-tag__content::first-letter) {
+  display: inline-block;
+  padding: 0 2px;
+  margin-right: 2px;
+  color: white;
+  background-color: $app-primary-color;
+  font-style: italic;
+  font-size: 90%;
+  border-radius: 2px;
 }
 
 .el-tags-container {
