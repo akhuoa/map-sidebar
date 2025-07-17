@@ -381,8 +381,20 @@ export default {
         // Show not found filter items warning message
         notFoundItems.forEach((notFoundItem) => {
           const itemLabel = notFoundItem.tagLabel || notFoundItem.facet;
+          const itemLabelLowerCase = itemLabel.charAt(0).toLowerCase() + itemLabel.slice(1);
+          let message = '';
+          if (notFoundItem.term.toLowerCase() === 'origin') {
+            message = `There are no neuron populations beginning at <strong>${itemLabelLowerCase}</strong>.`;
+          } else if (notFoundItem.term.toLowerCase() === 'via') {
+            message = `There are no neuron populations that run through <strong>${itemLabelLowerCase}</strong>.`;
+          } else if (notFoundItem.term.toLowerCase() === 'destination') {
+            message = `There are no neuron populations terminating at <strong>${itemLabelLowerCase}</strong>.`;
+          } else {
+            message = `There are no neuron populations beginning, terminating, or running through <strong>${itemLabelLowerCase}</strong>.`
+          }
           Message({
-            message: `${itemLabel} cannot be found in ${notFoundItem.term}!`,
+            dangerouslyUseHTMLString: true,
+            message: message,
             appendTo: this.$el,
             showClose: true,
             offset: 113,

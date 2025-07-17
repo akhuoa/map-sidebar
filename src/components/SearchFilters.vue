@@ -1152,6 +1152,7 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .connectivity-tag::first-letter,
@@ -1172,6 +1173,12 @@ export default {
   gap: 4px;
 }
 
+:deep(.connectivity-tag .el-tag__content) {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .el-tag {
   .cascader-tag &,
   .el-tags-container & {
@@ -1180,6 +1187,9 @@ export default {
     color: #303133 !important;
     background-color: #fff;
     border-color: #dcdfe6 !important;
+    width: auto;
+    max-width: 100%;
+    justify-content: flex-start;
   }
 }
 
