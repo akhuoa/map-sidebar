@@ -246,9 +246,6 @@ export default {
         this.initLoading = false;
         this.numberOfHits = this.results.length;
         // knowledge is from the neuron click if there is 'ready' property
-        if (this.numberOfHits === 1 && !('ready' in this.results[0])) {
-          this.onConnectivityCollapseChange(this.results[0]);
-        }
         if (this.numberOfHits > 0 && ('ready' in this.results[0])) {
           this.$refs.filtersRef.checkShowAllBoxes();
           this.searchInput = '';
@@ -263,9 +260,12 @@ export default {
         JSON.stringify(newVal) !== JSON.stringify(oldVal) &&
         newVal.length === 1 && newVal[0].ready
       ) {
-        // if the changed property is connectivity source,
-        // or two different maps in split view, do not collapse
+        const hasValidFacet = this.filter.some(f => f.facet !== "Show all");
         if (
+          // card should not be expanded if only one entry and from neuron click
+          (this.numberOfHits === 1 && !this.searchInput && !hasValidFacet)||
+          // if the changed property is connectivity source,
+          // or two different maps in split view, do not collapse
           (
             newVal[0].connectivitySource !== oldVal[0].connectivitySource ||
             newVal[0].mapId !== oldVal[0].mapId

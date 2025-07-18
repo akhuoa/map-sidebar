@@ -13,6 +13,7 @@ declare module 'vue' {
     ConnectivityExplorer: typeof import('./components/ConnectivityExplorer.vue')['default']
     ConnectivityInfo: typeof import('./components/ConnectivityInfo.vue')['default']
     DatasetCard: typeof import('./components/DatasetCard.vue')['default']
+    DatasetExplorer: typeof import('./components/DatasetExplorer.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElCascader: typeof import('element-plus/es')['ElCascader']
@@ -44,7 +45,6 @@ declare module 'vue' {
     SearchFilters: typeof import('./components/SearchFilters.vue')['default']
     SearchHistory: typeof import('./components/SearchHistory.vue')['default']
     SideBar: typeof import('./components/SideBar.vue')['default']
-    SidebarContent: typeof import('./components/SidebarContent.vue')['default']
     Tabs: typeof import('./components/Tabs.vue')['default']
   }
   export interface ComponentCustomProperties {

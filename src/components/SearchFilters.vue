@@ -662,7 +662,7 @@ export default {
           clearTimeout(this.filterTimeout);
         }
 
-        this.$emit('loading', true) // let sidebarcontent wait for the requests
+        this.$emit('loading', true) // let dataset explorer wait for the requests
         this.setCascader(filterKeys) //update our cascader v-model if we modified the event
 
         this.filterTimeout = setTimeout(() => {

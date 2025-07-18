@@ -132,7 +132,7 @@ export default {
     Input,
     Pagination
   },
-  name: 'SideBarContent',
+  name: 'DatasetExplorer',
   props: {
     visible: {
       type: Boolean,
@@ -430,7 +430,7 @@ export default {
               ? element['abi-contextual-information']
               : undefined,
           segmentation: element['mbf-segmentation'],
-          simulation: element['abi-simulation-file'],
+          simulation: element['abi-simulation-omex-file'] ? element['abi-simulation-omex-file'] : element['abi-simulation-file'],
           additionalLinks: element.additionalLinks,
           detailsReady: true,
         })

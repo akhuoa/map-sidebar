@@ -64,7 +64,7 @@
               />
             </template>
             <template v-else>
-              <SidebarContent
+              <DatasetExplorer
                 class="sidebar-content-container"
                 v-show="tab.id === activeTabId"
                 :contextCardEntry="tab.contextCard"
@@ -88,7 +88,7 @@ import {
 } from '@element-plus/icons-vue'
 /* eslint-disable no-alert, no-console */
 import { ElDrawer as Drawer, ElIcon as Icon } from 'element-plus'
-import SidebarContent from './SidebarContent.vue'
+import DatasetExplorer from './DatasetExplorer.vue'
 import EventBus from './EventBus.js'
 import Tabs from './Tabs.vue'
 import AnnotationTool from './AnnotationTool.vue'
@@ -99,7 +99,7 @@ import ConnectivityExplorer from './ConnectivityExplorer.vue'
  */
 export default {
   components: {
-    SidebarContent,
+    DatasetExplorer,
     Tabs,
     ElIconArrowLeft,
     ElIconArrowRight,
