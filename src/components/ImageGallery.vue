@@ -322,26 +322,67 @@ export default {
       }
     },
     createSimulationItems: function () {
-      if (this.entry.simulation && this.entry.simulation.length > 0) {
-        let action = {
-          label: undefined,
-          apiLocation: this.envVars.API_LOCATION,
-          s3uri: this.entry.s3uri,
-          version: this.datasetVersion,
-          title: 'View simulation',
-          type: 'Simulation',
-          name: this.entry.name,
-          description: this.entry.description,
-          discoverId: this.datasetId,
-          dataset: `${this.envVars.ROOT_URL}/datasets/${this.datasetId}?type=dataset`,
-        }
-        this.items['Simulations'].push({
-          id: 'simulation',
-          title: ' ',
-          type: 'Simulation',
-          hideType: true,
-          hideTitle: true,
-          userData: action,
+      if (this.entry.simulation) {
+        this.entry.simulation.forEach((simulation) => {
+          if (simulation.additional_mimetype.name === "application/x.vnd.abi.simulation+json") {
+            let action = {
+              label: undefined,
+              apiLocation: this.envVars.API_LOCATION,
+              s3uri: this.entry.s3uri,
+              version: this.datasetVersion,
+              title: 'View simulation',
+              type: 'Simulation',
+              name: this.entry.name,
+              description: this.entry.description,
+              discoverId: this.datasetId,
+              dataset: `${this.envVars.ROOT_URL}/datasets/${this.datasetId}?type=dataset`,
+            }
+            this.items['Simulations'].push({
+              id: 'simulation',
+              title: ' ',
+              type: 'Simulation',
+              hideType: true,
+              hideTitle: true,
+              userData: action,
+            })
+          } else {
+            const filePath = simulation.dataset.path
+            const id = simulation.identifier
+            const thumbnail = this.getThumbnailForPlot(
+              simulation,
+              this.entry.thumbnails
+            )
+            let thumbnailURL = undefined
+            let mimetype = ''
+            if (thumbnail) {
+              thumbnailURL = this.getImageURL(this.envVars.API_LOCATION, {
+                id,
+                prefix: this.getS3Prefix(),
+                file_path: thumbnail.dataset.path,
+                s3Bucket: this.s3Bucket,
+              })
+              mimetype = thumbnail.mimetype.name
+            }
+            const resource = `${this.envVars.API_LOCATION}s3-resource/${this.getS3Prefix()}files/${filePath}${this.getS3Args()}`
+            let action = {
+              label: capitalise(this.label),
+              resource: resource,
+              s3uri: this.entry.s3uri,
+              title: 'View simulation',
+              type: 'Simulation',
+              discoverId: this.discoverId,
+              version: this.datasetVersion,
+            }
+            this.items['Simulations'].push({
+              id,
+              title: baseName(filePath),
+              type: 'Simulation',
+              thumbnail: thumbnailURL,
+              userData: action,
+              hideType: true,
+              mimetype,
+            })
+          }
         })
       }
     },

@@ -210,14 +210,16 @@ export default {
     action: function (action) {
       console.log('action fired: ', action)
       let facets = [];
-      facets.push(
-        ...action.labels.map(val => ({
-          facet: capitalise(val),
-          term: "Anatomical structure",
-          facetPropPath: "anatomy.organ.category.name",
-        }))
-      );
-      if (this.$refs.sideBar) {
+      if (action.labels) {
+        facets.push(
+          ...action.labels.map(val => ({
+            facet: capitalise(val),
+            term: "Anatomical structure",
+            facetPropPath: "anatomy.organ.category.name",
+          }))
+        );
+      }
+      if (this.$refs.sideBar && facets?.length) {
         console.log('openSearch', facets)
         this.$refs.sideBar.openSearch(facets, "");
       }

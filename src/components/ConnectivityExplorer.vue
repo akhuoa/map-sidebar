@@ -133,7 +133,9 @@ import {
   ElIcon as Icon,
   ElInput as Input,
   ElPagination as Pagination,
+  ElMessage as Message,
 } from "element-plus";
+import 'element-plus/es/components/message/style/css';
 import EventBus from './EventBus.js'
 import SearchFilters from "./SearchFilters.vue";
 import SearchHistory from "./SearchHistory.vue";
@@ -244,9 +246,6 @@ export default {
         this.initLoading = false;
         this.numberOfHits = this.results.length;
         // knowledge is from the neuron click if there is 'ready' property
-        if (this.numberOfHits === 1 && !('ready' in this.results[0])) {
-          this.onConnectivityCollapseChange(this.results[0]);
-        }
         if (this.numberOfHits > 0 && ('ready' in this.results[0])) {
           this.$refs.filtersRef.checkShowAllBoxes();
           this.searchInput = '';
@@ -261,9 +260,12 @@ export default {
         JSON.stringify(newVal) !== JSON.stringify(oldVal) &&
         newVal.length === 1 && newVal[0].ready
       ) {
-        // if the changed property is connectivity source,
-        // or two different maps in split view, do not collapse
+        const hasValidFacet = this.filter.some(f => f.facet !== "Show all");
         if (
+          // card should not be expanded if only one entry and from neuron click
+          (this.numberOfHits === 1 && !this.searchInput && !hasValidFacet)||
+          // if the changed property is connectivity source,
+          // or two different maps in split view, do not collapse
           (
             newVal[0].connectivitySource !== oldVal[0].connectivitySource ||
             newVal[0].mapId !== oldVal[0].mapId
@@ -303,7 +305,6 @@ export default {
     },
     onConnectivityClicked: function (data) {
       this.searchInput = data.query;
-      this.filter = data.filter;
       this.searchAndFilterUpdate();
     },
     collapseChange:function (data) {
@@ -342,13 +343,13 @@ export default {
       // disable hover changes when show connectivity is clicked
       if (!this.freezed) {
         let payload = { tabType: "connectivity" };
-  
+
         if (data) {
           payload = {...payload, ...data};
         } else if (this.expandedData) {
           payload = {...payload, ...this.expandedData};
         }
-  
+
         this.$emit("hover-changed", payload);
       }
     },
@@ -365,15 +366,44 @@ export default {
     },
     onResetClick: function () {
       this.openSearch([], '');
-      this.$emit('connectivity-explorer-reset');
+      this.$emit('connectivity-explorer-reset', []);
     },
     openSearch: function (filter, search = "") {
       this.searchInput = search;
       this.resetPageNavigation();
       //Proceed normally if cascader is ready
       if (this.cascaderIsReady) {
-        this.filter =
-          this.$refs.filtersRef.getHierarchicalValidatedFilters(filter);
+        const validatedFilters = this.$refs.filtersRef.getHierarchicalValidatedFilters(filter);
+        const notFoundItems = validatedFilters.notFound || [];
+        this.filter = validatedFilters.result;
+
+        // Show not found filter items warning message
+        notFoundItems.forEach((notFoundItem) => {
+          const itemLabel = notFoundItem.tagLabel || notFoundItem.facet;
+          const itemLabelLowerCase = itemLabel.charAt(0).toLowerCase() + itemLabel.slice(1);
+          let message = '';
+          if (notFoundItem.term.toLowerCase() === 'origin') {
+            message = `There are no neuron populations beginning at <strong>${itemLabelLowerCase}</strong>.`;
+          } else if (notFoundItem.term.toLowerCase() === 'via') {
+            message = `There are no neuron populations that run through <strong>${itemLabelLowerCase}</strong>.`;
+          } else if (notFoundItem.term.toLowerCase() === 'destination') {
+            message = `There are no neuron populations terminating at <strong>${itemLabelLowerCase}</strong>.`;
+          } else {
+            message = `There are no neuron populations beginning, terminating, or running through <strong>${itemLabelLowerCase}</strong>.`
+          }
+          Message({
+            dangerouslyUseHTMLString: true,
+            message: message,
+            appendTo: this.$el,
+            showClose: true,
+            offset: 113,
+          });
+        });
+
+        if (notFoundItems.length) {
+          this.$emit('connectivity-explorer-reset', notFoundItems);
+        }
+
         //Facets provided but cannot find at least one valid
         //facet. Tell the users the search is invalid and reset
         //facets check boxes.
@@ -441,6 +471,7 @@ export default {
     searchAndFilterUpdate: function () {
       this.resetPageNavigation();
       this.searchKnowledge(this.filter, this.searchInput);
+      this.$refs.filtersRef.setCascader(this.filter);
       this.searchHistoryUpdate(this.filter, this.searchInput);
     },
     searchHistoryUpdate: function (filters, search) {
@@ -498,6 +529,12 @@ export default {
           contentRef.scrollTop = stepItemRef[0].offsetTop;
         }
       });
+    },
+    getSearch: function () {
+      return this.searchInput;
+    },
+    getFilters: function () {
+      return this.filter;
     },
   },
   mounted: function () {
@@ -610,6 +647,24 @@ export default {
   background-color: #f7faff;
   overflow-y: hidden;
   padding: 1rem;
+}
+
+.content-card :deep(.el-message) {
+  position: absolute !important;
+  width: 80%;
+  font-size: 12px;
+  border-radius: var(--el-border-radius-base);
+  --el-message-bg-color: var(--el-color-error-light-9);
+  --el-message-border-color: var(--el-color-error);
+  --el-message-text-color: var(--el-text-color-primary);
+
+  .el-icon.el-message__icon {
+    display: none;
+  }
+
+  .el-message__closeBtn {
+    margin-left: auto;
+  }
 }
 
 .content {

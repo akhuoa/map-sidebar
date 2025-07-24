@@ -79,7 +79,9 @@ import {
   ElIcon as Icon,
   ElInput as Input,
   ElPagination as Pagination,
+  ElMessage as Message,
 } from 'element-plus'
+import 'element-plus/es/components/message/style/css';
 import SearchFilters from './SearchFilters.vue'
 import SearchHistory from './SearchHistory.vue'
 import DatasetCard from './DatasetCard.vue'
@@ -130,7 +132,7 @@ export default {
     Input,
     Pagination
   },
-  name: 'SideBarContent',
+  name: 'DatasetExplorer',
   props: {
     visible: {
       type: Boolean,
@@ -192,8 +194,20 @@ export default {
       this.resetPageNavigation()
       //Proceed normally if cascader is ready
       if (this.cascaderIsReady) {
-        this.filter =
-          this.$refs.filtersRef.getHierarchicalValidatedFilters(filter)
+        const validatedFilters = this.$refs.filtersRef.getHierarchicalValidatedFilters(filter);
+        const notFoundItems = validatedFilters.notFound || [];
+        this.filter = validatedFilters.result;
+
+        // Show not found filter items warning message
+        notFoundItems.forEach((notFoundItem) => {
+          Message({
+            message: `${notFoundItem.facet} cannot be found in ${notFoundItem.term}!`,
+            appendTo: this.$el,
+            showClose: true,
+            offset: 113,
+          });
+        });
+
         //Facets provided but cannot find at least one valid
         //facet. Tell the users the search is invalid and reset
         //facets check boxes.
@@ -416,7 +430,7 @@ export default {
               ? element['abi-contextual-information']
               : undefined,
           segmentation: element['mbf-segmentation'],
-          simulation: element['abi-simulation-file'],
+          simulation: element['abi-simulation-omex-file'] ? element['abi-simulation-omex-file'] : element['abi-simulation-file'],
           additionalLinks: element.additionalLinks,
           detailsReady: true,
         })
@@ -462,6 +476,12 @@ export default {
       this.searchInput = item.search
       this.filter = item.filters
       this.openSearch([...item.filters], item.search);
+    },
+    getSearch: function () {
+      return this.searchInput
+    },
+    getFilters: function () {
+      return this.filter;
     },
   },
   mounted: function () {
@@ -561,6 +581,20 @@ export default {
   background-color: #f7faff;
   overflow-y: hidden;
   padding: 1rem;
+}
+
+.content-card :deep(.el-message) {
+  position: absolute !important;
+  width: 80%;
+  font-size: 12px;
+  border-radius: var(--el-border-radius-base);
+  --el-message-bg-color: var(--el-color-error-light-9);
+  --el-message-border-color: var(--el-color-error);
+  --el-message-text-color: var(--el-text-color-primary);
+
+  .el-icon.el-message__icon {
+    display: none;
+  }
 }
 
 .content {
