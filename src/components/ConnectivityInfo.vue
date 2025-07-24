@@ -92,7 +92,7 @@
       <div class="block buttons-row">
         <span>Connectivity from:</span>
         <el-radio-group v-model="connectivitySource" @change="onConnectivitySourceChange">
-          <el-radio value="map">Map</el-radio>
+          <el-radio value="map" :disabled="noMapConnectivity">Map</el-radio>
           <el-radio value="sckan">SCKAN</el-radio>
         </el-radio-group>
         <el-button
@@ -229,6 +229,7 @@ export default {
       activeView: 'listView',
       connectivityLoading: false,
       connectivitySource: 'map', // sckan
+      noMapConnectivity: false,
       connectivityError: {},
       graphViewLoaded: false,
       connectivityFromMap: null,
@@ -300,6 +301,7 @@ export default {
             this.graphViewLoaded = true;
           }
           this.connectivitySource = this.entry.connectivitySource;
+          this.noMapConnectivity = this.entry.noMapConnectivity;
           this.updateGraphConnectivity();
           this.connectivityLoading = false;
           // only emit to scroll when entire entry content changes

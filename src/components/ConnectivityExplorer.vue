@@ -305,7 +305,6 @@ export default {
     },
     onConnectivityClicked: function (data) {
       this.searchInput = data.query;
-      this.filter = data.filter;
       this.searchAndFilterUpdate();
     },
     collapseChange:function (data) {
@@ -472,6 +471,7 @@ export default {
     searchAndFilterUpdate: function () {
       this.resetPageNavigation();
       this.searchKnowledge(this.filter, this.searchInput);
+      this.$refs.filtersRef.setCascader(this.filter);
       this.searchHistoryUpdate(this.filter, this.searchInput);
     },
     searchHistoryUpdate: function (filters, search) {
@@ -529,6 +529,12 @@ export default {
           contentRef.scrollTop = stepItemRef[0].offsetTop;
         }
       });
+    },
+    getSearch: function () {
+      return this.searchInput;
+    },
+    getFilters: function () {
+      return this.filter;
     },
   },
   mounted: function () {

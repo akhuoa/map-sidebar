@@ -477,6 +477,12 @@ export default {
       this.filter = item.filters
       this.openSearch([...item.filters], item.search);
     },
+    getSearch: function () {
+      return this.searchInput
+    },
+    getFilters: function () {
+      return this.filter;
+    },
   },
   mounted: function () {
     // initialise algolia
