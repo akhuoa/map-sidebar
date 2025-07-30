@@ -1,7 +1,7 @@
 <template>
   <div class="filters">
     <MapSvgSpriteColor />
-    <div v-if="showFilters">
+    <div v-if="showFilters && options.length > 0">
       <div class="cascader-tag" v-if="presentTags.length > 0">
         <el-tag
           class="ml-2"
@@ -254,10 +254,12 @@ export default {
           // Populate the cascader with new options
           this.populateCascader().then(() => {
             this.cascaderIsReady = true
-            this.checkShowAllBoxes()
-            // this.setCascader(this.entry.filterFacets)
-            this.cssMods()
-            this.$emit('cascaderReady')
+            if (this.options.length) {
+              this.checkShowAllBoxes()
+              // this.setCascader(this.entry.filterFacets)
+              this.cssMods()
+              this.$emit('cascaderReady')
+            }
           })
         }
       },
@@ -451,7 +453,7 @@ export default {
           this.correctnessCheck.term.add(option.label)
           option.children.map((child) => {
             this.correctnessCheck.facet.add(child.label)
-            if (option.label === 'Anatomical structure' && child.label !== 'Show all') {
+            if (['Anatomical structure', 'Nerves'].includes(option.label) && child.label !== 'Show all') {
               child.children.map((child2) => {
                 this.correctnessCheck.facet2.add(child2.label)
               })
@@ -498,7 +500,7 @@ export default {
             // If 'cascaderTags' has key 'Anatomical structure',
             // it's value type will be Object (because it has nested facets),
             // in this case 'push' action will not available.
-            if (term in this.cascaderTags && term !== 'Anatomical structure') {
+            if (term in this.cascaderTags && !['Anatomical structure', 'Nerves'].includes(term)) {
               this.cascaderTags[term].push(facetLabel)
               // connectivity exploration mode tags
               if (termId) {
@@ -1065,8 +1067,13 @@ export default {
             result.push(validatedFilter)
             terms.push(validatedFilter.term)
           } else {
-            // not found items
-            notFound.push(filter)
+            const validOption = this.options.find((option) => {
+              return option.key === filter.facetPropPath;
+            });
+            if (validOption) {
+              // not found items
+              notFound.push(filter)
+            }
           }
         })
 
