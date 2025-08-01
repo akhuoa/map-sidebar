@@ -441,11 +441,25 @@ export default {
       // if state is not provided or formatted incorrectly, do nothing
       if (!state || !state.dataset || !state.connectivity) return;
       this.state = JSON.parse(JSON.stringify(state)); // deep copy to avoid reference issues
-      this.openSearch(state.dataset.filters, state.dataset.search);
-      this.openConnectivitySearch(state.connectivity.filters, state.connectivity.search);
+      const datasetFilters = state.dataset.filters;
+      const connectivityFilters = state.connectivity.filters;
+      const datasetSearch = state.dataset.search;
+      const connectivitySearch = state.connectivity.search;
+
+      if (datasetFilters.length || datasetSearch) {
+        this.openSearch(datasetFilters, datasetSearch);
+      }
+
+      if (connectivityFilters.length || connectivitySearch) {
+        this.openConnectivitySearch(connectivityFilters, connectivitySearch);
+      }
+
       if (state.activeTabId) {
         this.$nextTick(() => {
-          this.activeTabId = state.activeTabId;
+          const hasTab = this.tabEntries.find((t) => t.id === state.activeTabId);
+          if (hasTab) {
+            this.activeTabId = state.activeTabId;
+          }
         });
       }
     },
