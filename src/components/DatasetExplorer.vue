@@ -341,6 +341,11 @@ export default {
         this.numberPerPage,
         this.page
       )
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_dataset_pagination`,
+        'category': `page_${this.page}`,
+      });
     },
     handleMissingData: function (doi) {
       let i = this.results.findIndex((res) => res.doi === doi)

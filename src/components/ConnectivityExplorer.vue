@@ -518,6 +518,11 @@ export default {
       this.expandedData = null;
       this.scrollToTop();
       // this.searchKnowledge(this.filter, this.searchInput);
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_connectivity_pagination`,
+        'category': `page_${this.page}`,
+      });
     },
     scrollToTop: function () {
       if (this.$refs.content) {

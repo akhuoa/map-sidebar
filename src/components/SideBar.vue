@@ -464,6 +464,19 @@ export default {
         });
       }
     },
+    /**
+     * @public
+     * Track an event for analytics
+     * @param {Object} `data` - The event data
+     */
+    trackEvent: function (data) {
+      const taggingData = {
+        'event': 'interaction_event',
+        'location': 'map_sidebar',
+        ...data,
+      };
+      this.$emit('trackEvent', taggingData);
+    }
   },
   computed: {
     // This should respect the information provided by the property
@@ -536,6 +549,11 @@ export default {
         this.availableAnatomyFacets = payLoad.find((facet) => facet.label === 'Anatomical Structure').children
         this.storeAvailableAnatomyFacets(this.availableAnatomyFacets);
     })
+
+    // Event tracking
+    EventBus.on('trackEvent', (data) => {
+      this.trackEvent(data);
+    });
   },
 }
 </script>
