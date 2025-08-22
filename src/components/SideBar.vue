@@ -27,6 +27,7 @@
             :activeId="activeTabId"
             @tabClicked="tabClicked"
             @tabClosed="tabClosed"
+            @trackEvent="trackEvent"
           />
           <template v-for="tab in tabs" key="tab.id">
             <template v-if="tab.type === 'annotation'">
@@ -40,7 +41,7 @@
                 @cancel-create="$emit('cancel-create')"
                 @confirm-delete="$emit('confirm-delete', $event)"
                 @hover-changed="hoverChanged(tab.id, $event)"
-                @trackEvent="$emit('trackEvent', $event)"
+                @trackEvent="trackEvent"
               />
             </template>
             <template v-else-if="tab.type === 'connectivityExplorer'">
