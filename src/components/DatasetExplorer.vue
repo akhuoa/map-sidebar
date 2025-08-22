@@ -266,6 +266,12 @@ export default {
         tabType: 'dataset',
         type: 'reset-update',
       })
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_action_filter`,
+        'category': `reset`,
+        'location': 'map_sidebar_dataset',
+      });
     },
     searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
@@ -334,6 +340,7 @@ export default {
       EventBus.emit('trackEvent', {
         'event_name': `portal_maps_dataset_perPage`,
         'category': val,
+        'location': 'map_sidebar_dataset',
       });
 
       const preventPaginationTracking = this.page === 1;
@@ -353,6 +360,7 @@ export default {
         EventBus.emit('trackEvent', {
           'event_name': `portal_maps_dataset_pagination`,
           'category': `page_${this.page}`,
+          'location': 'map_sidebar_dataset',
         });
       }
     },
