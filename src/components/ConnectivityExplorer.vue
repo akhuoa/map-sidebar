@@ -509,9 +509,16 @@ export default {
     },
     numberPerPageUpdate: function (val) {
       this.numberPerPage = val;
-      this.pageChange(1);
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_connectivity_perPage`,
+        'category': val,
+      });
+
+      const preventPaginationTracking = this.page === 1;
+      this.pageChange(1, preventPaginationTracking);
     },
-    pageChange: function (page) {
+    pageChange: function (page, preventPaginationTracking = false) {
       this.start = (page - 1) * this.numberPerPage;
       this.page = page;
       this.expanded = "";
@@ -519,10 +526,12 @@ export default {
       this.scrollToTop();
       // this.searchKnowledge(this.filter, this.searchInput);
 
-      EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_connectivity_pagination`,
-        'category': `page_${this.page}`,
-      });
+      if (!preventPaginationTracking) {
+        EventBus.emit('trackEvent', {
+          'event_name': `portal_maps_connectivity_pagination`,
+          'category': `page_${this.page}`,
+        });
+      }
     },
     scrollToTop: function () {
       if (this.$refs.content) {

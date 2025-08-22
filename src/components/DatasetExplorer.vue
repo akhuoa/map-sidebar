@@ -330,9 +330,16 @@ export default {
     },
     numberPerPageUpdate: function (val) {
       this.numberPerPage = val
-      this.pageChange(1)
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_dataset_perPage`,
+        'category': val,
+      });
+
+      const preventPaginationTracking = this.page === 1;
+      this.pageChange(1, preventPaginationTracking)
     },
-    pageChange: function (page) {
+    pageChange: function (page, preventPaginationTracking = false) {
       this.start = (page - 1) * this.numberPerPage
       this.page = page
       this.searchAlgolia(
@@ -342,10 +349,12 @@ export default {
         this.page
       )
 
-      EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_dataset_pagination`,
-        'category': `page_${this.page}`,
-      });
+      if (!preventPaginationTracking) {
+        EventBus.emit('trackEvent', {
+          'event_name': `portal_maps_dataset_pagination`,
+          'category': `page_${this.page}`,
+        });
+      }
     },
     handleMissingData: function (doi) {
       let i = this.results.findIndex((res) => res.doi === doi)
