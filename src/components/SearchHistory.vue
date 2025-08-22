@@ -346,6 +346,16 @@ export default {
     },
     search: function (item) {
       this.$emit('search', item)
+
+      // Event tracking
+      const isConnectivity = this.localStorageKey?.indexOf('connectivity') !== -1;
+      const isDataset = this.localStorageKey?.indexOf('dataset') !== -1;
+      const location = isConnectivity ? 'connectivity' : isDataset ? 'dataset' : '';
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_search_history_click`,
+        'category': item.longLabel || item.label,
+        'location': `map_sidebar_${location}`,
+      });
     },
     searchHistoryItemLabel: function (search, filters) {
       let label = search ? `"${search.trim()}"` : '';
