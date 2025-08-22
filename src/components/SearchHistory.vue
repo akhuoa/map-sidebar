@@ -417,6 +417,13 @@ export default {
       this.searchHistory.splice(itemIndex, 1);
       this.savedSearchHistory = this.searchHistory.filter((item) => item.saved);
       this.updateSearchHistory();
+
+      const location = this.getParentComponentName();
+      EventBus.emit('trackEvent', {
+        'event_name': 'portal_maps_search_history_removed',
+        'category': item.longLabel || item.label,
+        'location': `map_sidebar_${location}`,
+      });
     },
   },
 }
