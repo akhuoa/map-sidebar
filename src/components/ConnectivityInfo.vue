@@ -363,6 +363,12 @@ export default {
       const featureIds = this.entry.featureId || [];
       // connected to flatmapvuer > moveMap(featureIds) function
       this.$emit('show-connectivity', featureIds);
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_show_connectivity_on_map`,
+        'category': this.entry.id || '',
+        'location': 'map_sidebar_connectivity',
+      });
     },
     switchConnectivityView: function (val) {
       this.activeView = val;
