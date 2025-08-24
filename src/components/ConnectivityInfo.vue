@@ -456,7 +456,7 @@ export default {
         const transformedNerves = transformData(title, nerveLabels);
         contentArray.push(transformedNerves);
       }
-      
+
       // Origins
       if (this.origins?.length) {
         const title = 'Origin';
@@ -605,6 +605,12 @@ export default {
     },
     closeConnectivity: function () {
       this.$emit('close-connectivity');
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_connectivity_close`,
+        'category': this.entry.id || '',
+        'location': 'map_sidebar_connectivity',
+      });
     },
   },
   mounted: function () {
