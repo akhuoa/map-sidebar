@@ -49,7 +49,7 @@
             Show connectivity on map
           </span>
         </el-popover>
-        <CopyToClipboard :content="updatedCopyContent" />
+        <CopyToClipboard @copied="onCopied" :content="updatedCopyContent" />
         <template v-if="withCloseButton">
           <el-popover
             width="auto"
@@ -366,6 +366,13 @@ export default {
 
       EventBus.emit('trackEvent', {
         'event_name': `portal_maps_show_connectivity_on_map`,
+        'category': this.entry.id || '',
+        'location': 'map_sidebar_connectivity',
+      });
+    },
+    onCopied: function () {
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_connectivity_copy`,
         'category': this.entry.id || '',
         'location': 'map_sidebar_connectivity',
       });
