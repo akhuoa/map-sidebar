@@ -188,6 +188,7 @@
         :resources="resources"
         @references-loaded="onReferencesLoaded"
         @show-reference-connectivities="onShowReferenceConnectivities"
+        @trackEvent="onTrackEvent"
       />
     </div>
   </div>
@@ -636,6 +637,9 @@ export default {
         'category': this.entry.id || '',
         'location': 'map_sidebar_connectivity',
       });
+    },
+    onTrackEvent: function (data) {
+      EventBus.emit('trackEvent', data);
     },
   },
   mounted: function () {
