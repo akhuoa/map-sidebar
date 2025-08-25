@@ -581,6 +581,12 @@ export default {
         entry: this.entry,
         connectivitySource: connectivitySource,
       });
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_connectivity_source_change`,
+        'category': connectivitySource,
+        'location': 'map_sidebar_connectivity',
+      });
     },
     updateGraphConnectivity: function () {
       if (this.connectivitySource === "map") {
