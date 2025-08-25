@@ -387,6 +387,12 @@ export default {
           this.graphViewLoaded = true;
         });
       }
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_connectivity_switch_view`,
+        'category': val,
+        'location': 'map_sidebar_connectivity',
+      });
     },
     onTapNode: function (data) {
       // save selected state for list view
