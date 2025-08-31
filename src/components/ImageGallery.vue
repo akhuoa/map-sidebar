@@ -151,39 +151,41 @@ export default {
     createFlatmapItems: function () {
       if (this.entry.flatmaps) {
         this.entry.flatmaps.forEach((flatmap) => {
-          const id = flatmap.identifier
-          const thumbnail = this.getThumbnailForPlot(
-            flatmap,
-            this.entry.thumbnails
-          )
-          let thumbnailURL = undefined
-          let mimetype = ''
-          if (thumbnail) {
-            thumbnailURL = this.getImageURL(this.envVars.API_LOCATION, {
+          if (flatmap.associated_flatmap?.identifier) {
+            const id = flatmap.identifier
+            const thumbnail = this.getThumbnailForPlot(
+              flatmap,
+              this.entry.thumbnails
+            )
+            let thumbnailURL = undefined
+            let mimetype = ''
+            if (thumbnail) {
+              thumbnailURL = this.getImageURL(this.envVars.API_LOCATION, {
+                id,
+                prefix: this.getS3Prefix(),
+                file_path: thumbnail.dataset.path,
+                s3Bucket: this.s3Bucket,
+              })
+              mimetype = thumbnail.mimetype.name
+            }
+            let action = {
+              label: capitalise(this.label),
+              resource: flatmap.associated_flatmap.identifier,
+              title: 'View Flatmap',
+              type: 'Flatmap',
+              discoverId: this.discoverId,
+              version: this.datasetVersion,
+            }
+            this.items['Flatmaps'].push({
               id,
-              prefix: this.getS3Prefix(),
-              file_path: thumbnail.dataset.path,
-              s3Bucket: this.s3Bucket,
+              title: baseName(filePath),
+              type: 'Flatmap',
+              thumbnail: thumbnailURL,
+              userData: action,
+              hideType: true,
+              mimetype,
             })
-            mimetype = thumbnail.mimetype.name
           }
-          let action = {
-            label: capitalise(this.label),
-            resource: flatmap.flatmap_uuid,
-            title: 'View Flatmap',
-            type: 'Flatmap',
-            discoverId: this.discoverId,
-            version: this.datasetVersion,
-          }
-          this.items['Flatmaps'].push({
-            id,
-            title: baseName(filePath),
-            type: 'Flatmap',
-            thumbnail: thumbnailURL,
-            userData: action,
-            hideType: true,
-            mimetype,
-          })
         })
       }
     },
