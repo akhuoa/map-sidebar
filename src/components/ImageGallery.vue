@@ -92,6 +92,7 @@ export default {
         //Use the Images instead for Biolucida Images
         //"Biolucida Images": [],
         Dataset: [],
+        Flatmaps:[],
         Images: [],
         Scaffolds: [],
         Segmentations: [],
