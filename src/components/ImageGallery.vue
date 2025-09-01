@@ -152,6 +152,7 @@ export default {
       if (this.entry.flatmaps) {
         this.entry.flatmaps.forEach((flatmap) => {
           if (flatmap.associated_flatmap?.identifier) {
+            const filePath = flatmap.dataset.path
             const id = flatmap.identifier
             const thumbnail = this.getThumbnailForPlot(
               flatmap,
@@ -173,7 +174,7 @@ export default {
               resource: flatmap.associated_flatmap.identifier,
               title: 'View Flatmap',
               type: 'Flatmap',
-              discoverId: this.discoverId,
+              discoverId: this.datasetId,
               version: this.datasetVersion,
             }
             this.items['Flatmaps'].push({
