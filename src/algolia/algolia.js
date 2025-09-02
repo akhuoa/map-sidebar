@@ -292,32 +292,26 @@ export class AlgoliaClient {
     const anatomyOrganCategoryNames = anatomyOrganCategoryName ? Object.keys(anatomyOrganCategoryName) : []
     const anatomyOrganSubcategoryNames = anatomyOrganSubcategoryName ? Object.keys(anatomyOrganSubcategoryName) : []
     const anatomyOrganSubsubcategoryNames = anatomyOrganSubsubcategoryName ? Object.keys(anatomyOrganSubsubcategoryName) : []
-
-    const filteredOrganNames = [];
+    const filteredOrganNames = []
+  
     anatomyOrganCategoryNames.forEach((_categoryName) => {
       const categoryName = _categoryName.toLowerCase();
       anatomyOrganNames.forEach((_organName) => {
         const organName = _organName.toLowerCase();
+        //This will be incorrect for subsubcategory
         const fullName = `${categoryName}.${organName}`
         const foundNamesInSubsub = []
-
         const found = anatomyOrganSubcategoryNames.some((_subcategoryName) => {
           const subcategoryName = _subcategoryName.toLowerCase();
           if (subcategoryName === fullName) {
-            const foundNameInSubsub = anatomyOrganSubsubcategoryNames.find((name) => name.toLocaleLowerCase().includes(subcategoryName))
-            if (foundNameInSubsub) {
-              const subsubOrganName = foundNameInSubsub.replace(`${subcategoryName}.`, '');
-              if (anatomyOrganNames.map((name) => name.toLowerCase()).includes(subsubOrganName)) {
-                foundNamesInSubsub.push(subsubOrganName)
-              }
-            }
             return true
+          } else {
+            return anatomyOrganSubsubcategoryNames.find((name) => {
+              const fullsubsubname = `${subcategoryName}.${organName}`
+              return (fullsubsubname === name) 
+            })
           }
         });
-
-        if (foundNamesInSubsub.length) {
-          filteredOrganNames.push(...foundNamesInSubsub.map(name => name.toLowerCase()))
-        }
 
         if (found) {
           filteredOrganNames.push(organName);
