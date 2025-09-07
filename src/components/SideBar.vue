@@ -306,6 +306,9 @@ export default {
       const tabInfo = matchedTab.length ? matchedTab : this.tabEntries;
       const tabRef = tabInfo[0].type + 'Tab_' + tabInfo[0].id;
       if (switchTab) this.setActiveTab({ id: tabInfo[0].id, type: tabInfo[0].type });
+      if (!this.$refs[tabRef] || this.$refs[tabRef].length === 0) {
+        return null;
+      }
       return this.$refs[tabRef][0];
     },
     /**
@@ -416,13 +419,16 @@ export default {
     updateState: function () {
       const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer');
       const connectivityExplorerTabRef = this.getTabRef(undefined, 'connectivityExplorer');
-      this.state.activeTabId = this.activeTabId;
-      this.state.dataset.search = datasetExplorerTabRef.getSearch();
-      this.state.dataset.filters = removeShowAllFacets(datasetExplorerTabRef.getFilters());
-      this.state.connectivity.search = connectivityExplorerTabRef.getSearch();
-      this.state.connectivity.filters = connectivityExplorerTabRef.getFilters();
-      this.state.connectivityEntries = this.connectivityEntry.map((entry) => entry.id);
-      this.state.annotationEntries = this.annotationEntry.map((entry) => entry.models);
+      // Only update state if both tabs are available
+      if (datasetExplorerTabRef && connectivityExplorerTabRef) {
+        this.state.activeTabId = this.activeTabId;
+        this.state.dataset.search = datasetExplorerTabRef.getSearch();
+        this.state.dataset.filters = removeShowAllFacets(datasetExplorerTabRef.getFilters());
+        this.state.connectivity.search = connectivityExplorerTabRef.getSearch();
+        this.state.connectivity.filters = connectivityExplorerTabRef.getFilters();
+        this.state.connectivityEntries = this.connectivityEntry.map((entry) => entry.id);
+        this.state.annotationEntries = this.annotationEntry.map((entry) => entry.models);
+      }
     },
     /**
      * This function returns the current state of the sidebar
