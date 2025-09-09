@@ -417,16 +417,29 @@ export default {
       EventBus.emit('close-connectivity');
     },
     updateState: function () {
+      this.state.activeTabId = this.activeTabId;
+
+      // Update dataset explorer state if available
       const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer');
-      const connectivityExplorerTabRef = this.getTabRef(undefined, 'connectivityExplorer');
-      // Only update state if both tabs are available
-      if (datasetExplorerTabRef && connectivityExplorerTabRef) {
-        this.state.activeTabId = this.activeTabId;
+      if (datasetExplorerTabRef) {
         this.state.dataset.search = datasetExplorerTabRef.getSearch();
         this.state.dataset.filters = removeShowAllFacets(datasetExplorerTabRef.getFilters());
+      }
+
+      // Update connectivity explorer state if available
+      const connectivityExplorerTabRef = this.getTabRef(undefined, 'connectivityExplorer');
+      if (connectivityExplorerTabRef) {
         this.state.connectivity.search = connectivityExplorerTabRef.getSearch();
         this.state.connectivity.filters = connectivityExplorerTabRef.getFilters();
+      }
+
+      // Update connectivity entries if available
+      if (this.connectivityEntry && this.connectivityEntry.length > 0) {
         this.state.connectivityEntries = this.connectivityEntry.map((entry) => entry.id);
+      }
+
+      // Update annotation entries if available
+      if (this.annotationEntry && this.annotationEntry.length > 0) {
         this.state.annotationEntries = this.annotationEntry.map((entry) => entry.models);
       }
     },
