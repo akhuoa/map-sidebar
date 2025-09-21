@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/map-side-bar",
-  "version": "2.10.0-beta.6",
+  "version": "2.10.4",
   "files": [
     "dist/*",
     "src/*",
@@ -38,9 +38,9 @@
     "./src/*": "./src/*"
   },
   "dependencies": {
-    "@abi-software/gallery": "^1.1.2",
-    "@abi-software/map-utilities": "1.6.1-beta.6",
-    "@abi-software/svg-sprite": "^1.0.1",
+    "@abi-software/gallery": "^1.2.0",
+    "@abi-software/map-utilities": "1.7.2",
+    "@abi-software/svg-sprite": "^1.0.2",
     "@element-plus/icons-vue": "^2.3.1",
     "algoliasearch": "^4.10.5",
     "element-plus": "2.8.4",

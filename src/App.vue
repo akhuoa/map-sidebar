@@ -9,6 +9,8 @@
       <el-button @click="openSearch">search Uberon from refs</el-button>
       <el-button @click="singleFacets">Add heart to Filter (facet2 set)</el-button>
       <el-button @click="addStomach">Add stomach to Filter</el-button>
+      <el-button @click="addDRG">Add DRG to Filter</el-button>
+      <el-button @click="addSubsubPath">Add lumbar dorsal root ganglion to Filter</el-button>
       <el-button @click="addInferiorVagus">Add inferior vagus to Filter (incorrect case)</el-button>
       <el-button @click="addInvalidTerm">Add invalid term to Filter</el-button>
       <el-button @click="multiFacets">multiple facets</el-button>
@@ -145,7 +147,7 @@ export default {
         y: 0,
       },
       createDataSet: false,
-      sckanVersion: 'sckan-2024-09-21-npo',
+      sckanVersion: 'sckan-2024-09-21',
       flatmapKnowledge: [],
       connectivityKnowledge: [],
       query: '',
@@ -162,7 +164,7 @@ export default {
       const mappedData = response.values.map(x => x[0]);
       const knowledge = mappedData.map(x => JSON.parse(x));
       this.flatmapKnowledge = knowledge.filter((item) => {
-        if (item.source === this.sckanVersion && item.connectivity?.length) return true;
+        if (item.connectivity?.length) return true;
         return false;
       });
       this.connectivityKnowledge = this.flatmapKnowledge;
@@ -242,6 +244,22 @@ export default {
     addStomach: function () {
       this.$refs.sideBar.addFilter({
         facet: 'Stomach',
+        term: 'Anatomical structure',
+        facetPropPath: 'anatomy.organ.category.name',
+        AND: true,
+      })
+    },
+    addDRG: function () {
+      this.$refs.sideBar.addFilter({
+        facet: 'Dorsal root ganglion',
+        term: 'Anatomical structure',
+        facetPropPath: 'anatomy.organ.category.name',
+        AND: true,
+      })
+    },
+    addSubsubPath: function () {
+      this.$refs.sideBar.addFilter({
+        facet: 'lumbar dorsal root ganglion',
         term: 'Anatomical structure',
         facetPropPath: 'anatomy.organ.category.name',
         AND: true,

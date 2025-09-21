@@ -21,7 +21,7 @@
         <el-button
           link
           class="el-button-link"
-          @click="openSearch([], '')"
+          @click="onResetClick"
           size="large"
         >
           Reset
@@ -195,7 +195,9 @@ export default {
       //Proceed normally if cascader is ready
       if (this.cascaderIsReady) {
         const validatedFilters = this.$refs.filtersRef.getHierarchicalValidatedFilters(filter);
-        const notFoundItems = validatedFilters.notFound || [];
+        const notFoundItems = validatedFilters.notFound
+          ? validatedFilters.notFound.filter(item => item.facet.toLowerCase() !== 'show all')
+          : [];
         this.filter = validatedFilters.result;
 
         // Show not found filter items warning message
@@ -238,14 +240,14 @@ export default {
       if (this.cascaderIsReady) {
         this.resetPageNavigation()
         if (filter) {
-          if (this.$refs.filtersRef.addFilter(filter))
+          if (this.$refs.filtersRef.addFilters(filter))
             this.$refs.filtersRef.initiateSearch()
         }
       } else {
         if (Array.isArray(this.filter)) {
-          this.filter.push(filter)
+          this.filter.push(...filter)
         } else {
-          this.filter = [filter]
+          this.filter = [...filter]
         }
       }
     },
@@ -256,6 +258,20 @@ export default {
     clearSearchClicked: function () {
       this.searchInput = '';
       this.searchAndFilterUpdate();
+    },
+    onResetClick: function () {
+      this.openSearch([], '')
+      this.$emit('search-changed', {
+        value: this.searchInput,
+        tabType: 'dataset',
+        type: 'reset-update',
+      })
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_action_filter`,
+        'category': `reset`,
+        'location': 'map_sidebar_dataset',
+      });
     },
     searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
@@ -320,9 +336,17 @@ export default {
     },
     numberPerPageUpdate: function (val) {
       this.numberPerPage = val
-      this.pageChange(1)
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_dataset_perPage`,
+        'category': val + '',
+        'location': 'map_sidebar_dataset',
+      });
+
+      const preventPaginationTracking = this.page === 1;
+      this.pageChange(1, preventPaginationTracking)
     },
-    pageChange: function (page) {
+    pageChange: function (page, preventPaginationTracking = false) {
       this.start = (page - 1) * this.numberPerPage
       this.page = page
       this.searchAlgolia(
@@ -331,6 +355,14 @@ export default {
         this.numberPerPage,
         this.page
       )
+
+      if (!preventPaginationTracking) {
+        EventBus.emit('trackEvent', {
+          'event_name': `portal_maps_dataset_pagination`,
+          'category': `page_${this.page}`,
+          'location': 'map_sidebar_dataset',
+        });
+      }
     },
     handleMissingData: function (doi) {
       let i = this.results.findIndex((res) => res.doi === doi)
@@ -430,7 +462,9 @@ export default {
               ? element['abi-contextual-information']
               : undefined,
           segmentation: element['mbf-segmentation'],
+          //omex format will be the preferred mimetype
           simulation: element['abi-simulation-omex-file'] ? element['abi-simulation-omex-file'] : element['abi-simulation-file'],
+          flatmaps: element['abi-flatmap-file'],
           additionalLinks: element.additionalLinks,
           detailsReady: true,
         })
