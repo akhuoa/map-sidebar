@@ -366,7 +366,17 @@ export default {
     },
     onResetClick: function () {
       this.openSearch([], '');
-      this.$emit('connectivity-explorer-reset', []);
+      this.$emit('search-changed', {
+        value: [],
+        tabType: 'dataset',
+        type: 'reset-update',
+      })
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_action_filter`,
+        'category': `reset`,
+        'location': 'map_sidebar_connectivity',
+      });
     },
     openSearch: function (filter, search = "") {
       this.searchInput = search;
@@ -374,7 +384,9 @@ export default {
       //Proceed normally if cascader is ready
       if (this.cascaderIsReady) {
         const validatedFilters = this.$refs.filtersRef.getHierarchicalValidatedFilters(filter);
-        const notFoundItems = validatedFilters.notFound || [];
+        const notFoundItems = validatedFilters.notFound
+          ? validatedFilters.notFound.filter(item => item.facet.toLowerCase() !== 'show all')
+          : [];
         this.filter = validatedFilters.result;
 
         // Show not found filter items warning message
@@ -401,7 +413,11 @@ export default {
         });
 
         if (notFoundItems.length) {
-          this.$emit('connectivity-explorer-reset', notFoundItems);
+          this.$emit('search-changed', {
+            value: notFoundItems,
+            tabType: 'dataset',
+            type: 'reset-update',
+          })
         }
 
         //Facets provided but cannot find at least one valid
@@ -499,15 +515,31 @@ export default {
     },
     numberPerPageUpdate: function (val) {
       this.numberPerPage = val;
-      this.pageChange(1);
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_connectivity_perPage`,
+        'category': val + '',
+        'location': 'map_sidebar_connectivity',
+      });
+
+      const preventPaginationTracking = this.page === 1;
+      this.pageChange(1, preventPaginationTracking);
     },
-    pageChange: function (page) {
+    pageChange: function (page, preventPaginationTracking = false) {
       this.start = (page - 1) * this.numberPerPage;
       this.page = page;
       this.expanded = "";
       this.expandedData = null;
       this.scrollToTop();
       // this.searchKnowledge(this.filter, this.searchInput);
+
+      if (!preventPaginationTracking) {
+        EventBus.emit('trackEvent', {
+          'event_name': `portal_maps_connectivity_pagination`,
+          'category': `page_${this.page}`,
+          'location': 'map_sidebar_connectivity',
+        });
+      }
     },
     scrollToTop: function () {
       if (this.$refs.content) {

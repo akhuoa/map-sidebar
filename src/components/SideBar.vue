@@ -27,6 +27,7 @@
             :activeId="activeTabId"
             @tabClicked="tabClicked"
             @tabClosed="tabClosed"
+            @trackEvent="trackEvent"
           />
           <template v-for="tab in tabs" key="tab.id">
             <template v-if="tab.type === 'annotation'">
@@ -40,6 +41,7 @@
                 @cancel-create="$emit('cancel-create')"
                 @confirm-delete="$emit('confirm-delete', $event)"
                 @hover-changed="hoverChanged(tab.id, $event)"
+                @trackEvent="trackEvent"
               />
             </template>
             <template v-else-if="tab.type === 'connectivityExplorer'">
@@ -55,7 +57,6 @@
                 :showVisibilityFilter="showVisibilityFilter"
                 @search-changed="searchChanged(tab.id, $event)"
                 @hover-changed="hoverChanged(tab.id, $event)"
-                @connectivity-explorer-reset="onConnectivityExplorerReset"
                 @show-connectivity="showConnectivity"
                 @show-reference-connectivities="onShowReferenceConnectivities"
                 @connectivity-hovered="onConnectivityHovered"
@@ -93,6 +94,7 @@ import EventBus from './EventBus.js'
 import Tabs from './Tabs.vue'
 import AnnotationTool from './AnnotationTool.vue'
 import ConnectivityExplorer from './ConnectivityExplorer.vue'
+import { removeShowAllFacets } from '../algolia/utils.js'
 
 /**
  * Aims to provide a sidebar for searching capability for SPARC portal.
@@ -230,12 +232,6 @@ export default {
       }
     },
     /**
-     * This event is emitted after clicking reset button in connectivity explorer
-     */
-    onConnectivityExplorerReset: function (payload) {
-      this.$emit('connectivity-explorer-reset', payload);
-    },
-    /**
      * This event is emitted when the show connectivity button is clicked.
      * @arg featureIds
      */
@@ -310,6 +306,9 @@ export default {
       const tabInfo = matchedTab.length ? matchedTab : this.tabEntries;
       const tabRef = tabInfo[0].type + 'Tab_' + tabInfo[0].id;
       if (switchTab) this.setActiveTab({ id: tabInfo[0].id, type: tabInfo[0].type });
+      if (!this.$refs[tabRef] || this.$refs[tabRef].length === 0) {
+        return null;
+      }
       return this.$refs[tabRef][0];
     },
     /**
@@ -319,14 +318,21 @@ export default {
      * @public
      */
     addFilter: function (filter) {
-      this.drawerOpen = true
-      filter.AND = true // When we add a filter external, it is currently only with an AND boolean
-
-      // Because refs are in v-for, nextTick is needed here
-      this.$nextTick(() => {
-        const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer', true);
-        datasetExplorerTabRef.addFilter(filter)
-      })
+      if (filter) {
+        this.drawerOpen = true
+        let filterToAdd = filter;
+        if (Array.isArray(filter)) {
+          filterToAdd.forEach(item => item.AND = true);
+        } else {
+          filter.AND = true // When we add a filter external, it is currently only with an AND boolean
+          filterToAdd = [filter]
+        }
+        // Because refs are in v-for, nextTick is needed here
+        this.$nextTick(() => {
+          const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer', true);
+          datasetExplorerTabRef.addFilter(filterToAdd)
+        })
+      }
     },
     openNeuronSearch: function (neuron) {
       this.drawerOpen = true
@@ -411,15 +417,31 @@ export default {
       EventBus.emit('close-connectivity');
     },
     updateState: function () {
-      const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer');
-      const connectivityExplorerTabRef = this.getTabRef(undefined, 'connectivityExplorer');
       this.state.activeTabId = this.activeTabId;
-      this.state.dataset.search = datasetExplorerTabRef.getSearch();
-      this.state.dataset.filters = datasetExplorerTabRef.getFilters();
-      this.state.connectivity.search = connectivityExplorerTabRef.getSearch();
-      this.state.connectivity.filters = connectivityExplorerTabRef.getFilters();
-      this.state.connectivityEntries = this.connectivityEntry.map((entry) => entry.id);
-      this.state.annotationEntries = this.annotationEntry.map((entry) => entry.models);
+
+      // Update dataset explorer state if available
+      const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer');
+      if (datasetExplorerTabRef) {
+        this.state.dataset.search = datasetExplorerTabRef.getSearch();
+        this.state.dataset.filters = removeShowAllFacets(datasetExplorerTabRef.getFilters());
+      }
+
+      // Update connectivity explorer state if available
+      const connectivityExplorerTabRef = this.getTabRef(undefined, 'connectivityExplorer');
+      if (connectivityExplorerTabRef) {
+        this.state.connectivity.search = connectivityExplorerTabRef.getSearch();
+        this.state.connectivity.filters = connectivityExplorerTabRef.getFilters();
+      }
+
+      // Update connectivity entries if available
+      if (this.connectivityEntry && this.connectivityEntry.length > 0) {
+        this.state.connectivityEntries = this.connectivityEntry.map((entry) => entry.id);
+      }
+
+      // Update annotation entries if available
+      if (this.annotationEntry && this.annotationEntry.length > 0) {
+        this.state.annotationEntries = this.annotationEntry.map((entry) => entry.models);
+      }
     },
     /**
      * This function returns the current state of the sidebar
@@ -463,6 +485,19 @@ export default {
         });
       }
     },
+    /**
+     * @public
+     * Track an event for analytics
+     * @param {Object} `data` - The event data
+     */
+    trackEvent: function (data) {
+      const taggingData = {
+        'event': 'interaction_event',
+        'location': 'map_sidebar',
+        ...data,
+      };
+      this.$emit('trackEvent', taggingData);
+    }
   },
   computed: {
     // This should respect the information provided by the property
@@ -535,6 +570,11 @@ export default {
         this.availableAnatomyFacets = payLoad.find((facet) => facet.label === 'Anatomical Structure').children
         this.storeAvailableAnatomyFacets(this.availableAnatomyFacets);
     })
+
+    // Event tracking
+    EventBus.on('trackEvent', (data) => {
+      this.trackEvent(data);
+    });
   },
 }
 </script>

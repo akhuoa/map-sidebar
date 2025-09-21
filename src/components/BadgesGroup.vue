@@ -61,7 +61,7 @@ export default {
     },
     addSimulationsToCategories: function (array) {
       if (array && array.length > 0) {
-        const size = 1
+        const size = array.length
         this.categories['Simulations'] = { size }
         this.categories['All'].size += size
       }
@@ -85,9 +85,10 @@ export default {
       deep: true,
       immediate: true,
       handler: function () {
+        this.addToCategories(this.entry.flatmaps, 'Flatmaps')
+        this.addToCategories(this.entry.plots, 'Plots')
         this.addToCategories(this.entry.scaffolds, 'Scaffolds')
         this.addToCategories(this.entry.segmentation, 'Segmentations')
-        this.addToCategories(this.entry.plots, 'Plots')
         this.addSimulationsToCategories(this.entry.simulation)
         /** disable the following
         this.addToCategories(this.entry.images, 'Images');

@@ -14,6 +14,7 @@ export const facetPropPathMapping = [
     id: 'anatomy.organ.category',
     facetPropPath: 'anatomy.organ.category.name',
     facetSubpropPath: 'anatomy.organ.subcategory.name',
+    facetSubsubpropPath: 'anatomy.organ.subsubcategory.name',
     facetFilterPath: 'anatomy.organ.name'
   },
   {
@@ -50,47 +51,62 @@ export const facetPropPathMapping = [
 
 // Same as above, but these show on the sidebar filters
 export const shownFilters = {
-  'anatomy.organ.name' : 'Anatomical Structure',
-  'organisms.primary.species.name' : 'Species',
-  'attributes.subject.sex.value' : 'Sex',
-  'attributes.subject.ageCategory.value' : 'Age Categories',
-  'pennsieve.organization.name' : 'Funding Program',
-  'item.types.name' : 'Data type',
+  'anatomy.organ.name': 'Anatomical Structure',
+  'organisms.primary.species.name': 'Species',
+  'attributes.subject.sex.value': 'Sex',
+  'attributes.subject.ageCategory.value': 'Age Categories',
+  'pennsieve.organization.name': 'Funding Program',
+  'item.types.name': 'Data type',
 }
 
 /* Returns filter for searching algolia. All facets of the same category are joined with OR,
   * and each of those results is then joined with an AND.
   * i.e. (color:blue OR color:red) AND (shape:circle OR shape:red) */
-export function getFilters(selectedFacetArray=undefined) {
+export function getFilters(selectedFacetArray = undefined) {
   // return all datasets if no filter
   if (selectedFacetArray === undefined) {
     return 'NOT item.published.status:embargo'
   }
 
   // Switch the 'term' attribute to 'label' if 'label' does not exist
-  selectedFacetArray.forEach(f=>f.label = f.facet2 ? f.facet2 : f.facet)
-
+  selectedFacetArray.forEach(f => {
+    f.label = f.facet3 ? f.facet3 : f.facet2 ? f.facet2 : f.facet
+  })
 
   let facets = removeShowAllFacets(selectedFacetArray)
+  //Facet 3 Non specific is the same as facet.facet2 the subsubcategory
+  facets.forEach((facet) => {
+    if (facet.facet3) {
+      if (facet.facet3 === "Non specific") {
+        facet.label = facet.facet2
+      }
+    }
+  })
 
   let filters = "NOT item.published.status:embargo";
   filters = `(${filters}) AND `;
-  const facetPropPaths = facetPropPathMapping.map((f) => f.facetPropPath);
-  facetPropPaths.map((facetPropPath) => {
+  const facetPropPaths = facetPropPathMapping.map(
+    (f) => [f.facetPropPath, f.facetFilterPath]
+  );
+  facetPropPaths.map(([facetPropPath, facetFilterPath]) => {
     let facetsToBool = facets.filter(
       (facet) => facet.facetPropPath == facetPropPath
     );
     let orFilters = "";
     let andFilters = "";
     facetsToBool.map((facet) => {
-      let facetPropPathToUse = facet.facetSubPropPath ? facet.facetSubPropPath : facetPropPath // Check if we have a subpath
-      if (facet.AND){
+      // for customization
+      // facetSubPropPath have the priority
+      let facetPropPathToUse = facet.facetSubPropPath ?
+        facet.facetSubPropPath : facetFilterPath ?
+          facetFilterPath : facetPropPath
+      if (facet.AND) {
         andFilters += `AND "${facetPropPathToUse}":"${facet.label}"`;
       } else {
         orFilters += `"${facetPropPathToUse}":"${facet.label}" OR `;
       }
     });
-    if (orFilters == "" && andFilters =="") {
+    if (orFilters == "" && andFilters == "") {
       return;
     }
     orFilters = `(${orFilters.substring(0, orFilters.lastIndexOf(" OR "))})` // remove last OR
@@ -103,6 +119,8 @@ export function getFilters(selectedFacetArray=undefined) {
   return filters.substring(0, filters.lastIndexOf(" AND "));
 }
 
-function removeShowAllFacets(facetArray){
-  return facetArray.filter( f => f.label !== 'Show all')
+function removeShowAllFacets(facetArray) {
+  return facetArray.filter(f => f.label !== 'Show all')
 }
+
+export { removeShowAllFacets }
