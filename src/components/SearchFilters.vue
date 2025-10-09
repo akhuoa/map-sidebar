@@ -1129,6 +1129,7 @@ export default {
         this.envVars.PENNSIEVE_API_LOCATION
       ))
       this.algoliaClient.initIndex(this.envVars.ALGOLIA_INDEX)
+      this.algoliaClient.setLocalStorageForTermMapping()
     }
     this.populateCascader().then(() => {
       this.cascaderIsReady = true
