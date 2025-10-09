@@ -94,7 +94,7 @@
           <span>
             Connectivity from:
             <el-popover
-              width="250"
+              width="320"
               trigger="hover"
               :teleported="false"
               popper-class="popover-origin-help"
@@ -103,9 +103,9 @@
                 <el-icon class="info"><el-icon-warning /></el-icon>
               </template>
               <span style="word-break: keep-all">
-                Map - connectivity as defined in displayed map
+                <strong>Map</strong> - connectivity as defined in displayed map
                 <br>
-                SCKAN - connectivity as defined in SCKAN
+                <strong>SCKAN</strong> - connectivity as defined in SCKAN
               </span>
             </el-popover>
           </span>
