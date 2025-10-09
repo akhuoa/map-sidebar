@@ -1044,6 +1044,24 @@ export default {
   }
 }
 
+:deep(.popover-origin-help.el-popover) {
+  font-family: 'Asap', sans-serif;
+  background: #f3ecf6 !important;
+  border: 1px solid $app-primary-color !important;
+  border-radius: 4px !important;
+  color: #303133 !important;
+  text-transform: none !important; // need to overide the tooltip text transform
+  font-weight: 400;
+
+  .el-popper__arrow {
+    &:before {
+      background: #f3ecf6 !important;
+      border-color: $app-primary-color;
+      background-color: #ffffff;
+    }
+  }
+}
+
 .content-container-connectivity {
   position: relative;
 
