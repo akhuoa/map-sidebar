@@ -362,7 +362,8 @@ export default {
       })
 
       // trigger reactivity only once
-      this.options = processedOptions;
+      // use Object.assign to keep same values for this.options and this.facets
+      Object.assign(this.options, processedOptions);
     },
     populateCascader: function () {
       if (this.entry.options) {
