@@ -362,7 +362,7 @@ export default {
       })
 
       // trigger reactivity only once
-      this.options = processedOptions;
+      Object.assign(this.options, processedOptions);
     },
     populateCascader: function () {
       if (this.entry.options) {
