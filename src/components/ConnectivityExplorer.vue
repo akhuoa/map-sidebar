@@ -304,7 +304,7 @@ export default {
       this.$emit('show-reference-connectivities', data);
     },
     onConnectivityClicked: function (data) {
-      this.searchInput = data.query;
+      this.searchInput = `"${data.query}"`;
       this.searchAndFilterUpdate();
     },
     collapseChange:function (data) {
