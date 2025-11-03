@@ -103,7 +103,7 @@
                 <el-icon class="info"><el-icon-warning /></el-icon>
               </template>
               <span style="word-break: keep-all">
-                <strong>Map</strong> - connectivity as defined in active maps.
+                <strong>Map</strong> - connectivity as defined in active map.
                 <br>
                 <strong>SCKAN</strong> - connectivity as defined in SCKAN.
               </span>
