@@ -279,6 +279,7 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes();
           this.searchInput = '';
           this.filter = [];
+          this.updateInputFocus();
         }
       }
     },
@@ -335,6 +336,7 @@ export default {
     onConnectivityClicked: function (data) {
       this.searchInput = data.query;
       this.searchAndFilterUpdate();
+      this.updateInputFocus();
     },
     collapseChange:function (data) {
       this.expanded = this.expanded === data.id ? "" : data.id;
@@ -409,6 +411,7 @@ export default {
     },
     openSearch: function (filter, search = "") {
       this.searchInput = search;
+      this.updateInputFocus();
       this.resetPageNavigation();
       //Proceed normally if cascader is ready
       if (this.cascaderIsReady) {
@@ -497,11 +500,13 @@ export default {
     clearSearchClicked: function () {
       this.searchInput = "";
       this.searchAndFilterUpdate();
+      this.updateInputFocus();
     },
     searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
         this.searchInput = this.searchInput.trim();
         this.searchAndFilterUpdate();
+        this.updateInputFocus();
       }
     },
     updateInputFocus: function () {
@@ -595,6 +600,7 @@ export default {
       this.searchInput = item.search;
       this.filter = item.filters;
       this.openSearch([...item.filters], item.search);
+      this.updateInputFocus();
     },
     onConnectivityInfoLoaded: function (result) {
       const stepItemRef = this.$refs['stepItem-' + result.id];
