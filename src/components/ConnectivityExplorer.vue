@@ -3,14 +3,42 @@
     <MapSvgSpriteColor />
     <template #header>
       <div class="header">
-        <el-input
-          class="search-input"
-          placeholder="Search"
-          v-model="searchInput"
-          @keyup="searchEvent"
-          clearable
-          @clear="clearSearchClicked"
-        ></el-input>
+        <div class="search-input-container" :class="{'is-focus': inputFocus}">
+          <el-input
+            class="search-input"
+            placeholder="Search"
+            v-model="searchInput"
+            @focus="onInputFocus"
+            @blur="onInputBlur"
+            @input="onInputChange"
+            @keyup="searchEvent"
+            clearable
+            @clear="clearSearchClicked"
+          ></el-input>
+          <el-popover
+            title="How does search work?"
+            width="250"
+            trigger="hover"
+            popper-class="filter-help-popover"
+          >
+            <template #reference>
+              <MapSvgIcon icon="help" class="help" />
+            </template>
+            <div>
+              <strong>Searches in:</strong>
+              Pathway IDs, titles, and connectivity components
+              <br /><br />
+              <strong>Multiple terms:</strong>
+              Comma-separated
+              <br /><br />
+              <strong>Matching rules:</strong>
+              <br />
+              <code>'kidney/132'</code> finds <code>'ilxtr:sparc-nlp/kidney/132'</code>
+              <br />
+              <code>'tunica'</code> finds in titles like "...to tunica..." and components <code>'UBERON:0007240'</code>
+            </div>
+          </el-popover>
+        </div>
         <el-button
           type="primary"
           class="button"
@@ -216,6 +244,7 @@ export default {
       expanded: "",
       filterVisibility: true,
       expandedData: null,
+      inputFocus: false,
     };
   },
   computed: {
@@ -250,6 +279,7 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes();
           this.searchInput = '';
           this.filter = [];
+          this.updateInputFocus();
         }
       }
     },
@@ -306,6 +336,7 @@ export default {
     onConnectivityClicked: function (data) {
       this.searchInput = data.query;
       this.searchAndFilterUpdate();
+      this.updateInputFocus();
     },
     collapseChange:function (data) {
       this.expanded = this.expanded === data.id ? "" : data.id;
@@ -380,6 +411,7 @@ export default {
     },
     openSearch: function (filter, search = "") {
       this.searchInput = search;
+      this.updateInputFocus();
       this.resetPageNavigation();
       //Proceed normally if cascader is ready
       if (this.cascaderIsReady) {
@@ -468,12 +500,26 @@ export default {
     clearSearchClicked: function () {
       this.searchInput = "";
       this.searchAndFilterUpdate();
+      this.updateInputFocus();
     },
     searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
         this.searchInput = this.searchInput.trim();
         this.searchAndFilterUpdate();
+        this.updateInputFocus();
       }
+    },
+    updateInputFocus: function () {
+      this.inputFocus = this.searchInput ? true : false;
+    },
+    onInputFocus: function () {
+      this.updateInputFocus();
+    },
+    onInputBlur: function () {
+      this.updateInputFocus();
+    },
+    onInputChange: function () {
+      this.updateInputFocus();
     },
     filterUpdate: function (filters) {
       this.filter = [...filters];
@@ -554,6 +600,7 @@ export default {
       this.searchInput = item.search;
       this.filter = item.filters;
       this.openSearch([...item.filters], item.search);
+      this.updateInputFocus();
     },
     onConnectivityInfoLoaded: function (result) {
       const stepItemRef = this.$refs['stepItem-' + result.id];
@@ -647,6 +694,24 @@ export default {
 
   :deep(.el-input__inner) {
     font-family: inherit;
+  }
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .map-icon {
+    position: absolute;
+    right: 18px;
+    color: $app-primary-color !important;
+  }
+
+  &.is-focus {
+    .map-icon {
+      display: none;
+    }
   }
 }
 
@@ -810,6 +875,10 @@ export default {
   &[data-popper-placement^=bottom] .el-popper__arrow:before {
     border-bottom-color: transparent !important;
     border-right-color: transparent !important;
+  }
+
+  code {
+    font-size: 90%;
   }
 }
 </style>
