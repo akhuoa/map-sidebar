@@ -16,8 +16,7 @@
             @clear="clearSearchClicked"
           ></el-input>
           <el-popover
-            title="How does search work?"
-            width="250"
+            width="350"
             trigger="hover"
             popper-class="filter-help-popover"
           >
@@ -25,17 +24,32 @@
               <MapSvgIcon icon="help" class="help" />
             </template>
             <div>
-              <strong>Searches in:</strong>
-              Pathway IDs, titles, and connectivity components
-              <br /><br />
-              <strong>Multiple terms:</strong>
-              Comma-separated
-              <br /><br />
-              <strong>Matching rules:</strong>
-              <br />
-              <code>'kidney/132'</code> finds <code>'ilxtr:sparc-nlp/kidney/132'</code>
-              <br />
-              <code>'tunica'</code> finds in titles like "...to tunica..." and components <code>'UBERON:0007240'</code>
+              <strong>Search rules:</strong>
+              <ul>
+                <li>
+                  <strong>Partial Matching:</strong> You don't need to type the full word or ID.
+                  The search will find items that contain your search term.
+                </li>
+                <li>
+                  <strong>Multiple Terms:</strong> Separate terms with a comma (<code>,</code>).
+                  This will find pathways that match any of the terms (an "OR" search).
+                </li>
+              </ul>
+              <br/>
+              <strong>Examples:</strong>
+              <ul>
+                <li>
+                  <strong>To find by partial ID:</strong>
+                  Searching for <code>kidney/132</code> will match the full <strong>Pathway ID</strong> <code>ilxtr:sparc-nlp/kidney/132</code>
+                </li>
+                <li>
+                  <strong>To find by keyword:</strong>
+                  Searching for (<code>vagus nerve</code>) will match <strong>pathways</strong> that have <code>vagus nerve</code> in their title OR are linked to a related component (like UBERON:0001759).
+                </li>
+                <li>
+                  <strong>To find by multiple terms:</strong>
+                  Searching for <code>kidney</code>, <code>vagus nerve</code> will find pathways that are related to either <code>kidney</code> OR <code>vagus nerve</code>.</li>
+              </ul>
             </div>
           </el-popover>
         </div>
