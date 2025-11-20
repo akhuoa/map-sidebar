@@ -881,6 +881,19 @@ export default {
   font-size: 12px !important;
   line-height: 18px !important;
 
+  > div {
+    word-break: break-word;
+    text-align: initial;
+  }
+
+  ul {
+    padding-left: 1.5rem;
+
+    > li + li {
+      margin-top: 0.5rem;
+    }
+  }
+
   .el-popper__arrow::before {
     background: #f3ecf6 !important;
     border-color: $app-primary-color !important;
