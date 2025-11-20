@@ -880,13 +880,10 @@ export default {
   color: #303133 !important;
   font-size: 12px !important;
   line-height: 18px !important;
+  word-break: break-word !important;
 
   ul {
     padding-left: 1.5rem;
-  }
-
-  &.el-popover {
-    word-break: break-word;
   }
 
   .el-popper__arrow::before {
