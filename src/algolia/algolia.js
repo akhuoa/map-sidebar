@@ -201,7 +201,6 @@ export class AlgoliaClient {
       }
     }
     processed = processed.trim()
-    console.log(processed, optionalWords)
 
     const payload = {
       advancedSyntax: true,
