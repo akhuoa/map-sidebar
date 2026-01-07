@@ -27,20 +27,20 @@
                   This will find dataset that match any of the terms (an "OR" search).
                 </li>
                 <li>
-                  <strong>Exact Phase:</strong> Terms within a comma block will be matched as exact phase.
+                  <strong>Exact Phrase:</strong> Terms within a comma block will be matched as exact phrase.
                 </li>
               </ul>
               <br/>
               <strong>Examples:</strong>
               <ul>
                 <li>
-                  <strong>To find by exact phase:</strong>
+                  <strong>To find by exact phrase:</strong>
                   Searching for <code>vagus nerve</code> will find any dataset containing <code>vagus nerve</code>.
                 </li>
                 <li>
                   <strong>To find by multiple terms:</strong>
                   Searching for <code>kidney, vagus</code> will find data that contains either <code>kidney</code> OR <code>vagus</code>.
-                  Due to the limitation of the search engine, space between words in a comma block will be treated as comma.
+                  Due to the limitation of the search engine, space between words in a comma block will be treated as comma when multiple terms search is active.
                 </li>
               </ul>
             </div>
