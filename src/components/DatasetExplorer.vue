@@ -40,8 +40,6 @@
                 <li>
                   <strong>To find by multiple terms:</strong>
                   Searching for <code>nerve, vagus</code> will find data that contains either <code>nerve</code> OR <code>vagus</code>.
-                  <br/>
-                  Due to the limitation of the search engine, space between words in a comma block will be treated as comma when multiple terms search is active.
                 </li>
               </ul>
             </div>
