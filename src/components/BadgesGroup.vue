@@ -88,7 +88,6 @@ export default {
         this.addToCategories(this.entry.flatmaps, 'Flatmaps')
         this.addToCategories(this.entry.plots, 'Plots')
         this.addToCategories(this.entry.scaffolds, 'Scaffolds')
-        this.addToCategories(this.entry.segmentation, 'Segmentations')
         this.addSimulationsToCategories(this.entry.simulation)
         /** disable the following
         this.addToCategories(this.entry.images, 'Images');
@@ -117,7 +116,7 @@ export default {
       color: #fff!important;
     }
   }
-  
+
   .tag-button + .tag-button {
     margin-left: 0!important;
   }
