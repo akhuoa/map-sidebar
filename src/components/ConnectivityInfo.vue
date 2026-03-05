@@ -215,16 +215,34 @@
 
     <div class="content-container content-container-connectivity" v-show="activeView === 'graphView'">
       <template v-if="graphViewLoaded">
-        <connectivity-graph
-          v-loading="connectivityLoading"
-          :key="`${connectivityKey}graph`"
-          :entry="entry.featureId[0]"
-          :mapServer="flatmapApi"
-          :sckanVersion="sckanVersion"
-          :connectivityFromMap="connectivityFromMap"
-          :connectivityError="connectivityError"
-          @tap-node="onTapNode"
-        />
+        <!-- TODO: To use only one component when the data is ready -->
+        <template v-if="hasSingleConnectivityList">
+          <connectivity-graph-new
+            v-loading="connectivityLoading"
+            :key="`${connectivityKey}graph`"
+            :entry="entry.featureId[0]"
+            :mapServer="flatmapApi"
+            :sckanVersion="sckanVersion"
+            :connectivityFromMap="connectivityFromMap"
+            :connectivityError="connectivityError"
+            :destinationsCombinations="destinationsCombinations"
+            :originsCombinations="originsCombinations"
+            :componentsCombinations="componentsCombinations"
+            @tap-node="onTapNode"
+          />
+        </template>
+        <template v-else>
+          <connectivity-graph
+            v-loading="connectivityLoading"
+            :key="`${connectivityKey}graph`"
+            :entry="entry.featureId[0]"
+            :mapServer="flatmapApi"
+            :sckanVersion="sckanVersion"
+            :connectivityFromMap="connectivityFromMap"
+            :connectivityError="connectivityError"
+            @tap-node="onTapNode"
+          />
+        </template>
       </template>
     </div>
 
@@ -258,6 +276,7 @@ import {
   ConnectivityGraph,
   ConnectivityList,
   ConnectivityListNew,
+  ConnectivityGraphNew,
   ExternalResourceCard,
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
@@ -287,6 +306,7 @@ export default {
     ConnectivityGraph,
     ConnectivityList,
     ConnectivityListNew,
+    ConnectivityGraphNew,
   },
   props: {
     connectivityEntry: {
