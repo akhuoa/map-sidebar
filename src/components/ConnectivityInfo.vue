@@ -70,7 +70,7 @@
       </div>
     </div>
 
-    <div class="content-container population-display">
+    <div class="content-container population-display" :class="{'flex-row': hasSingleConnectivityList}">
       <div class="block attribute-title-container">
         <span class="attribute-title">Population Display</span>
         <el-popover
@@ -114,7 +114,7 @@
             <el-radio value="sckan">SCKAN</el-radio>
           </el-radio-group>
         </div>
-        <div class="population-display-view">
+        <div class="population-display-view" :class="{'align-right': hasSingleConnectivityList}">
           <el-button
             :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
             @click="switchConnectivityView('listView')"
@@ -941,15 +941,22 @@ export default {
   justify-content: space-between;
   border-bottom: 1px solid $app-primary-color;
   padding-bottom: 0.5rem !important;
-
   flex-direction: column !important;
   align-items: start;
+
+  &.flex-row {
+    flex-direction: row !important;
+    align-items: center;
+  }
 
   .buttons-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+
+  &:not(.flex-row) .buttons-row {
     width: 100%;
   }
 }
@@ -980,6 +987,10 @@ export default {
 .population-display-view {
   .el-button + .el-button {
     margin-left: 0.5rem !important;
+  }
+
+  &.align-right {
+    margin-left: auto;
   }
 }
 
