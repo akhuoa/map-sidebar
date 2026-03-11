@@ -173,7 +173,7 @@
     <div class="content-container content-container-connectivity" v-show="activeView === 'listView'">
       <!-- TODO: To use only one component when the data is ready -->
       <temmplate v-if="hasSingleConnectivityList">
-        <connectivity-list-new
+        <connectivity-reconciliation-list
           v-loading="connectivityLoading"
           :key="`${connectivityKey}list`"
           :entry="entry"
@@ -275,7 +275,7 @@ import {
   CopyToClipboard,
   ConnectivityGraph,
   ConnectivityList,
-  ConnectivityListNew,
+  ConnectivityReconciliationList,
   ConnectivityGraphNew,
   ExternalResourceCard,
 } from '@abi-software/map-utilities';
@@ -305,7 +305,7 @@ export default {
     CopyToClipboard,
     ConnectivityGraph,
     ConnectivityList,
-    ConnectivityListNew,
+    ConnectivityReconciliationList,
     ConnectivityGraphNew,
   },
   props: {
