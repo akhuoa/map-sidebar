@@ -140,10 +140,12 @@
         <ConnectivityInfo
           v-if="expanded === result.id"
           class="connectivity-info"
+          :entryData="result"
           :entryId="result.id"
           :connectivityEntry="connectivityEntry"
           :availableAnatomyFacets="availableAnatomyFacets"
           :envVars="envVars"
+          :showLongLabel="showLongLabel"
           :withCloseButton="true"
           @show-connectivity="onShowConnectivity"
           @show-reference-connectivities="onShowReferenceConnectivities"

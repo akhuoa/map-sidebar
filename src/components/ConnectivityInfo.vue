@@ -5,7 +5,7 @@
       <div class="title-content">
         <div class="block" v-if="entry.title">
           <div class="title">
-            <span>{{ capitalise(entry.title) }}</span>
+            <span>{{ capitalise(displayTitle) }}</span>
             <template v-if="entry.featuresAlert">
               <el-popover
                 width="250"
@@ -313,6 +313,10 @@ export default {
       type: Array,
       default: [],
     },
+    entryData: {
+      type: Object,
+      default: () => ({}),
+    },
     entryId: {
       type: String,
       default: "",
@@ -326,6 +330,10 @@ export default {
       default: () => [],
     },
     withCloseButton: {
+      type: Boolean,
+      default: false,
+    },
+    showLongLabel: {
       type: Boolean,
       default: false,
     },
@@ -347,6 +355,12 @@ export default {
       return this.connectivityEntry.find((entry) => {
         return entry.featureId[0] === this.entryId;
       });
+    },
+    displayTitle: function () {
+      if (this.showLongLabel) {
+        return this.entryData?.['long-label'] || this.entry?.['long-label'] || '';
+      }
+      return this.entry?.title || '';
     },
     hasProvenanceTaxonomyLabel: function () {
       return (
@@ -762,8 +776,13 @@ export default {
   line-height: 1.3em !important;
   font-size: 18px;
   font-weight: bold;
-  padding-bottom: 8px;
+  margin-bottom: 8px;
   color: $app-primary-color;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .block + .block {
