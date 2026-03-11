@@ -8,7 +8,7 @@
         </div>
         <template v-for="field in displayFields" :key="field">
           <div class="card-details" v-if="entry[field]">
-            <strong>{{ field }}:</strong>
+            <strong>{{ field }}: </strong>
             <div v-if="field === 'nerve-label'" class="card-tags">
               <div v-for="nerve in entry[field]" :key="nerve.nerve">
                 <el-tag type="primary" size="small">
