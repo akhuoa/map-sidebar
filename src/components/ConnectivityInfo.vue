@@ -4,8 +4,8 @@
     <div class="connectivity-info-title">
       <div class="title-content">
         <div class="block" v-if="entry.title">
-          <div class="title">
-            <span>{{ capitalise(entry.title) }}</span>
+          <div class="title" :title="displayTitle">
+            <span>{{ capitalise(displayTitle) }}</span>
             <template v-if="entry.featuresAlert">
               <el-popover
                 width="250"
@@ -70,7 +70,7 @@
       </div>
     </div>
 
-    <div class="content-container population-display">
+    <div class="content-container population-display" :class="{'flex-row': hasSingleConnectivityList}">
       <div class="block attribute-title-container">
         <span class="attribute-title">Population Display</span>
         <el-popover
@@ -114,7 +114,7 @@
             <el-radio value="sckan">SCKAN</el-radio>
           </el-radio-group>
         </div>
-        <div class="population-display-view">
+        <div class="population-display-view" :class="{'align-right': hasSingleConnectivityList}">
           <el-button
             :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
             @click="switchConnectivityView('listView')"
@@ -173,7 +173,7 @@
     <div class="content-container content-container-connectivity" v-show="activeView === 'listView'">
       <!-- TODO: To use only one component when the data is ready -->
       <temmplate v-if="hasSingleConnectivityList">
-        <connectivity-list-new
+        <connectivity-reconciliation-list
           v-loading="connectivityLoading"
           :key="`${connectivityKey}list`"
           :entry="entry"
@@ -215,16 +215,34 @@
 
     <div class="content-container content-container-connectivity" v-show="activeView === 'graphView'">
       <template v-if="graphViewLoaded">
-        <connectivity-graph
-          v-loading="connectivityLoading"
-          :key="`${connectivityKey}graph`"
-          :entry="entry.featureId[0]"
-          :mapServer="flatmapApi"
-          :sckanVersion="sckanVersion"
-          :connectivityFromMap="connectivityFromMap"
-          :connectivityError="connectivityError"
-          @tap-node="onTapNode"
-        />
+        <!-- TODO: To use only one component when the data is ready -->
+        <template v-if="hasSingleConnectivityList">
+          <connectivity-graph-new
+            v-loading="connectivityLoading"
+            :key="`${connectivityKey}graph`"
+            :entry="entry.featureId[0]"
+            :mapServer="flatmapApi"
+            :sckanVersion="sckanVersion"
+            :connectivityFromMap="connectivityFromMap"
+            :connectivityError="connectivityError"
+            :destinationsCombinations="destinationsCombinations"
+            :originsCombinations="originsCombinations"
+            :componentsCombinations="componentsCombinations"
+            @tap-node="onTapNode"
+          />
+        </template>
+        <template v-else>
+          <connectivity-graph
+            v-loading="connectivityLoading"
+            :key="`${connectivityKey}graph`"
+            :entry="entry.featureId[0]"
+            :mapServer="flatmapApi"
+            :sckanVersion="sckanVersion"
+            :connectivityFromMap="connectivityFromMap"
+            :connectivityError="connectivityError"
+            @tap-node="onTapNode"
+          />
+        </template>
       </template>
     </div>
 
@@ -257,7 +275,8 @@ import {
   CopyToClipboard,
   ConnectivityGraph,
   ConnectivityList,
-  ConnectivityListNew,
+  ConnectivityReconciliationList,
+  ConnectivityGraphNew,
   ExternalResourceCard,
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
@@ -286,12 +305,17 @@ export default {
     CopyToClipboard,
     ConnectivityGraph,
     ConnectivityList,
-    ConnectivityListNew,
+    ConnectivityReconciliationList,
+    ConnectivityGraphNew,
   },
   props: {
     connectivityEntry: {
       type: Array,
       default: [],
+    },
+    entryData: {
+      type: Object,
+      default: () => ({}),
     },
     entryId: {
       type: String,
@@ -306,6 +330,10 @@ export default {
       default: () => [],
     },
     withCloseButton: {
+      type: Boolean,
+      default: false,
+    },
+    showLongLabel: {
       type: Boolean,
       default: false,
     },
@@ -327,6 +355,12 @@ export default {
       return this.connectivityEntry.find((entry) => {
         return entry.featureId[0] === this.entryId;
       });
+    },
+    displayTitle: function () {
+      if (this.showLongLabel) {
+        return this.entryData?.['long-label'] || this.entry?.['long-label'] || '';
+      }
+      return this.entry?.title || '';
     },
     hasProvenanceTaxonomyLabel: function () {
       return (
@@ -742,8 +776,13 @@ export default {
   line-height: 1.3em !important;
   font-size: 18px;
   font-weight: bold;
-  padding-bottom: 8px;
+  margin-bottom: 8px;
   color: $app-primary-color;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .block + .block {
@@ -921,15 +960,22 @@ export default {
   justify-content: space-between;
   border-bottom: 1px solid $app-primary-color;
   padding-bottom: 0.5rem !important;
-
   flex-direction: column !important;
   align-items: start;
+
+  &.flex-row {
+    flex-direction: row !important;
+    align-items: center;
+  }
 
   .buttons-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+
+  &:not(.flex-row) .buttons-row {
     width: 100%;
   }
 }
@@ -960,6 +1006,10 @@ export default {
 .population-display-view {
   .el-button + .el-button {
     margin-left: 0.5rem !important;
+  }
+
+  &.align-right {
+    margin-left: auto;
   }
 }
 
