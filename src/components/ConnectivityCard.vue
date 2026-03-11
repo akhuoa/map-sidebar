@@ -3,7 +3,9 @@
     <div class="connectivity-card" ref="card">
       <div class="seperator-path"></div>
       <div v-loading="loading" class="card-content" @click="cardClicked(entry)">
-        <div class="card-title">{{ capitalise(entry.label) }}</div>
+        <div class="card-title">
+          {{ showLongLabel ? capitalise(entry['long-label']) : capitalise(entry.label) }}
+        </div>
         <template v-for="field in displayFields" :key="field">
           <div class="card-details" v-if="entry[field]">
             <strong>{{ field }}:</strong>
@@ -47,6 +49,10 @@ export default {
     connectivityEntry: {
       type: Array,
       default: () => [],
+    },
+    showLongLabel: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {

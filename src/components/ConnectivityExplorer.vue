@@ -134,6 +134,7 @@
           class="connectivity-card"
           :entry="result"
           :connectivityEntry="connectivityEntry"
+          :showLongLabel="showLongLabel"
           @open-connectivity="onConnectivityCollapseChange"
         />
         <ConnectivityInfo
@@ -241,7 +242,11 @@ export default {
     showVisibilityFilter: {
       type: Boolean,
       default: false,
-    }
+    },
+    showLongLabel: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {
