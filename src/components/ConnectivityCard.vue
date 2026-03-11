@@ -105,10 +105,15 @@ export default {
 }
 
 .card-title {
-  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
   font-weight: bold;
   line-height: 1.5;
   letter-spacing: 1.05px;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .card-details {
