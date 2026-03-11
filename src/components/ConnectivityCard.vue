@@ -3,8 +3,8 @@
     <div class="connectivity-card" ref="card">
       <div class="seperator-path"></div>
       <div v-loading="loading" class="card-content" @click="cardClicked(entry)">
-        <div class="card-title">
-          {{ showLongLabel ? capitalise(entry['long-label']) : capitalise(entry.label) }}
+        <div class="card-title" :title="displayTitle">
+          {{ capitalise(displayTitle) }}
         </div>
         <template v-for="field in displayFields" :key="field">
           <div class="card-details" v-if="entry[field]">
@@ -56,6 +56,12 @@ export default {
     },
   },
   computed: {
+    displayTitle: function () {
+      if (this.showLongLabel) {
+        return this.entry?.['long-label'] || '';
+      }
+      return this.entry?.label || '';
+    },
     loading: function () {
       // for clicking on the flatmap neuron
       if ("ready" in this.entry) {
