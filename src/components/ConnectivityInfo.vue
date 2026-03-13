@@ -430,6 +430,11 @@ export default {
         sckanVersion: this.sckanVersion,
         connectivityFromMap: this.connectivityFromMap,
         connectivityError: this.connectivityError,
+        allWithDatasets: [
+          ...this.componentsWithDatasets,
+          ...this.destinationsWithDatasets,
+          ...this.originsWithDatasets,
+        ],
       };
       EventBus.emit('show-connectivity-graph', payload);
     },
