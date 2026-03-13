@@ -215,34 +215,22 @@
 
     <div class="content-container content-container-connectivity" v-show="activeView === 'graphView'">
       <template v-if="graphViewLoaded">
-        <!-- TODO: To use only one component when the data is ready -->
-        <template v-if="hasSingleConnectivityList">
-          <connectivity-graph-new
-            v-loading="connectivityLoading"
-            :key="`${connectivityKey}graph`"
-            :entry="entry.featureId[0]"
-            :mapServer="flatmapApi"
-            :sckanVersion="sckanVersion"
-            :connectivityFromMap="connectivityFromMap"
-            :connectivityError="connectivityError"
-            :destinationsCombinations="destinationsCombinations"
-            :originsCombinations="originsCombinations"
-            :componentsCombinations="componentsCombinations"
-            @tap-node="onTapNode"
-          />
-        </template>
-        <template v-else>
-          <connectivity-graph
-            v-loading="connectivityLoading"
-            :key="`${connectivityKey}graph`"
-            :entry="entry.featureId[0]"
-            :mapServer="flatmapApi"
-            :sckanVersion="sckanVersion"
-            :connectivityFromMap="connectivityFromMap"
-            :connectivityError="connectivityError"
-            @tap-node="onTapNode"
-          />
-        </template>
+        <el-button
+          class="button"
+          @click="openGraphInViewer"
+        >
+          Open in viewer
+        </el-button>
+        <connectivity-graph
+          v-loading="connectivityLoading"
+          :key="`${connectivityKey}graph`"
+          :entry="entry.featureId[0]"
+          :mapServer="flatmapApi"
+          :sckanVersion="sckanVersion"
+          :connectivityFromMap="connectivityFromMap"
+          :connectivityError="connectivityError"
+          @tap-node="onTapNode"
+        />
       </template>
     </div>
 
@@ -487,6 +475,22 @@ export default {
         'category': val,
         'location': 'map_sidebar_connectivity',
       });
+    },
+    openGraphInViewer: function () {
+      // Open graph view in viewer
+      const payload = {
+        entry: this.entry.featureId[0],
+        mapServer: this.flatmapApi,
+        sckanVersion: this.sckanVersion,
+        connectivityFromMap: this.connectivityFromMap,
+        connectivityError: this.connectivityError,
+        allWithDatasets: [
+          ...this.componentsWithDatasets,
+          ...this.destinationsWithDatasets,
+          ...this.originsWithDatasets,
+        ],
+      };
+      EventBus.emit('show-connectivity-graph', payload);
     },
     onTapNode: function (data) {
       // save selected state for list view
