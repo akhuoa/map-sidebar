@@ -87,6 +87,21 @@
             This list is ordered alphabetically,
             switch to graph view for path details.
           </span>
+          <div v-if="hasSingleConnectivityList" class="connectivity-legends">
+            <div class="legend-title">Legend</div>
+            <span class="legend-item">
+              <span class="legend-color differ"></span>
+              SCKAN feature maps differently on Map
+            </span>
+            <span class="legend-item">
+              <span class="legend-color unavailable"></span>
+              SCKAN feature unavailable on Map
+            </span>
+            <span class="legend-item">
+              <span class="legend-color mapped"></span>
+              SCKAN feature available on Map
+            </span>
+          </div>
         </el-popover>
       </div>
       <div class="block buttons-row">
@@ -990,6 +1005,60 @@ export default {
 
   &.align-right {
     margin-left: auto;
+  }
+}
+
+.connectivity-legends {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+
+  .legend-title {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--el-text-color-primary);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.375rem;
+    font-size: 12px;
+    line-height: 1.2;
+    color: var(--el-text-color-regular);
+  }
+
+  .legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
+    border-left: 2px solid;
+
+    &.mapped {
+      background-color: #d9ffe0;
+      border-left-color: #7fe09c;
+    }
+
+    &.unavailable {
+      background-color: #ffe5e3;
+      border-left-color: #ffb7b4;
+    }
+
+    &.differ {
+      background: linear-gradient(
+        90deg,
+        #ffe5e3 0%,
+        #ffe5e3 calc(50% - 1px),
+        #7fe09c calc(50% - 1px),
+        #7fe09c calc(50% + 1px),
+        #d9ffe0 calc(50% + 1px),
+        #d9ffe0 100%
+      );
+      border-left-color: #ffb7b4;
+    }
   }
 }
 
