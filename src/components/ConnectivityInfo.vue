@@ -1038,8 +1038,8 @@ export default {
     border-left: 2px solid;
 
     &.mapped {
-      background-color: #d9ffe0;
-      border-left-color: #7fe09c;
+      background-color: rgba($app-primary-color, 0.04);
+      border-left-color: rgba($app-primary-color, 0.16);
     }
 
     &.unavailable {
