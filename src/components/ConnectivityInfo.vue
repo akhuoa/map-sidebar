@@ -83,7 +83,11 @@
           <template #reference>
             <el-icon class="info"><el-icon-warning /></el-icon>
           </template>
-          <span style="word-break: keep-all">
+          <span v-if="hasSingleConnectivityList" style="word-break: keep-all">
+            This list is ordered alphabetically. Switch to graph view for path details,
+            and use the legend below for reconciliation status.
+          </span>
+          <span v-else style="word-break: keep-all">
             This list is ordered alphabetically,
             switch to graph view for path details.
           </span>
