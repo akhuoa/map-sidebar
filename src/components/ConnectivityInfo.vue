@@ -509,23 +509,28 @@ export default {
       // to avoid default formatting on font size and margin
 
       // Title
-      let title = this.entry.title;
+      const title = this.entry?.title || '';
+      const longLabel = this.entryData?.['long-label'] || this.entry?.['long-label'] || '';
       let featureId = this.entry.featureId;
       const titleContent = [];
 
       if (title) {
-        titleContent.push(`<strong>${capitalise(this.entry.title)}</strong>`);
+        titleContent.push(`<div><strong>Label:</strong> ${capitalise(title)}</div>`);
+      }
+
+      if (longLabel) {
+        titleContent.push(`<div><strong>Long label:</strong> ${capitalise(longLabel)}</div>`);
       }
 
       if (featureId?.length) {
         if (typeof featureId === 'object') {
-          titleContent.push(`(${featureId[0]})`);
+          titleContent.push(`<div><strong>ID:</strong> ${featureId[0]}</div>`);
         } else {
-          titleContent.push(`(${featureId})`);
+          titleContent.push(`<div><strong>ID:</strong> ${featureId}</div>`);
         }
       }
 
-      contentArray.push(`<div>${titleContent.join(' ')}</div>`);
+      contentArray.push(`<div>${titleContent.join('\n')}</div>`);
 
       // Description
       if (this.entry.provenanceTaxonomyLabel?.length) {
