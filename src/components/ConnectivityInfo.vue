@@ -22,7 +22,7 @@
               </el-popover>
             </template>
           </div>
-          <div class="subtitle"><strong>id: </strong>{{ entry.featureId[0] }}</div>
+          <div class="subtitle"><strong>Id: </strong>{{ entry.featureId[0] }}</div>
           <div v-if="hasProvenanceTaxonomyLabel" class="subtitle">
             {{ provSpeciesDescription }}
           </div>
@@ -524,9 +524,9 @@ export default {
 
       if (featureId?.length) {
         if (typeof featureId === 'object') {
-          titleContent.push(`<div><strong>ID:</strong> ${featureId[0]}</div>`);
+          titleContent.push(`<div><strong>Id:</strong> ${featureId[0]}</div>`);
         } else {
-          titleContent.push(`<div><strong>ID:</strong> ${featureId}</div>`);
+          titleContent.push(`<div><strong>Id:</strong> ${featureId}</div>`);
         }
       }
 
