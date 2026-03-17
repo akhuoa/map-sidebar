@@ -70,9 +70,9 @@
       </div>
     </div>
 
-    <div class="content-container population-display" :class="{'flex-row': hasSingleConnectivityList}">
+    <div class="content-container population-details" :class="{'flex-row': hasSingleConnectivityList}">
       <div class="block attribute-title-container">
-        <span class="attribute-title">Population Display</span>
+        <span class="attribute-title">Population Details</span>
         <el-popover
           v-if="activeView === 'listView'"
           width="250"
@@ -95,7 +95,7 @@
             <div class="legend-title">Legend</div>
             <span class="legend-item">
               <span class="legend-color differ"></span>
-              SCKAN feature maps differently on Map
+              SCKAN feature alias to Map feature
             </span>
             <span class="legend-item">
               <span class="legend-color unavailable"></span>
@@ -109,7 +109,7 @@
         </el-popover>
       </div>
       <div class="block buttons-row">
-        <div class="population-display-source" v-if="!hasSingleConnectivityList">
+        <div class="population-details-source" v-if="!hasSingleConnectivityList">
           <span>
             Connectivity from:
             <el-popover
@@ -133,7 +133,7 @@
             <el-radio value="sckan">SCKAN</el-radio>
           </el-radio-group>
         </div>
-        <div class="population-display-view" :class="{'align-right': hasSingleConnectivityList}">
+        <div class="population-details-view" :class="{'align-right': hasSingleConnectivityList}">
           <el-button
             :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
             @click="switchConnectivityView('listView')"
@@ -648,7 +648,7 @@ export default {
             legendNotes.push('<div>* SCKAN feature unavailable on Map</div>');
           }
           if (hasDifferReference) {
-            legendNotes.push('<div>** SCKAN feature maps differently on Map</div>');
+            legendNotes.push('<div>** SCKAN feature alias to Map feature</div>');
           }
           contentArray.push(`<div>${legendNotes.join('\n')}</div>`);
         }
@@ -1024,7 +1024,7 @@ export default {
   }
 }
 
-.population-display {
+.population-details {
   display: flex;
   flex: 1 1 auto !important;
   flex-direction: row !important;
@@ -1052,7 +1052,7 @@ export default {
   }
 }
 
-.population-display-source {
+.population-details-source {
   text-align: left;
 
   .el-radio,
@@ -1075,7 +1075,7 @@ export default {
   }
 }
 
-.population-display-view {
+.population-details-view {
   .el-button + .el-button {
     margin-left: 0.5rem !important;
   }
