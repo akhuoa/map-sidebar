@@ -34,7 +34,7 @@
               type="button"
               @click="toggleTitleExpansion"
             >
-              {{ isTitleExpanded ? 'Show less' : 'Show more' }}
+              {{ isTitleExpanded ? 'Collapse' : 'Expand title' }}
               <el-icon class="title-toggle-icon">
                 <el-icon-arrow-up v-if="isTitleExpanded" />
                 <el-icon-arrow-down v-else />
