@@ -4,7 +4,11 @@
     <div class="connectivity-info-title">
       <div class="title-content">
         <div class="block" v-if="entry.title">
-          <div class="title">
+          <div
+            ref="titleElement"
+            class="title"
+            :class="{ 'title--clamped': !isTitleExpanded }"
+          >
             <span>{{ capitalise(displayTitle) }}</span>
             <template v-if="entry.featuresAlert">
               <el-popover
@@ -22,6 +26,14 @@
               </el-popover>
             </template>
           </div>
+          <button
+            v-if="showTitleToggle"
+            class="title-toggle"
+            type="button"
+            @click="toggleTitleExpansion"
+          >
+            {{ isTitleExpanded ? 'Show less' : 'Show more' }}
+          </button>
           <div class="subtitle"><strong>Id: </strong>{{ entry.featureId[0] }}</div>
           <div v-if="hasProvenanceTaxonomyLabel" class="subtitle">
             {{ provSpeciesDescription }}
@@ -347,6 +359,8 @@ export default {
       connectivityError: {},
       graphViewLoaded: false,
       connectivityFromMap: null,
+      isTitleExpanded: false,
+      showTitleToggle: false,
     };
   },
   computed: {
@@ -440,8 +454,15 @@ export default {
           if (!oldVal || newVal?.featureId[0] !== oldVal?.featureId[0]) {
             this.$emit('loaded');
           }
+
+          this.isTitleExpanded = false;
+          this.updateTitleToggleVisibility();
         }
       },
+    },
+    displayTitle: function () {
+      this.isTitleExpanded = false;
+      this.updateTitleToggleVisibility();
     },
   },
   methods: {
@@ -450,6 +471,39 @@ export default {
     },
     capitalise: function (text) {
       return capitalise(text)
+    },
+    toggleTitleExpansion: function () {
+      this.isTitleExpanded = !this.isTitleExpanded;
+      if (!this.isTitleExpanded) {
+        this.$nextTick(() => {
+          this.updateTitleToggleVisibility();
+        });
+      }
+    },
+    updateTitleToggleVisibility: function () {
+      this.$nextTick(() => {
+        const titleElement = this.$refs.titleElement;
+        if (!titleElement) {
+          this.showTitleToggle = false;
+          return;
+        }
+
+        const wasExpanded = this.isTitleExpanded;
+        if (wasExpanded) {
+          titleElement.classList.add('title--clamped');
+        }
+
+        const hasOverflow = titleElement.scrollHeight > titleElement.clientHeight + 1;
+        this.showTitleToggle = hasOverflow;
+
+        if (wasExpanded) {
+          titleElement.classList.remove('title--clamped');
+        }
+
+        if (!hasOverflow) {
+          this.isTitleExpanded = false;
+        }
+      });
     },
     showConnectivity: function () {
       // move the map center to highlighted area
@@ -806,6 +860,7 @@ export default {
   },
   mounted: function () {
     this.updatedCopyContent = this.getUpdateCopyContent();
+    this.updateTitleToggleVisibility();
 
     EventBus.on('connectivity-error', (errorInfo) => {
       const connectivityError = this.getConnectivityError(errorInfo);
@@ -847,11 +902,25 @@ export default {
   font-weight: bold;
   margin-bottom: 8px;
   color: $app-primary-color;
+}
+
+.title--clamped {
   display: -webkit-box;
   -webkit-line-clamp: 5;
   line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.title-toggle {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: -2px 0 8px;
+  color: $app-primary-color;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .block + .block {
