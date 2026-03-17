@@ -565,6 +565,43 @@ export default {
         return contentString;
       }
 
+      function transformReconciliationData(title, combinations = []) {
+        let contentString = `<div><strong>${title}</strong></div>`;
+        const sortedCombinations = [...combinations].sort((a, b) => {
+          const labelA = (a?.sckanLabel || a?.mapLabel || '').toLowerCase();
+          const labelB = (b?.sckanLabel || b?.mapLabel || '').toLowerCase();
+          return labelA.localeCompare(labelB);
+        });
+        const transformedItems = sortedCombinations.map((item) => {
+          const isDirectMatch =
+            item?.sckanId &&
+            item?.mapId &&
+            JSON.stringify(item.sckanId) === JSON.stringify(item.mapId);
+
+          if (isDirectMatch) {
+            return `${capitalise(item.sckanLabel || item.mapLabel || '-')}`;
+          }
+
+          const sckanLabel = item?.sckanLabel ? capitalise(item.sckanLabel) : '-';
+          const isUnavailableOnMap = !item?.mapId?.length || !item?.mapLabel;
+
+          if (isUnavailableOnMap) {
+            return `<s>${sckanLabel}</s> (unavailable on <strong>Map</strong>)`;
+          }
+
+          const mapLabel = item?.mapId?.length && item?.mapLabel
+            ? capitalise(item.mapLabel)
+            : '(unavailable on <strong>Map</strong>)';
+          return `<s>${sckanLabel}</s> (<strong>Map:</strong> ${mapLabel})`;
+        });
+        const contentList = transformedItems
+          .map((item) => `<li>${item}</li>`)
+          .join('\n');
+        contentString += '\n';
+        contentString += `<ul>${contentList}</ul>`;
+        return contentString;
+      }
+
       // Nerves
       if (this.entry['nerve-label']?.length) {
         const title = 'Nerves';
@@ -574,31 +611,37 @@ export default {
         contentArray.push(transformedNerves);
       }
 
-      // Origins
-      if (this.origins?.length) {
-        const title = 'Origin';
-        const origins = this.origins;
-        const originsWithDatasets = this.originsWithDatasets;
-        const transformedOrigins = transformData(title, origins, originsWithDatasets);
-        contentArray.push(transformedOrigins);
-      }
+      // Origins / Components / Destination
+      if (this.hasSingleConnectivityList) {
+        if (this.originsCombinations?.length) {
+          const transformedOrigins = transformReconciliationData('Origin', this.originsCombinations);
+          contentArray.push(transformedOrigins);
+        }
 
-      // Components
-      if (this.components?.length) {
-        const title = 'Components';
-        const components = this.components;
-        const componentsWithDatasets = this.componentsWithDatasets;
-        const transformedComponents = transformData(title, components, componentsWithDatasets);
-        contentArray.push(transformedComponents);
-      }
+        if (this.componentsCombinations?.length) {
+          const transformedComponents = transformReconciliationData('Components', this.componentsCombinations);
+          contentArray.push(transformedComponents);
+        }
 
-      // Destination
-      if (this.destinations?.length) {
-        const title = 'Destination';
-        const destinations = this.destinations;
-        const destinationsWithDatasets = this.destinationsWithDatasets;
-        const transformedDestinations = transformData(title, destinations, destinationsWithDatasets);
-        contentArray.push(transformedDestinations);
+        if (this.destinationsCombinations?.length) {
+          const transformedDestinations = transformReconciliationData('Destination', this.destinationsCombinations);
+          contentArray.push(transformedDestinations);
+        }
+      } else {
+        if (this.origins?.length) {
+          const transformedOrigins = transformData('Origin', this.origins, this.originsWithDatasets);
+          contentArray.push(transformedOrigins);
+        }
+
+        if (this.components?.length) {
+          const transformedComponents = transformData('Components', this.components, this.componentsWithDatasets);
+          contentArray.push(transformedComponents);
+        }
+
+        if (this.destinations?.length) {
+          const transformedDestinations = transformData('Destination', this.destinations, this.destinationsWithDatasets);
+          contentArray.push(transformedDestinations);
+        }
       }
 
       // References
