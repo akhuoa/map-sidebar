@@ -3,7 +3,7 @@
     <div class="connectivity-card" ref="card">
       <div class="seperator-path"></div>
       <div v-loading="loading" class="card-content" @click="cardClicked(entry)">
-        <div class="card-title" :title="displayTitle">
+        <div class="card-title">
           {{ capitalise(displayTitle) }}
         </div>
         <template v-for="field in displayFields" :key="field">

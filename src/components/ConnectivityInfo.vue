@@ -4,25 +4,44 @@
     <div class="connectivity-info-title">
       <div class="title-content">
         <div class="block" v-if="entry.title">
-          <div class="title" :title="displayTitle">
-            <span>{{ capitalise(displayTitle) }}</span>
-            <template v-if="entry.featuresAlert">
-              <el-popover
-                width="250"
-                trigger="hover"
-                :teleported="false"
-                popper-class="popover-origin-help"
-              >
-                <template #reference>
-                  <el-icon class="alert"><el-icon-warn-triangle-filled /></el-icon>
-                </template>
-                <span style="word-break: keep-all">
-                  {{ entry.featuresAlert }}
-                </span>
-              </el-popover>
-            </template>
+          <div class="title-group">
+            <div
+              ref="titleElement"
+              class="title"
+              :class="{ 'title--clamped': !isTitleExpanded }"
+              @click="toggleTitleExpansion"
+            >
+              <span>{{ capitalise(displayTitle) }}</span>
+              <template v-if="entry.featuresAlert">
+                <el-popover
+                  width="250"
+                  trigger="hover"
+                  :teleported="false"
+                  popper-class="popover-origin-help"
+                >
+                  <template #reference>
+                    <el-icon class="alert"><el-icon-warn-triangle-filled /></el-icon>
+                  </template>
+                  <span style="word-break: keep-all">
+                    {{ entry.featuresAlert }}
+                  </span>
+                </el-popover>
+              </template>
+            </div>
+            <button
+              v-if="showTitleToggle"
+              class="title-toggle"
+              type="button"
+              @click="toggleTitleExpansion"
+            >
+              {{ isTitleExpanded ? 'Collapse' : 'Expand title' }}
+              <el-icon class="title-toggle-icon">
+                <el-icon-arrow-up v-if="isTitleExpanded" />
+                <el-icon-arrow-down v-else />
+              </el-icon>
+            </button>
           </div>
-          <div class="subtitle"><strong>id: </strong>{{ entry.featureId[0] }}</div>
+          <div class="subtitle"><strong>Id: </strong>{{ entry.featureId[0] }}</div>
           <div v-if="hasProvenanceTaxonomyLabel" class="subtitle">
             {{ provSpeciesDescription }}
           </div>
@@ -70,9 +89,9 @@
       </div>
     </div>
 
-    <div class="content-container population-display" :class="{'flex-row': hasSingleConnectivityList}">
+    <div class="content-container population-details" :class="{'flex-row': hasSingleConnectivityList}">
       <div class="block attribute-title-container">
-        <span class="attribute-title">Population Display</span>
+        <span class="attribute-title">Population Details</span>
         <el-popover
           v-if="activeView === 'listView'"
           width="250"
@@ -95,7 +114,7 @@
             <div class="legend-title">Legend</div>
             <span class="legend-item">
               <span class="legend-color differ"></span>
-              SCKAN feature maps differently on Map
+              SCKAN feature alias to Map feature
             </span>
             <span class="legend-item">
               <span class="legend-color unavailable"></span>
@@ -109,7 +128,7 @@
         </el-popover>
       </div>
       <div class="block buttons-row">
-        <div class="population-display-source" v-if="!hasSingleConnectivityList">
+        <div class="population-details-source" v-if="!hasSingleConnectivityList">
           <span>
             Connectivity from:
             <el-popover
@@ -133,7 +152,7 @@
             <el-radio value="sckan">SCKAN</el-radio>
           </el-radio-group>
         </div>
-        <div class="population-display-view" :class="{'align-right': hasSingleConnectivityList}">
+        <div class="population-details-view" :class="{'align-right': hasSingleConnectivityList}">
           <el-button
             :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
             @click="switchConnectivityView('listView')"
@@ -270,6 +289,8 @@ import {
   Warning as ElIconWarning,
   Location as ElIconLocation,
   Search as ElIconSearch,
+  ArrowDown as ElIconArrowDown,
+  ArrowUp as ElIconArrowUp,
 } from '@element-plus/icons-vue'
 import {
   ElButton as Button,
@@ -307,6 +328,8 @@ export default {
     ElIconWarning,
     ElIconLocation,
     ElIconSearch,
+    ElIconArrowDown,
+    ElIconArrowUp,
     ExternalResourceCard,
     CopyToClipboard,
     ConnectivityGraph,
@@ -353,6 +376,8 @@ export default {
       connectivityError: {},
       graphViewLoaded: false,
       connectivityFromMap: null,
+      isTitleExpanded: false,
+      showTitleToggle: false,
     };
   },
   computed: {
@@ -446,8 +471,15 @@ export default {
           if (!oldVal || newVal?.featureId[0] !== oldVal?.featureId[0]) {
             this.$emit('loaded');
           }
+
+          this.isTitleExpanded = false;
+          this.updateTitleToggleVisibility();
         }
       },
+    },
+    displayTitle: function () {
+      this.isTitleExpanded = false;
+      this.updateTitleToggleVisibility();
     },
   },
   methods: {
@@ -456,6 +488,39 @@ export default {
     },
     capitalise: function (text) {
       return capitalise(text)
+    },
+    toggleTitleExpansion: function () {
+      this.isTitleExpanded = !this.isTitleExpanded;
+      if (!this.isTitleExpanded) {
+        this.$nextTick(() => {
+          this.updateTitleToggleVisibility();
+        });
+      }
+    },
+    updateTitleToggleVisibility: function () {
+      this.$nextTick(() => {
+        const titleElement = this.$refs.titleElement;
+        if (!titleElement) {
+          this.showTitleToggle = false;
+          return;
+        }
+
+        const wasExpanded = this.isTitleExpanded;
+        if (wasExpanded) {
+          titleElement.classList.add('title--clamped');
+        }
+
+        const hasOverflow = titleElement.scrollHeight > titleElement.clientHeight + 1;
+        this.showTitleToggle = hasOverflow;
+
+        if (wasExpanded) {
+          titleElement.classList.remove('title--clamped');
+        }
+
+        if (!hasOverflow) {
+          this.isTitleExpanded = false;
+        }
+      });
     },
     showConnectivity: function () {
       // move the map center to highlighted area
@@ -531,23 +596,25 @@ export default {
       // to avoid default formatting on font size and margin
 
       // Title
-      let title = this.entry.title;
+      const title = this.entry?.title || '';
+      const longLabel = this.entryData?.['long-label'] || this.entry?.['long-label'] || '';
       let featureId = this.entry.featureId;
       const titleContent = [];
 
-      if (title) {
-        titleContent.push(`<strong>${capitalise(this.entry.title)}</strong>`);
+      const displayLabel = capitalise(longLabel || title);
+      if (displayLabel) {
+        titleContent.push(`<div><strong>${displayLabel}</strong></div>`);
       }
 
       if (featureId?.length) {
         if (typeof featureId === 'object') {
-          titleContent.push(`(${featureId[0]})`);
+          titleContent.push(`<div><strong>Id:</strong> ${featureId[0]}</div>`);
         } else {
-          titleContent.push(`(${featureId})`);
+          titleContent.push(`<div><strong>Id:</strong> ${featureId}</div>`);
         }
       }
 
-      contentArray.push(`<div>${titleContent.join(' ')}</div>`);
+      contentArray.push(`<div>${titleContent.join('\n')}</div>`);
 
       // Description
       if (this.entry.provenanceTaxonomyLabel?.length) {
@@ -558,6 +625,9 @@ export default {
       if (this.entry.paths) {
         contentArray.push(`<div>${this.entry.paths}</div>`);
       }
+
+      let hasUnavailableReference = false;
+      let hasDifferReference = false;
 
       function transformData(title, items, itemsWithDatasets = []) {
         let contentString = `<div><strong>${title}</strong></div>`;
@@ -582,6 +652,54 @@ export default {
         return contentString;
       }
 
+      function transformReconciliationData(title, combinations = []) {
+        let contentString = `<div><strong>${title}</strong></div>`;
+        const sortedCombinations = [...combinations].sort((a, b) => {
+          const labelA = (a?.sckanLabel || a?.mapLabel || '').toLowerCase();
+          const labelB = (b?.sckanLabel || b?.mapLabel || '').toLowerCase();
+          return labelA.localeCompare(labelB);
+        });
+        const getFirstId = (idArr) => {
+          if (!idArr?.length) return null;
+          const first = idArr[0];
+          return typeof first === 'string' ? first : (first?.[0] || null);
+        };
+        const transformedItems = sortedCombinations.map((item) => {
+          const isDirectMatch =
+            item?.sckanId &&
+            item?.mapId &&
+            JSON.stringify(item.sckanId) === JSON.stringify(item.mapId);
+
+          if (isDirectMatch) {
+            const id = getFirstId(item.mapId);
+            const label = capitalise(item.sckanLabel || item.mapLabel || '-');
+            return id ? `${label} (${id})` : label;
+          }
+
+          const sckanLabel = item?.sckanLabel ? capitalise(item.sckanLabel) : '-';
+          const sckanId = getFirstId(item.sckanId);
+          const sckanLabelWithId = sckanId ? `${sckanLabel} (${sckanId})` : sckanLabel;
+          const isUnavailableOnMap = !item?.mapId?.length || !item?.mapLabel;
+
+          if (isUnavailableOnMap) {
+            hasUnavailableReference = true;
+            return `<s>${sckanLabelWithId}</s> (unavailable on <strong>Map</strong>) *`;
+          }
+
+          const mapLabel = capitalise(item.mapLabel);
+          const mapId = getFirstId(item.mapId);
+          const mapLabelWithId = mapId ? `${mapLabel} (${mapId})` : mapLabel;
+          hasDifferReference = true;
+          return `<s>${sckanLabelWithId}</s> (<strong>Map:</strong> ${mapLabelWithId}) **`;
+        });
+        const contentList = transformedItems
+          .map((item) => `<li>${item}</li>`)
+          .join('\n');
+        contentString += '\n';
+        contentString += `<ul>${contentList}</ul>`;
+        return contentString;
+      }
+
       // Nerves
       if (this.entry['nerve-label']?.length) {
         const title = 'Nerves';
@@ -591,31 +709,48 @@ export default {
         contentArray.push(transformedNerves);
       }
 
-      // Origins
-      if (this.origins?.length) {
-        const title = 'Origin';
-        const origins = this.origins;
-        const originsWithDatasets = this.originsWithDatasets;
-        const transformedOrigins = transformData(title, origins, originsWithDatasets);
-        contentArray.push(transformedOrigins);
-      }
+      // Origins / Components / Destination
+      if (this.hasSingleConnectivityList) {
+        if (this.originsCombinations?.length) {
+          const transformedOrigins = transformReconciliationData('Origin', this.originsCombinations);
+          contentArray.push(transformedOrigins);
+        }
 
-      // Components
-      if (this.components?.length) {
-        const title = 'Components';
-        const components = this.components;
-        const componentsWithDatasets = this.componentsWithDatasets;
-        const transformedComponents = transformData(title, components, componentsWithDatasets);
-        contentArray.push(transformedComponents);
-      }
+        if (this.componentsCombinations?.length) {
+          const transformedComponents = transformReconciliationData('Components', this.componentsCombinations);
+          contentArray.push(transformedComponents);
+        }
 
-      // Destination
-      if (this.destinations?.length) {
-        const title = 'Destination';
-        const destinations = this.destinations;
-        const destinationsWithDatasets = this.destinationsWithDatasets;
-        const transformedDestinations = transformData(title, destinations, destinationsWithDatasets);
-        contentArray.push(transformedDestinations);
+        if (this.destinationsCombinations?.length) {
+          const transformedDestinations = transformReconciliationData('Destination', this.destinationsCombinations);
+          contentArray.push(transformedDestinations);
+        }
+
+        if (hasUnavailableReference || hasDifferReference) {
+          const legendNotes = [];
+          if (hasUnavailableReference) {
+            legendNotes.push('<div>* SCKAN feature unavailable on Map</div>');
+          }
+          if (hasDifferReference) {
+            legendNotes.push('<div>** SCKAN feature alias to Map feature</div>');
+          }
+          contentArray.push(`<div>${legendNotes.join('\n')}</div>`);
+        }
+      } else {
+        if (this.origins?.length) {
+          const transformedOrigins = transformData('Origin', this.origins, this.originsWithDatasets);
+          contentArray.push(transformedOrigins);
+        }
+
+        if (this.components?.length) {
+          const transformedComponents = transformData('Components', this.components, this.componentsWithDatasets);
+          contentArray.push(transformedComponents);
+        }
+
+        if (this.destinations?.length) {
+          const transformedDestinations = transformData('Destination', this.destinations, this.destinationsWithDatasets);
+          contentArray.push(transformedDestinations);
+        }
       }
 
       // References
@@ -758,6 +893,7 @@ export default {
   },
   mounted: function () {
     this.updatedCopyContent = this.getUpdateCopyContent();
+    this.updateTitleToggleVisibility();
 
     EventBus.on('connectivity-error', (errorInfo) => {
       const connectivityError = this.getConnectivityError(errorInfo);
@@ -792,18 +928,54 @@ export default {
   }
 }
 
+.title-group {
+  margin-bottom: 8px;
+}
+
 .title {
+  flex: 1;
+  min-width: 0;
   text-align: left;
   line-height: 1.3em !important;
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
   color: $app-primary-color;
+}
+
+.title--clamped {
   display: -webkit-box;
   -webkit-line-clamp: 5;
   line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.title-toggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin-top: 2px;
+  color: $app-primary-color;
+  text-decoration: underline;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0.65;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  .title-toggle-icon {
+    font-size: 10px;
+  }
 }
 
 .block + .block {
@@ -973,7 +1145,7 @@ export default {
   }
 }
 
-.population-display {
+.population-details {
   display: flex;
   flex: 1 1 auto !important;
   flex-direction: row !important;
@@ -1001,7 +1173,7 @@ export default {
   }
 }
 
-.population-display-source {
+.population-details-source {
   text-align: left;
 
   .el-radio,
@@ -1024,7 +1196,7 @@ export default {
   }
 }
 
-.population-display-view {
+.population-details-view {
   .el-button + .el-button {
     margin-left: 0.5rem !important;
   }
