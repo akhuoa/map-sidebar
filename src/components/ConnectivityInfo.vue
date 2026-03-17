@@ -35,6 +35,10 @@
               @click="toggleTitleExpansion"
             >
               {{ isTitleExpanded ? 'Show less' : 'Show more' }}
+              <el-icon class="title-toggle-icon">
+                <el-icon-arrow-up v-if="isTitleExpanded" />
+                <el-icon-arrow-down v-else />
+              </el-icon>
             </button>
           </div>
           <div class="subtitle"><strong>Id: </strong>{{ entry.featureId[0] }}</div>
@@ -279,6 +283,8 @@ import {
   Warning as ElIconWarning,
   Location as ElIconLocation,
   Search as ElIconSearch,
+  ArrowDown as ElIconArrowDown,
+  ArrowUp as ElIconArrowUp,
 } from '@element-plus/icons-vue'
 import {
   ElButton as Button,
@@ -316,6 +322,8 @@ export default {
     ElIconWarning,
     ElIconLocation,
     ElIconSearch,
+    ElIconArrowDown,
+    ElIconArrowUp,
     ExternalResourceCard,
     CopyToClipboard,
     ConnectivityGraph,
@@ -922,6 +930,9 @@ export default {
 
 .title-toggle {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   border: 0;
   background: transparent;
   padding: 0;
@@ -933,6 +944,16 @@ export default {
   line-height: 1.3;
   cursor: pointer;
   white-space: nowrap;
+  opacity: 0.65;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  .title-toggle-icon {
+    font-size: 10px;
+  }
 }
 
 .block + .block {
