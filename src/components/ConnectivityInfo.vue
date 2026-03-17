@@ -572,6 +572,11 @@ export default {
           const labelB = (b?.sckanLabel || b?.mapLabel || '').toLowerCase();
           return labelA.localeCompare(labelB);
         });
+        const getFirstId = (idArr) => {
+          if (!idArr?.length) return null;
+          const first = idArr[0];
+          return typeof first === 'string' ? first : (first?.[0] || null);
+        };
         const transformedItems = sortedCombinations.map((item) => {
           const isDirectMatch =
             item?.sckanId &&
@@ -579,20 +584,24 @@ export default {
             JSON.stringify(item.sckanId) === JSON.stringify(item.mapId);
 
           if (isDirectMatch) {
-            return `${capitalise(item.sckanLabel || item.mapLabel || '-')}`;
+            const id = getFirstId(item.mapId);
+            const label = capitalise(item.sckanLabel || item.mapLabel || '-');
+            return id ? `${label} (${id})` : label;
           }
 
           const sckanLabel = item?.sckanLabel ? capitalise(item.sckanLabel) : '-';
+          const sckanId = getFirstId(item.sckanId);
+          const sckanLabelWithId = sckanId ? `${sckanLabel} (${sckanId})` : sckanLabel;
           const isUnavailableOnMap = !item?.mapId?.length || !item?.mapLabel;
 
           if (isUnavailableOnMap) {
-            return `<s>${sckanLabel}</s> (unavailable on <strong>Map</strong>)`;
+            return `<s>${sckanLabelWithId}</s> (unavailable on <strong>Map</strong>)`;
           }
 
-          const mapLabel = item?.mapId?.length && item?.mapLabel
-            ? capitalise(item.mapLabel)
-            : '(unavailable on <strong>Map</strong>)';
-          return `<s>${sckanLabel}</s> (<strong>Map:</strong> ${mapLabel})`;
+          const mapLabel = capitalise(item.mapLabel);
+          const mapId = getFirstId(item.mapId);
+          const mapLabelWithId = mapId ? `${mapLabel} (${mapId})` : mapLabel;
+          return `<s>${sckanLabelWithId}</s> (<strong>Map:</strong> ${mapLabelWithId})`;
         });
         const contentList = transformedItems
           .map((item) => `<li>${item}</li>`)
