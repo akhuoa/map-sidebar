@@ -4,36 +4,39 @@
     <div class="connectivity-info-title">
       <div class="title-content">
         <div class="block" v-if="entry.title">
-          <div
-            ref="titleElement"
-            class="title"
-            :class="{ 'title--clamped': !isTitleExpanded }"
-          >
-            <span>{{ capitalise(displayTitle) }}</span>
-            <template v-if="entry.featuresAlert">
-              <el-popover
-                width="250"
-                trigger="hover"
-                :teleported="false"
-                popper-class="popover-origin-help"
-              >
-                <template #reference>
-                  <el-icon class="alert"><el-icon-warn-triangle-filled /></el-icon>
-                </template>
-                <span style="word-break: keep-all">
-                  {{ entry.featuresAlert }}
-                </span>
-              </el-popover>
-            </template>
+          <div class="title-group">
+            <div
+              ref="titleElement"
+              class="title"
+              :class="{ 'title--clamped': !isTitleExpanded }"
+              @click="toggleTitleExpansion"
+            >
+              <span>{{ capitalise(displayTitle) }}</span>
+              <template v-if="entry.featuresAlert">
+                <el-popover
+                  width="250"
+                  trigger="hover"
+                  :teleported="false"
+                  popper-class="popover-origin-help"
+                >
+                  <template #reference>
+                    <el-icon class="alert"><el-icon-warn-triangle-filled /></el-icon>
+                  </template>
+                  <span style="word-break: keep-all">
+                    {{ entry.featuresAlert }}
+                  </span>
+                </el-popover>
+              </template>
+            </div>
+            <button
+              v-if="showTitleToggle"
+              class="title-toggle"
+              type="button"
+              @click="toggleTitleExpansion"
+            >
+              {{ isTitleExpanded ? 'Show less' : 'Show more' }}
+            </button>
           </div>
-          <button
-            v-if="showTitleToggle"
-            class="title-toggle"
-            type="button"
-            @click="toggleTitleExpansion"
-          >
-            {{ isTitleExpanded ? 'Show less' : 'Show more' }}
-          </button>
           <div class="subtitle"><strong>Id: </strong>{{ entry.featureId[0] }}</div>
           <div v-if="hasProvenanceTaxonomyLabel" class="subtitle">
             {{ provSpeciesDescription }}
@@ -895,12 +898,17 @@ export default {
   }
 }
 
+.title-group {
+  margin-bottom: 8px;
+}
+
 .title {
+  flex: 1;
+  min-width: 0;
   text-align: left;
   line-height: 1.3em !important;
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
   color: $app-primary-color;
 }
 
@@ -913,14 +921,18 @@ export default {
 }
 
 .title-toggle {
+  flex-shrink: 0;
   border: 0;
   background: transparent;
   padding: 0;
-  margin: -2px 0 8px;
+  margin-top: 2px;
   color: $app-primary-color;
+  text-decoration: underline;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.3;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .block + .block {
