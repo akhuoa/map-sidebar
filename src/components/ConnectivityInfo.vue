@@ -514,12 +514,9 @@ export default {
       let featureId = this.entry.featureId;
       const titleContent = [];
 
-      if (title) {
-        titleContent.push(`<div><strong>Label:</strong> ${capitalise(title)}</div>`);
-      }
-
-      if (longLabel) {
-        titleContent.push(`<div><strong>Long label:</strong> ${capitalise(longLabel)}</div>`);
+      const displayLabel = capitalise(longLabel || title);
+      if (displayLabel) {
+        titleContent.push(`<div><strong>${displayLabel}</strong></div>`);
       }
 
       if (featureId?.length) {
