@@ -542,6 +542,9 @@ export default {
         contentArray.push(`<div>${this.entry.paths}</div>`);
       }
 
+      let hasUnavailableReference = false;
+      let hasDifferReference = false;
+
       function transformData(title, items, itemsWithDatasets = []) {
         let contentString = `<div><strong>${title}</strong></div>`;
         const transformedItems = [];
@@ -595,13 +598,15 @@ export default {
           const isUnavailableOnMap = !item?.mapId?.length || !item?.mapLabel;
 
           if (isUnavailableOnMap) {
-            return `<s>${sckanLabelWithId}</s> (unavailable on <strong>Map</strong>)`;
+            hasUnavailableReference = true;
+            return `<s>${sckanLabelWithId}</s> (unavailable on <strong>Map</strong>) *`;
           }
 
           const mapLabel = capitalise(item.mapLabel);
           const mapId = getFirstId(item.mapId);
           const mapLabelWithId = mapId ? `${mapLabel} (${mapId})` : mapLabel;
-          return `<s>${sckanLabelWithId}</s> (<strong>Map:</strong> ${mapLabelWithId})`;
+          hasDifferReference = true;
+          return `<s>${sckanLabelWithId}</s> (<strong>Map:</strong> ${mapLabelWithId}) **`;
         });
         const contentList = transformedItems
           .map((item) => `<li>${item}</li>`)
@@ -635,6 +640,17 @@ export default {
         if (this.destinationsCombinations?.length) {
           const transformedDestinations = transformReconciliationData('Destination', this.destinationsCombinations);
           contentArray.push(transformedDestinations);
+        }
+
+        if (hasUnavailableReference || hasDifferReference) {
+          const legendNotes = [];
+          if (hasUnavailableReference) {
+            legendNotes.push('<div>* SCKAN feature unavailable on Map</div>');
+          }
+          if (hasDifferReference) {
+            legendNotes.push('<div>** SCKAN feature maps differently on Map</div>');
+          }
+          contentArray.push(`<div>${legendNotes.join('\n')}</div>`);
         }
       } else {
         if (this.origins?.length) {
