@@ -4,7 +4,7 @@
     <div class="connectivity-info-title">
       <div class="title-content">
         <div class="block" v-if="entry.title">
-          <div class="title" :title="displayTitle">
+          <div class="title">
             <span>{{ capitalise(displayTitle) }}</span>
             <template v-if="entry.featuresAlert">
               <el-popover
