@@ -270,6 +270,7 @@
           :destinationsCombinations="destinationsCombinations"
           :originsCombinations="originsCombinations"
           :componentsCombinations="componentsCombinations"
+          :hasSingleConnectivityList="hasSingleConnectivityList"
           @tap-node="onTapNode"
         />
       </template>
