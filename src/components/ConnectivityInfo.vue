@@ -267,9 +267,15 @@
           :sckanVersion="sckanVersion"
           :connectivityFromMap="connectivityFromMap"
           :connectivityError="connectivityError"
-          :destinationsCombinations="destinationsCombinations"
+          :origins="origins"
+          :components="components"
+          :destinations="destinations"
+          :originsWithDatasets="originsWithDatasets"
+          :componentsWithDatasets="componentsWithDatasets"
+          :destinationsWithDatasets="destinationsWithDatasets"
           :originsCombinations="originsCombinations"
           :componentsCombinations="componentsCombinations"
+          :destinationsCombinations="destinationsCombinations"
           :hasSingleConnectivityList="hasSingleConnectivityList"
           @tap-node="onTapNode"
         />
@@ -570,6 +576,13 @@ export default {
         sckanVersion: this.sckanVersion,
         connectivityFromMap: this.connectivityFromMap,
         connectivityError: this.connectivityError,
+        origins: this.origins,
+        components: this.components,
+        destinations: this.destinations,
+        originsWithDatasets: this.originsWithDatasets,
+        componentsWithDatasets: this.componentsWithDatasets,
+        destinationsWithDatasets: this.destinationsWithDatasets,
+        hasSingleConnectivityList: this.hasSingleConnectivityList,
         originsCombinations: this.originsCombinations,
         componentsCombinations: this.componentsCombinations,
         destinationsCombinations: this.destinationsCombinations,
