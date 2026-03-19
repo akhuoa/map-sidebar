@@ -210,7 +210,7 @@
 
     <div class="content-container content-container-connectivity" v-show="activeView === 'listView'">
       <!-- TODO: To use only one component when the data is ready -->
-      <temmplate v-if="hasSingleConnectivityList">
+      <template v-if="hasSingleConnectivityList">
         <connectivity-reconciliation-list
           v-loading="connectivityLoading"
           :key="`${connectivityKey}list`"
@@ -230,7 +230,7 @@
           @connectivity-clicked="onConnectivityClicked"
           @connectivity-action-click="onConnectivityActionClick"
         />
-      </temmplate>
+      </template>
       <template v-else>
         <connectivity-list
           v-loading="connectivityLoading"
