@@ -65,6 +65,15 @@
                 @connectivity-item-close="onConnectivityItemClose"
               />
             </template>
+            <template v-else-if="tab.type === 'cellCards'">
+              <CellCardsExplorer
+                class="sidebar-content-container"
+                v-show="tab.id === activeTabId"
+                :envVars="envVars"
+                @search-changed="searchChanged(tab.id, $event)"
+                @hover-changed="hoverChanged(tab.id, $event)"
+              />
+            </template>
             <template v-else>
               <DatasetExplorer
                 class="sidebar-content-container"
@@ -95,6 +104,7 @@ import EventBus from './EventBus.js'
 import Tabs from './Tabs.vue'
 import AnnotationTool from './AnnotationTool.vue'
 import ConnectivityExplorer from './ConnectivityExplorer.vue'
+import CellCardsExplorer from './CellCardsExplorer.vue'
 import { removeShowAllFacets } from '../algolia/utils.js'
 
 /**
@@ -110,6 +120,7 @@ export default {
     Icon,
     AnnotationTool,
     ConnectivityExplorer,
+    CellCardsExplorer,
   },
   name: 'SideBar',
   props: {
@@ -119,6 +130,7 @@ export default {
         { title: 'Dataset Explorer', id: 1, type: 'datasetExplorer', closable: false },
         { title: 'Connectivity Explorer', id: 2, type: 'connectivityExplorer', closable: false },
         { title: 'Annotation', id: 3, type: 'annotation', closable: true },
+        { title: 'Cell Cards', id: 4, type: 'cellCards', closable: false },
       ],
     },
     /**
@@ -513,7 +525,8 @@ export default {
           tab.type === "annotation" &&
           this.annotationEntry &&
           this.annotationEntry.length > 0
-        )
+        ) ||
+        tab.type === "cellCards"
       );
     },
   },

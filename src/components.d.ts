@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AnnotationTool: typeof import('./components/AnnotationTool.vue')['default']
     BadgesGroup: typeof import('./components/BadgesGroup.vue')['default']
+    CellCardsExplorer: typeof import('./components/CellCardsExplorer.vue')['default']
     ConnectivityCard: typeof import('./components/ConnectivityCard.vue')['default']
     ConnectivityExplorer: typeof import('./components/ConnectivityExplorer.vue')['default']
     ConnectivityInfo: typeof import('./components/ConnectivityInfo.vue')['default']
