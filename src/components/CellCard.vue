@@ -63,7 +63,10 @@
               <span
                 v-for="somaLocation in cellType.somaLocations"
                 class="card-chip"
-                :key="somaLocation">
+                :key="somaLocation"
+                @mouseenter="showSomaLocation(somaLocation)"
+                @mouseleave="showSomaLocation()"
+              >
                 {{ somaLocation }}
               </span>
             </div>
@@ -276,6 +279,9 @@ export default {
     },
     closeCard: function() {
       this.$emit('close');
+    },
+    showSomaLocation: function (name) {
+      this.$emit('soma-location-hovered', name);
     },
   }
 }
