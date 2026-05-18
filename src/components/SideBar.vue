@@ -71,8 +71,7 @@
                 v-show="tab.id === activeTabId"
                 :envVars="envVars"
                 :activeSpecies="activeSpeciesForEntries"
-                @search-changed="searchChanged(tab.id, $event)"
-                @hover-changed="hoverChanged(tab.id, $event)"
+                @soma-location-hovered="showSomaLocation"
               />
             </template>
             <template v-else>
@@ -252,6 +251,13 @@ export default {
       if (activeTabType === 'annotation') {
         this.activeAnnotationData = data;
       }
+    },
+    /**
+     * This event is emitted when the mouse hover on or off a soma location in cell card explorer.
+     * @param name Soma location
+     */
+    showSomaLocation: function (name) {
+      this.$emit('soma-location-hovered', name);
     },
     /**
      * This event is emitted when the show connectivity button is clicked.

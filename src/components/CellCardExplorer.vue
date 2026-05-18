@@ -89,6 +89,7 @@
         :isActive="activeCardId === cellType.id"
         @open="openCard(cellType.id)"
         @close="closeCard"
+        @soma-location-hovered="showSomaLocation"
       />
       <el-pagination
         class="pagination"
@@ -587,6 +588,9 @@ export default {
       if (!this.cellTypes.some((cellType) => cellType.id === this.activeCardId)) {
         this.activeCardId = null;
       }
+    },
+    showSomaLocation: function (name) {
+      this.$emit('soma-location-hovered', name);
     },
   },
 }

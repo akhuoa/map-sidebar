@@ -156,7 +156,7 @@ export default {
       default: false,
     },
   },
-  emits: ['open', 'close'],
+  emits: ['open', 'close', 'soma-location-hovered'],
   computed: {
     cardStyleVars: function() {
       return {
