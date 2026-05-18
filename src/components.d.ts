@@ -7,8 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    AcupointsCard: typeof import('./components/AcupointsCard.vue')['default']
-    AcupointsInfoSearch: typeof import('./components/AcupointsInfoSearch.vue')['default']
     AnnotationTool: typeof import('./components/AnnotationTool.vue')['default']
     BadgesGroup: typeof import('./components/BadgesGroup.vue')['default']
     ConnectivityCard: typeof import('./components/ConnectivityCard.vue')['default']
@@ -29,6 +27,7 @@ declare module 'vue' {
     ElIconArrowDown: typeof import('@element-plus/icons-vue')['ArrowDown']
     ElIconArrowLeft: typeof import('@element-plus/icons-vue')['ArrowLeft']
     ElIconArrowRight: typeof import('@element-plus/icons-vue')['ArrowRight']
+    ElIconArrowUp: typeof import('@element-plus/icons-vue')['ArrowUp']
     ElIconClose: typeof import('@element-plus/icons-vue')['Close']
     ElIconDelete: typeof import('@element-plus/icons-vue')['Delete']
     ElIconLocation: typeof import('@element-plus/icons-vue')['Location']

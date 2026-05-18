@@ -4,25 +4,41 @@
     <div class="connectivity-info-title">
       <div class="title-content">
         <div class="block" v-if="entry.title">
-          <div class="title">
-            <span>{{ capitalise(entry.title) }}</span>
-            <template v-if="entry.featuresAlert">
-              <el-popover
-                width="250"
-                trigger="hover"
-                :teleported="false"
-                popper-class="popover-origin-help"
-              >
-                <template #reference>
-                  <el-icon class="alert"><el-icon-warn-triangle-filled /></el-icon>
-                </template>
-                <span style="word-break: keep-all">
-                  {{ entry.featuresAlert }}
-                </span>
-              </el-popover>
-            </template>
+          <div class="title-group">
+            <div
+              ref="titleElement"
+              class="title"
+              :class="{ 'title--clamped': !isTitleExpanded }"
+              @click="toggleTitleExpansion"
+            >
+              <span>{{ capitalise(displayTitle) }}</span>
+            </div>
+            <button
+              v-if="showTitleToggle"
+              class="title-toggle"
+              type="button"
+              @click="toggleTitleExpansion"
+            >
+              {{ isTitleExpanded ? 'Collapse' : 'Expand title' }}
+              <el-icon class="title-toggle-icon">
+                <el-icon-arrow-up v-if="isTitleExpanded" />
+                <el-icon-arrow-down v-else />
+              </el-icon>
+            </button>
           </div>
-          <div class="subtitle"><strong>id: </strong>{{ entry.featureId[0] }}</div>
+          <div class="subtitle">
+            <strong>Id: </strong>{{ entry.featureId[0] }}
+            <el-button
+              round
+              size="small"
+              class="alert-chip"
+              @click="showAlertMessage"
+              v-if="entry.featuresAlert?.length"
+            >
+              <el-icon class="alert"><el-icon-warn-triangle-filled /></el-icon>
+              Notes
+            </el-button>
+          </div>
           <div v-if="hasProvenanceTaxonomyLabel" class="subtitle">
             {{ provSpeciesDescription }}
           </div>
@@ -70,9 +86,9 @@
       </div>
     </div>
 
-    <div class="content-container population-display">
+    <div class="content-container population-details" :class="{'flex-row': hasSingleConnectivityList}">
       <div class="block attribute-title-container">
-        <span class="attribute-title">Population Display</span>
+        <span class="attribute-title">Population Details</span>
         <el-popover
           v-if="activeView === 'listView'"
           width="250"
@@ -83,30 +99,70 @@
           <template #reference>
             <el-icon class="info"><el-icon-warning /></el-icon>
           </template>
-          <span style="word-break: keep-all">
+          <span v-if="hasSingleConnectivityList" style="word-break: keep-all">
+            This list is ordered alphabetically. Switch to graph view for path details,
+            and use the legend below for reconciliation status.
+          </span>
+          <span v-else style="word-break: keep-all">
             This list is ordered alphabetically,
             switch to graph view for path details.
           </span>
+          <div v-if="hasSingleConnectivityList" class="connectivity-legends">
+            <div class="legend-title">Legend</div>
+            <span class="legend-item">
+              <span class="legend-color differ"></span>
+              SCKAN feature alias to Map feature
+            </span>
+            <span class="legend-item">
+              <span class="legend-color unavailable"></span>
+              SCKAN feature unavailable on Map
+            </span>
+            <span class="legend-item">
+              <span class="legend-color mapped"></span>
+              SCKAN feature available on Map
+            </span>
+          </div>
         </el-popover>
       </div>
       <div class="block buttons-row">
-        <span>Connectivity from:</span>
-        <el-radio-group v-model="connectivitySource" @change="onConnectivitySourceChange">
-          <el-radio value="map" :disabled="noMapConnectivity">Map</el-radio>
-          <el-radio value="sckan">SCKAN</el-radio>
-        </el-radio-group>
-        <el-button
-          :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
-          @click="switchConnectivityView('listView')"
-        >
-          List view
-        </el-button>
-        <el-button
-          :class="activeView === 'graphView' ? 'button' : 'el-button-secondary'"
-          @click="switchConnectivityView('graphView')"
-        >
-          Graph view
-        </el-button>
+        <div class="population-details-source" v-if="!hasSingleConnectivityList">
+          <span>
+            Connectivity from:
+            <el-popover
+              width="320"
+              trigger="hover"
+              :teleported="false"
+              popper-class="popover-origin-help"
+            >
+              <template #reference>
+                <el-icon class="info"><el-icon-warning /></el-icon>
+              </template>
+              <span style="word-break: keep-all">
+                <strong>Map</strong> - connectivity as defined in active map.
+                <br>
+                <strong>SCKAN</strong> - connectivity as defined in SCKAN.
+              </span>
+            </el-popover>
+          </span>
+          <el-radio-group v-model="connectivitySource" @change="onConnectivitySourceChange">
+            <el-radio value="map" :disabled="noMapConnectivity">Map</el-radio>
+            <el-radio value="sckan">SCKAN</el-radio>
+          </el-radio-group>
+        </div>
+        <div class="population-details-view" :class="{'align-right': hasSingleConnectivityList}">
+          <el-button
+            :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
+            @click="switchConnectivityView('listView')"
+          >
+            List view
+          </el-button>
+          <el-button
+            :class="activeView === 'graphView' ? 'button' : 'el-button-secondary'"
+            @click="switchConnectivityView('graphView')"
+          >
+            Graph view
+          </el-button>
+        </div>
       </div>
     </div>
 
@@ -150,26 +206,56 @@
     </div>
 
     <div class="content-container content-container-connectivity" v-show="activeView === 'listView'">
-      <connectivity-list
-        v-loading="connectivityLoading"
-        :key="`${connectivityKey}list`"
-        :entry="entry"
-        :origins="origins"
-        :components="components"
-        :destinations="destinations"
-        :originsWithDatasets="originsWithDatasets"
-        :componentsWithDatasets="componentsWithDatasets"
-        :destinationsWithDatasets="destinationsWithDatasets"
-        :availableAnatomyFacets="availableAnatomyFacets"
-        :connectivityError="connectivityError"
-        @connectivity-hovered="onConnectivityHovered"
-        @connectivity-clicked="onConnectivityClicked"
-        @connectivity-action-click="onConnectivityActionClick"
-      />
+      <!-- TODO: To use only one component when the data is ready -->
+      <template v-if="hasSingleConnectivityList">
+        <connectivity-reconciliation-list
+          v-loading="connectivityLoading"
+          :key="`${connectivityKey}list`"
+          :entry="entry"
+          :origins="origins"
+          :components="components"
+          :destinations="destinations"
+          :originsWithDatasets="originsWithDatasets"
+          :componentsWithDatasets="componentsWithDatasets"
+          :destinationsWithDatasets="destinationsWithDatasets"
+          :destinationsCombinations="destinationsCombinations"
+          :originsCombinations="originsCombinations"
+          :componentsCombinations="componentsCombinations"
+          :availableAnatomyFacets="availableAnatomyFacets"
+          :connectivityError="connectivityError"
+          @connectivity-hovered="onConnectivityHovered"
+          @connectivity-clicked="onConnectivityClicked"
+          @connectivity-action-click="onConnectivityActionClick"
+        />
+      </template>
+      <template v-else>
+        <connectivity-list
+          v-loading="connectivityLoading"
+          :key="`${connectivityKey}list`"
+          :entry="entry"
+          :origins="origins"
+          :components="components"
+          :destinations="destinations"
+          :originsWithDatasets="originsWithDatasets"
+          :componentsWithDatasets="componentsWithDatasets"
+          :destinationsWithDatasets="destinationsWithDatasets"
+          :availableAnatomyFacets="availableAnatomyFacets"
+          :connectivityError="connectivityError"
+          @connectivity-hovered="onConnectivityHovered"
+          @connectivity-clicked="onConnectivityClicked"
+          @connectivity-action-click="onConnectivityActionClick"
+        />
+      </template>
     </div>
 
     <div class="content-container content-container-connectivity" v-show="activeView === 'graphView'">
       <template v-if="graphViewLoaded">
+        <el-button
+          class="button"
+          @click="openGraphInViewer"
+        >
+          Open in viewer
+        </el-button>
         <connectivity-graph
           v-loading="connectivityLoading"
           :key="`${connectivityKey}graph`"
@@ -178,6 +264,16 @@
           :sckanVersion="sckanVersion"
           :connectivityFromMap="connectivityFromMap"
           :connectivityError="connectivityError"
+          :origins="origins"
+          :components="components"
+          :destinations="destinations"
+          :originsWithDatasets="originsWithDatasets"
+          :componentsWithDatasets="componentsWithDatasets"
+          :destinationsWithDatasets="destinationsWithDatasets"
+          :originsCombinations="originsCombinations"
+          :componentsCombinations="componentsCombinations"
+          :destinationsCombinations="destinationsCombinations"
+          :hasSingleConnectivityList="hasSingleConnectivityList"
           @tap-node="onTapNode"
         />
       </template>
@@ -191,6 +287,22 @@
         @trackEvent="onTrackEvent"
       />
     </div>
+
+    <div
+      ref="alertElement"
+      class="content-container content-container-alert"
+      v-if="entry.featuresAlert?.length"
+    >
+      <div class="block attribute-title-container">
+        <span class="attribute-title">Notes</span>
+      </div>
+      <div class="block">
+        <div class="alert-block"
+          v-for="alert in entry.featuresAlert"
+          v-html="formatAlertText(alert)"
+        ></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -200,6 +312,8 @@ import {
   Warning as ElIconWarning,
   Location as ElIconLocation,
   Search as ElIconSearch,
+  ArrowDown as ElIconArrowDown,
+  ArrowUp as ElIconArrowUp,
 } from '@element-plus/icons-vue'
 import {
   ElButton as Button,
@@ -212,6 +326,7 @@ import {
   CopyToClipboard,
   ConnectivityGraph,
   ConnectivityList,
+  ConnectivityReconciliationList,
   ExternalResourceCard,
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
@@ -236,15 +351,22 @@ export default {
     ElIconWarning,
     ElIconLocation,
     ElIconSearch,
+    ElIconArrowDown,
+    ElIconArrowUp,
     ExternalResourceCard,
     CopyToClipboard,
     ConnectivityGraph,
     ConnectivityList,
+    ConnectivityReconciliationList,
   },
   props: {
     connectivityEntry: {
       type: Array,
       default: [],
+    },
+    entryData: {
+      type: Object,
+      default: () => ({}),
     },
     entryId: {
       type: String,
@@ -262,6 +384,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    showLongLabel: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {
@@ -273,6 +399,8 @@ export default {
       connectivityError: {},
       graphViewLoaded: false,
       connectivityFromMap: null,
+      isTitleExpanded: false,
+      showTitleToggle: false,
     };
   },
   computed: {
@@ -280,6 +408,12 @@ export default {
       return this.connectivityEntry.find((entry) => {
         return entry.featureId[0] === this.entryId;
       });
+    },
+    displayTitle: function () {
+      if (this.showLongLabel) {
+        return this.entryData?.['long-label'] || this.entry?.['long-label'] || '';
+      }
+      return this.entry?.title || '';
     },
     hasProvenanceTaxonomyLabel: function () {
       return (
@@ -317,6 +451,18 @@ export default {
     destinationsWithDatasets: function () {
       return this.entry.destinationsWithDatasets;
     },
+    hasSingleConnectivityList: function () {
+      return this.entry.hasSingleConnectivityList;
+    },
+    destinationsCombinations: function () {
+      return this.entry.destinationsCombinations || [];
+    },
+    originsCombinations: function () {
+      return this.entry.originsCombinations || [];
+    },
+    componentsCombinations: function () {
+      return this.entry.componentsCombinations || [];
+    },
     resources: function () {
       return this.entry.hyperlinks || [];
     },
@@ -348,8 +494,15 @@ export default {
           if (!oldVal || newVal?.featureId[0] !== oldVal?.featureId[0]) {
             this.$emit('loaded');
           }
+
+          this.isTitleExpanded = false;
+          this.updateTitleToggleVisibility();
         }
       },
+    },
+    displayTitle: function () {
+      this.isTitleExpanded = false;
+      this.updateTitleToggleVisibility();
     },
   },
   methods: {
@@ -358,6 +511,39 @@ export default {
     },
     capitalise: function (text) {
       return capitalise(text)
+    },
+    toggleTitleExpansion: function () {
+      this.isTitleExpanded = !this.isTitleExpanded;
+      if (!this.isTitleExpanded) {
+        this.$nextTick(() => {
+          this.updateTitleToggleVisibility();
+        });
+      }
+    },
+    updateTitleToggleVisibility: function () {
+      this.$nextTick(() => {
+        const titleElement = this.$refs.titleElement;
+        if (!titleElement) {
+          this.showTitleToggle = false;
+          return;
+        }
+
+        const wasExpanded = this.isTitleExpanded;
+        if (wasExpanded) {
+          titleElement.classList.add('title--clamped');
+        }
+
+        const hasOverflow = titleElement.scrollHeight > titleElement.clientHeight + 1;
+        this.showTitleToggle = hasOverflow;
+
+        if (wasExpanded) {
+          titleElement.classList.remove('title--clamped');
+        }
+
+        if (!hasOverflow) {
+          this.isTitleExpanded = false;
+        }
+      });
     },
     showConnectivity: function () {
       // move the map center to highlighted area
@@ -395,6 +581,33 @@ export default {
         'location': 'map_sidebar_connectivity',
       });
     },
+    openGraphInViewer: function () {
+      // Open graph view in viewer
+      const payload = {
+        entry: this.entry.featureId[0],
+        mapServer: this.flatmapApi,
+        sckanVersion: this.sckanVersion,
+        connectivityFromMap: this.connectivityFromMap,
+        connectivityError: this.connectivityError,
+        origins: this.origins,
+        components: this.components,
+        destinations: this.destinations,
+        originsWithDatasets: this.originsWithDatasets,
+        componentsWithDatasets: this.componentsWithDatasets,
+        destinationsWithDatasets: this.destinationsWithDatasets,
+        hasSingleConnectivityList: this.hasSingleConnectivityList,
+        originsCombinations: this.originsCombinations,
+        componentsCombinations: this.componentsCombinations,
+        destinationsCombinations: this.destinationsCombinations,
+        allWithDatasets: [
+          ...this.componentsWithDatasets,
+          ...this.destinationsWithDatasets,
+          ...this.originsWithDatasets,
+        ],
+        connectivityInfo: this.entry,
+      };
+      EventBus.emit('show-connectivity-graph', payload);
+    },
     onTapNode: function (data) {
       // save selected state for list view
       const name = data.map(t => t.label).join(', ');
@@ -417,23 +630,25 @@ export default {
       // to avoid default formatting on font size and margin
 
       // Title
-      let title = this.entry.title;
+      const title = this.entry?.title || '';
+      const longLabel = this.entryData?.['long-label'] || this.entry?.['long-label'] || '';
       let featureId = this.entry.featureId;
       const titleContent = [];
 
-      if (title) {
-        titleContent.push(`<strong>${capitalise(this.entry.title)}</strong>`);
+      const displayLabel = capitalise(longLabel || title);
+      if (displayLabel) {
+        titleContent.push(`<div><strong>${displayLabel}</strong></div>`);
       }
 
       if (featureId?.length) {
         if (typeof featureId === 'object') {
-          titleContent.push(`(${featureId[0]})`);
+          titleContent.push(`<div><strong>Id:</strong> ${featureId[0]}</div>`);
         } else {
-          titleContent.push(`(${featureId})`);
+          titleContent.push(`<div><strong>Id:</strong> ${featureId}</div>`);
         }
       }
 
-      contentArray.push(`<div>${titleContent.join(' ')}</div>`);
+      contentArray.push(`<div>${titleContent.join('\n')}</div>`);
 
       // Description
       if (this.entry.provenanceTaxonomyLabel?.length) {
@@ -444,6 +659,9 @@ export default {
       if (this.entry.paths) {
         contentArray.push(`<div>${this.entry.paths}</div>`);
       }
+
+      let hasUnavailableReference = false;
+      let hasDifferReference = false;
 
       function transformData(title, items, itemsWithDatasets = []) {
         let contentString = `<div><strong>${title}</strong></div>`;
@@ -468,6 +686,54 @@ export default {
         return contentString;
       }
 
+      function transformReconciliationData(title, combinations = []) {
+        let contentString = `<div><strong>${title}</strong></div>`;
+        const sortedCombinations = [...combinations].sort((a, b) => {
+          const labelA = (a?.sckanLabel || a?.mapLabel || '').toLowerCase();
+          const labelB = (b?.sckanLabel || b?.mapLabel || '').toLowerCase();
+          return labelA.localeCompare(labelB);
+        });
+        const getFirstId = (idArr) => {
+          if (!idArr?.length) return null;
+          const first = idArr[0];
+          return typeof first === 'string' ? first : (first?.[0] || null);
+        };
+        const transformedItems = sortedCombinations.map((item) => {
+          const isDirectMatch =
+            item?.sckanId &&
+            item?.mapId &&
+            JSON.stringify(item.sckanId) === JSON.stringify(item.mapId);
+
+          if (isDirectMatch) {
+            const id = getFirstId(item.mapId);
+            const label = capitalise(item.sckanLabel || item.mapLabel || '-');
+            return id ? `${label} (${id})` : label;
+          }
+
+          const sckanLabel = item?.sckanLabel ? capitalise(item.sckanLabel) : '-';
+          const sckanId = getFirstId(item.sckanId);
+          const sckanLabelWithId = sckanId ? `${sckanLabel} (${sckanId})` : sckanLabel;
+          const isUnavailableOnMap = !item?.mapId?.length || !item?.mapLabel;
+
+          if (isUnavailableOnMap) {
+            hasUnavailableReference = true;
+            return `<s>${sckanLabelWithId}</s> (unavailable on <strong>Map</strong>) *`;
+          }
+
+          const mapLabel = capitalise(item.mapLabel);
+          const mapId = getFirstId(item.mapId);
+          const mapLabelWithId = mapId ? `${mapLabel} (${mapId})` : mapLabel;
+          hasDifferReference = true;
+          return `<s>${sckanLabelWithId}</s> (<strong>Map:</strong> ${mapLabelWithId}) **`;
+        });
+        const contentList = transformedItems
+          .map((item) => `<li>${item}</li>`)
+          .join('\n');
+        contentString += '\n';
+        contentString += `<ul>${contentList}</ul>`;
+        return contentString;
+      }
+
       // Nerves
       if (this.entry['nerve-label']?.length) {
         const title = 'Nerves';
@@ -477,31 +743,48 @@ export default {
         contentArray.push(transformedNerves);
       }
 
-      // Origins
-      if (this.origins?.length) {
-        const title = 'Origin';
-        const origins = this.origins;
-        const originsWithDatasets = this.originsWithDatasets;
-        const transformedOrigins = transformData(title, origins, originsWithDatasets);
-        contentArray.push(transformedOrigins);
-      }
+      // Origins / Components / Destination
+      if (this.hasSingleConnectivityList) {
+        if (this.originsCombinations?.length) {
+          const transformedOrigins = transformReconciliationData('Origin', this.originsCombinations);
+          contentArray.push(transformedOrigins);
+        }
 
-      // Components
-      if (this.components?.length) {
-        const title = 'Components';
-        const components = this.components;
-        const componentsWithDatasets = this.componentsWithDatasets;
-        const transformedComponents = transformData(title, components, componentsWithDatasets);
-        contentArray.push(transformedComponents);
-      }
+        if (this.componentsCombinations?.length) {
+          const transformedComponents = transformReconciliationData('Components', this.componentsCombinations);
+          contentArray.push(transformedComponents);
+        }
 
-      // Destination
-      if (this.destinations?.length) {
-        const title = 'Destination';
-        const destinations = this.destinations;
-        const destinationsWithDatasets = this.destinationsWithDatasets;
-        const transformedDestinations = transformData(title, destinations, destinationsWithDatasets);
-        contentArray.push(transformedDestinations);
+        if (this.destinationsCombinations?.length) {
+          const transformedDestinations = transformReconciliationData('Destination', this.destinationsCombinations);
+          contentArray.push(transformedDestinations);
+        }
+
+        if (hasUnavailableReference || hasDifferReference) {
+          const legendNotes = [];
+          if (hasUnavailableReference) {
+            legendNotes.push('<div>* SCKAN feature unavailable on Map</div>');
+          }
+          if (hasDifferReference) {
+            legendNotes.push('<div>** SCKAN feature alias to Map feature</div>');
+          }
+          contentArray.push(`<div>${legendNotes.join('\n')}</div>`);
+        }
+      } else {
+        if (this.origins?.length) {
+          const transformedOrigins = transformData('Origin', this.origins, this.originsWithDatasets);
+          contentArray.push(transformedOrigins);
+        }
+
+        if (this.components?.length) {
+          const transformedComponents = transformData('Components', this.components, this.componentsWithDatasets);
+          contentArray.push(transformedComponents);
+        }
+
+        if (this.destinations?.length) {
+          const transformedDestinations = transformData('Destination', this.destinations, this.destinationsWithDatasets);
+          contentArray.push(transformedDestinations);
+        }
       }
 
       // References
@@ -513,6 +796,14 @@ export default {
           .join('\n');
         contentString += `<ul>${contentList}</ul>`;
         contentArray.push(contentString);
+      }
+
+      // Alert (Notes)
+      if (this.entry.featuresAlert?.length) {
+        const alertContent = this.entry.featuresAlert
+          .map((alert) => this.formatAlertText(alert))
+          .join('\n');
+        contentArray.push(`<div><strong>Notes</strong></div>\n${alertContent}`);
       }
 
       return contentArray.join('\n\n<br>');
@@ -641,9 +932,55 @@ export default {
     onTrackEvent: function (data) {
       EventBus.emit('trackEvent', data);
     },
+    showAlertMessage: function () {
+      // scroll to alert message
+      this.$nextTick(() => {
+        const alertElement = this.$refs.alertElement;
+        if (alertElement) {
+          alertElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest',
+          });
+        }
+      });
+    },
+    formatAlertText: function (text) {
+      if (!text) return '';
+      const escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      const linkified = escaped.replace(
+        /(https?:\/\/[^\s"<>\[]+)/g,
+        (url) => {
+          const parts = url.match(/^(.*?)([\].,;:!?]*)$/);
+          const cleanUrl = parts ? parts[1] : url;
+          const suffix = parts ? parts[2] : '';
+          return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>${suffix}`;
+        }
+      );
+
+      const normalised = linkified
+        .replace(/\\n/g, '\n')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+
+      return normalised
+        .split('\n')
+        .map((line) => {
+          const withBoldLabel = line.replace(
+            /^\s*([A-Za-z][^:<]{0,120}:)/,
+            '<strong>$1</strong>'
+          );
+          return `<div class="alert-line">${withBoldLabel}</div>`;
+        })
+        .join('\n');
+    },
   },
   mounted: function () {
     this.updatedCopyContent = this.getUpdateCopyContent();
+    this.updateTitleToggleVisibility();
 
     EventBus.on('connectivity-error', (errorInfo) => {
       const connectivityError = this.getConnectivityError(errorInfo);
@@ -678,13 +1015,54 @@ export default {
   }
 }
 
+.title-group {
+  margin-bottom: 8px;
+}
+
 .title {
+  flex: 1;
+  min-width: 0;
   text-align: left;
   line-height: 1.3em !important;
   font-size: 18px;
   font-weight: bold;
-  padding-bottom: 8px;
   color: $app-primary-color;
+}
+
+.title--clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.title-toggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin-top: 2px;
+  color: $app-primary-color;
+  text-decoration: underline;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0.65;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  .title-toggle-icon {
+    font-size: 10px;
+  }
 }
 
 .block + .block {
@@ -777,15 +1155,6 @@ export default {
   text-transform: uppercase;
 }
 
-.main {
-  .el-button.is-round {
-    border-radius: 4px;
-    padding: 9px 20px 10px 20px;
-    display: flex;
-    height: 36px;
-  }
-}
-
 .button {
   margin-left: 0px !important;
   margin-top: 0px !important;
@@ -854,7 +1223,7 @@ export default {
   }
 }
 
-.population-display {
+.population-details {
   display: flex;
   flex: 1 1 auto !important;
   flex-direction: row !important;
@@ -862,20 +1231,110 @@ export default {
   justify-content: space-between;
   border-bottom: 1px solid $app-primary-color;
   padding-bottom: 0.5rem !important;
-
   flex-direction: column !important;
   align-items: start;
+
+  &.flex-row {
+    flex-direction: row !important;
+    align-items: center;
+  }
 
   .buttons-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
   }
 
-  .el-radio {
-    margin-right: 1rem;
+  &:not(.flex-row) .buttons-row {
+    width: 100%;
+  }
+}
+
+.population-details-source {
+  text-align: left;
+
+  .el-radio,
+  .info {
+    margin: 0;
+  }
+
+  .info {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -1rem;
+  }
+
+  .el-radio-group {
+    gap: 0.5rem;
+  }
+
+  :deep(.el-radio__label) {
+    padding-left: 4px;
+  }
+}
+
+.population-details-view {
+  .el-button + .el-button {
+    margin-left: 0.5rem !important;
+  }
+
+  &.align-right {
+    margin-left: auto;
+  }
+}
+
+.connectivity-legends {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+
+  .legend-title {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--el-text-color-primary);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.375rem;
+    font-size: 12px;
+    line-height: 1.2;
+    color: var(--el-text-color-regular);
+  }
+
+  .legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
+    border-left: 2px solid;
+
+    &.mapped {
+      background-color: rgba($app-primary-color, 0.04);
+      border-left-color: rgba($app-primary-color, 0.16);
+    }
+
+    &.unavailable {
+      background-color: #ffe5e3;
+      border-left-color: #ffb7b4;
+    }
+
+    &.differ {
+      background: linear-gradient(
+        90deg,
+        #ffe5e3 0%,
+        #ffe5e3 calc(50% - 1px),
+        #7fe09c calc(50% - 1px),
+        #7fe09c calc(50% + 1px),
+        #d9ffe0 calc(50% + 1px),
+        #d9ffe0 100%
+      );
+      border-left-color: #ffb7b4;
+    }
   }
 }
 
@@ -998,12 +1457,26 @@ export default {
   }
 }
 
+:deep(.popover-origin-help.el-popover) {
+  font-family: 'Asap', sans-serif;
+  background: #f3ecf6 !important;
+  border: 1px solid $app-primary-color !important;
+  border-radius: 4px !important;
+  color: #303133 !important;
+  text-transform: none !important; // need to overide the tooltip text transform
+  font-weight: 400;
+
+  .el-popper__arrow {
+    &:before {
+      background: #f3ecf6 !important;
+      border-color: $app-primary-color;
+      background-color: #ffffff;
+    }
+  }
+}
+
 .content-container-connectivity {
   position: relative;
-
-  &:not([style*="display: none"]) ~ .content-container-references {
-    margin-top: -1.25rem;
-  }
 }
 
 .attribute-content {
@@ -1045,6 +1518,50 @@ export default {
 
   &:last-of-type {
     margin-bottom: 0.5em;
+  }
+}
+
+.alert-block {
+  background-color: var(--el-color-warning-light-9);
+  border: 1px dashed var(--el-color-warning);
+  padding: 0.75rem;
+  border-radius: 4px;
+
+  :deep(.alert-line + .alert-line) {
+    margin-top: 0.5rem;
+  }
+
+  :deep(a) {
+    color: $app-primary-color;
+    word-break: break-all;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.alert-chip {
+  margin-left: 5px;
+  background-color: $app-primary-color;
+  border-color: $app-primary-color;
+  color: #fff;
+
+  &:hover {
+    color: #fff !important;
+    background-color: #ac76c5 !important;
+    border: 1px solid #ac76c5 !important;
+  }
+
+  :deep(> span) {
+    gap: 2px;
+  }
+
+  .alert {
+    width: 1rem;
+    height: 1rem;
+    color: inherit;
+    margin: 0;
   }
 }
 </style>

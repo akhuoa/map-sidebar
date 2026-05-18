@@ -3,14 +3,56 @@
     <MapSvgSpriteColor />
     <template #header>
       <div class="header">
-        <el-input
-          class="search-input"
-          placeholder="Search"
-          v-model="searchInput"
-          @keyup="searchEvent"
-          clearable
-          @clear="clearSearchClicked"
-        ></el-input>
+        <div class="search-input-container" :class="{'is-focus': inputFocus}">
+          <el-input
+            class="search-input"
+            placeholder="Search"
+            v-model="searchInput"
+            @focus="onInputFocus"
+            @blur="onInputBlur"
+            @input="onInputChange"
+            @keyup="searchEvent"
+            clearable
+            @clear="clearSearchClicked"
+          ></el-input>
+          <el-popover
+            width="350"
+            trigger="hover"
+            popper-class="filter-help-popover"
+          >
+            <template #reference>
+              <MapSvgIcon icon="help" class="help" />
+            </template>
+            <div>
+              <strong>Search rules:</strong>
+              <ul>
+                <li>
+                  <strong>Partial Matching:</strong> You don't need to type the full word or ID.
+                  The search will find items that contain your search term.
+                </li>
+                <li>
+                  <strong>Multiple Terms:</strong> Separate terms with a comma (<code>,</code>).
+                  This will find pathways that match any of the terms (an "OR" search).
+                </li>
+              </ul>
+              <br/>
+              <strong>Examples:</strong>
+              <ul>
+                <li>
+                  <strong>To find by partial ID:</strong>
+                  Searching for <code>kidney/132</code> will match the full <strong>Pathway ID</strong> <code>ilxtr:sparc-nlp/kidney/132</code>
+                </li>
+                <li>
+                  <strong>To find by keyword:</strong>
+                  Searching for (<code>vagus nerve</code>) will match <strong>pathways</strong> that have <code>vagus nerve</code> in their title OR are linked to a related component (like UBERON:0001759).
+                </li>
+                <li>
+                  <strong>To find by multiple terms:</strong>
+                  Searching for <code>kidney</code>, <code>vagus nerve</code> will find pathways that are related to either <code>kidney</code> OR <code>vagus nerve</code>.</li>
+              </ul>
+            </div>
+          </el-popover>
+        </div>
         <el-button
           type="primary"
           class="button"
@@ -92,15 +134,18 @@
           class="connectivity-card"
           :entry="result"
           :connectivityEntry="connectivityEntry"
+          :showLongLabel="showLongLabel"
           @open-connectivity="onConnectivityCollapseChange"
         />
         <ConnectivityInfo
           v-if="expanded === result.id"
           class="connectivity-info"
+          :entryData="result"
           :entryId="result.id"
           :connectivityEntry="connectivityEntry"
           :availableAnatomyFacets="availableAnatomyFacets"
           :envVars="envVars"
+          :showLongLabel="showLongLabel"
           :withCloseButton="true"
           @show-connectivity="onShowConnectivity"
           @show-reference-connectivities="onShowReferenceConnectivities"
@@ -199,7 +244,11 @@ export default {
     showVisibilityFilter: {
       type: Boolean,
       default: false,
-    }
+    },
+    showLongLabel: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {
@@ -216,6 +265,7 @@ export default {
       expanded: "",
       filterVisibility: true,
       expandedData: null,
+      inputFocus: false,
     };
   },
   computed: {
@@ -250,6 +300,7 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes();
           this.searchInput = '';
           this.filter = [];
+          this.updateInputFocus();
         }
       }
     },
@@ -306,6 +357,7 @@ export default {
     onConnectivityClicked: function (data) {
       this.searchInput = data.query;
       this.searchAndFilterUpdate();
+      this.updateInputFocus();
     },
     collapseChange:function (data) {
       this.expanded = this.expanded === data.id ? "" : data.id;
@@ -380,6 +432,7 @@ export default {
     },
     openSearch: function (filter, search = "") {
       this.searchInput = search;
+      this.updateInputFocus();
       this.resetPageNavigation();
       //Proceed normally if cascader is ready
       if (this.cascaderIsReady) {
@@ -468,12 +521,26 @@ export default {
     clearSearchClicked: function () {
       this.searchInput = "";
       this.searchAndFilterUpdate();
+      this.updateInputFocus();
     },
     searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
         this.searchInput = this.searchInput.trim();
         this.searchAndFilterUpdate();
+        this.updateInputFocus();
       }
+    },
+    updateInputFocus: function () {
+      this.inputFocus = this.searchInput ? true : false;
+    },
+    onInputFocus: function () {
+      this.updateInputFocus();
+    },
+    onInputBlur: function () {
+      this.updateInputFocus();
+    },
+    onInputChange: function () {
+      this.updateInputFocus();
     },
     filterUpdate: function (filters) {
       this.filter = [...filters];
@@ -554,6 +621,7 @@ export default {
       this.searchInput = item.search;
       this.filter = item.filters;
       this.openSearch([...item.filters], item.search);
+      this.updateInputFocus();
     },
     onConnectivityInfoLoaded: function (result) {
       const stepItemRef = this.$refs['stepItem-' + result.id];
@@ -585,6 +653,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../assets/searchPopover.scss';
 @import '../assets/pagination.scss';
 
 .connectivity-card {
@@ -636,33 +705,6 @@ export default {
     background-color: #f7faff;
     border: 2px solid $app-primary-color;
     border-radius: var(--el-border-radius-base);
-  }
-}
-
-.search-input {
-  width: 298px !important;
-  height: 40px;
-  padding-right: 14px;
-  font-family: inherit;
-
-  :deep(.el-input__inner) {
-    font-family: inherit;
-  }
-}
-
-.header {
-  display: flex;
-  align-items: center;
-
-  .el-button {
-    font-family: inherit;
-
-    &:hover,
-    &:focus {
-      background: $app-primary-color;
-      box-shadow: -3px 2px 4px #00000040;
-      color: #ffffff;
-    }
   }
 }
 
@@ -785,31 +827,4 @@ export default {
   }
 }
 
-.help {
-  width: 24px !important;
-  height: 24px;
-  transform: scale(1.1);
-  cursor: pointer;
-  color: #ffffff !important;
-}
-
-.filter-help-popover {
-  font-family: 'Asap', sans-serif;
-  background: #f3ecf6 !important;
-  border: 1px solid $app-primary-color !important;
-  border-radius: 4px !important;
-  color: #303133 !important;
-  font-size: 12px !important;
-  line-height: 18px !important;
-
-  .el-popper__arrow::before {
-    background: #f3ecf6 !important;
-    border-color: $app-primary-color !important;
-  }
-
-  &[data-popper-placement^=bottom] .el-popper__arrow:before {
-    border-bottom-color: transparent !important;
-    border-right-color: transparent !important;
-  }
-}
 </style>

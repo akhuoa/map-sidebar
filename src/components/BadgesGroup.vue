@@ -1,6 +1,6 @@
 <template>
   <div v-if="categories['All'].size > 1" class="container" ref="container">
-    <div>View data types:</div>
+    <div v-if="displayText">View data types:</div>
     <template v-for="(item, key) in categories">
       <el-button
         v-if="item.size > 0"
@@ -32,13 +32,15 @@ export default {
         return []
       },
     },
-    datasetBiolucida: {
-      type: Object,
-      default: () => {
-        return {}
-      },
+    displayDataset: {
+      type: Boolean,
+      default: true,
     },
-    entry: {
+    displayText: {
+      type: Boolean,
+      default: true,
+    },
+    items: {
       type: Object,
       default: () => {
         return {}
@@ -53,17 +55,11 @@ export default {
     }
   },
   methods: {
-    addToCategories: function (array, name) {
+    addToCategories: function (name) {
+      const array = this.items[name]
       if (array && array.length > 0) {
         this.categories[name] = { size: array.length }
         this.categories['All'].size += array.length
-      }
-    },
-    addSimulationsToCategories: function (array) {
-      if (array && array.length > 0) {
-        const size = array.length
-        this.categories['Simulations'] = { size }
-        this.categories['All'].size += size
       }
     },
     categoryClicked: function (name) {
@@ -72,24 +68,20 @@ export default {
     },
   },
   watch: {
-    datasetBiolucida: {
-      deep: true,
-      immediate: true,
-      handler: function (biolucidaData) {
-        if ('dataset_images' in biolucidaData) {
-          this.addToCategories(biolucidaData['dataset_images'], 'Images')
-        }
-      },
-    },
-    entry: {
+    items: {
       deep: true,
       immediate: true,
       handler: function () {
-        this.addToCategories(this.entry.flatmaps, 'Flatmaps')
-        this.addToCategories(this.entry.plots, 'Plots')
-        this.addToCategories(this.entry.scaffolds, 'Scaffolds')
-        this.addToCategories(this.entry.segmentation, 'Segmentations')
-        this.addSimulationsToCategories(this.entry.simulation)
+        this.categories = {}
+        this.active = "All"
+        if (this.displayDataset) {
+          this.categories.All = { size: 1 }
+          this.categories.Dataset = { size: 1 }
+        } else {
+          this.categories.All = { size: 0 }
+        }
+        let keys = ['Flatmaps', 'Plots', 'Scaffolds', 'Simulations']
+        keys.forEach(key => this.addToCategories(key))
         /** disable the following
         this.addToCategories(this.entry.images, 'Images');
         this.addToCategories(this.entry.videos, 'Videos');
@@ -117,7 +109,7 @@ export default {
       color: #fff!important;
     }
   }
-  
+
   .tag-button + .tag-button {
     margin-left: 0!important;
   }
