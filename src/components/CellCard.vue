@@ -341,6 +341,10 @@ export default {
 
       .card-title {
         margin: 0;
+        line-height: 1.3em !important;
+        font-size: 18px;
+        font-weight: bold;
+        color: $app-primary-color;
       }
 
       .card-keywords {
@@ -400,6 +404,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding-top: 0;
 }
 
 .card-keywords,
