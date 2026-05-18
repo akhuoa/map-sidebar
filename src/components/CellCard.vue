@@ -50,15 +50,15 @@
       <div class="card-details-inner">
         <div class="card-section-group">
           <div v-if="cellType.entity" class="card-section-inline">
-            <label>Entity:</label>
+            <div class="card-section-title">Entity:</div>
             <span>{{ cellType.entity }}</span>
           </div>
           <div v-if="cellType.species" class="card-section-inline">
-            <label>Species:</label>
+            <div class="card-section-title">Species:</div>
             <span>{{ cellType.species }}</span>
           </div>
           <div v-if="cellType.somaLocations?.length" class="card-section-inline">
-            <label>Soma Location:</label>
+            <div class="card-section-title">Soma Location:</div>
             <div class="card-chips">
               <span
                 v-for="somaLocation in cellType.somaLocations"
@@ -72,16 +72,16 @@
             </div>
           </div>
           <div v-if="cellType.circuitRole" class="card-section-inline">
-            <label>Circuit Role:</label>
+            <div class="card-section-title">Circuit Role:</div>
             <span>{{ cellType.circuitRole }}</span>
           </div>
           <div v-if="cellType.creLine" class="card-section-inline">
-            <label>Cre Line:</label>
+            <div class="card-section-title">Cre Line:</div>
             <span>{{ cellType.creLine }}</span>
           </div>
         </div>
         <div v-if="formattedMarkerGenes.length" class="card-section">
-          <label>Marker Genes</label>
+          <div class="card-section-title">Marker Genes</div>
           <div class="marker-genes-list">
             <a
               v-for="markerGene in formattedMarkerGenes"
@@ -97,21 +97,21 @@
           </div>
         </div>
         <div v-if="cellType.fiberTypeString" class="card-section">
-          <label>Axon Phenotype</label>
+          <div class="card-section-title">Axon Phenotype</div>
           <div class="card-section-content">{{ cellType.fiberTypeString }}</div>
         </div>
         <div v-if="cellType.physiologyString" class="card-section">
-          <label>Physiology</label>
+          <div class="card-section-title">Physiology</div>
           <div class="card-section-content success">{{ cellType.physiologyString }}</div>
         </div>
         <div v-if="cellType.relatedCells?.length" class="card-section">
-          <label>Related Species Variants</label>
+          <div class="card-section-title">Related Species Variants</div>
           <ul v-for="relatedCell in cellType.relatedCells" :key="relatedCell">
             <li>{{ relatedCell.label }}</li>
           </ul>
         </div>
         <div v-if="cellType.sourceNomenclature" class="card-section source-publication-section">
-          <label>Source Publication</label>
+          <div class="card-section-title">Source Publication</div>
           <p>
             <a
               class="source-publication-link"
@@ -439,7 +439,7 @@ export default {
 
 .card-section,
 .card-section-inline {
-  label {
+  .card-section-title {
     font-weight: 600;
   }
 
@@ -466,7 +466,7 @@ export default {
 }
 
 .card-section {
-  label {
+  .card-section-title {
     display: block;
     margin-bottom: 0.75rem;
     font-size: 16px;
