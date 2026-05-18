@@ -422,6 +422,7 @@ export default {
   .card-details & {
     padding: 4px 8px;
     border: 1px solid #dcdcdc;
+    cursor: default;
   }
 }
 
