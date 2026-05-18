@@ -403,7 +403,7 @@ export default {
 .card-details-inner {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1.75rem;
   padding-top: 0;
 }
 
@@ -468,7 +468,10 @@ export default {
 .card-section {
   label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
   }
 }
 
@@ -528,7 +531,6 @@ export default {
 }
 
 .source-publication-link {
-  margin-top: 0.25rem;
   padding: 4px 8px;
 
   &:hover {
