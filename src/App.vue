@@ -19,6 +19,7 @@
       <el-button @click="getFacets">Get facets</el-button>
       <el-button @click="toggleCreateData">Create Data/Annotation</el-button>
       <el-button @click="openConnectivitySearch()">Connectivity Search</el-button>
+      <el-button @click="showCellCardExplorer()">Show Cell Card Explorer</el-button>
     </div>
     <SideBar
       :envVars="envVars"
@@ -30,6 +31,7 @@
       :connectivityEntry="connectivityEntry"
       :connectivityKnowledge="connectivityKnowledge"
       :showVisibilityFilter="true"
+      :showCellCards="showCellCards"
       @search-changed="searchChanged($event)"
       @hover-changed="hoverChanged($event)"
       @connectivity-hovered="onConnectivityHovered"
@@ -151,6 +153,7 @@ export default {
       query: '',
       filter: [],
       target: [],
+      showCellCards: false,
     }
   },
   methods: {
@@ -365,7 +368,12 @@ export default {
     },
     onConnectivityCollapseChange: function () {
       this.connectivityEntry = [...exampleConnectivityInput]
-    }
+    },
+    showCellCardExplorer: function () {
+      this.showCellCards = true;
+      this.$refs.sideBar.tabClicked({ id: 4, type: 'cellCardExplorer' });
+      this.$refs.sideBar.setDrawerOpen(true);
+    },
   },
   mounted: async function () {
     console.log('mounted app')
