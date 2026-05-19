@@ -59,16 +59,18 @@
         <div v-if="cellType.somaLocations?.length" class="card-section">
           <div class="card-section-title">Soma Location</div>
           <div class="card-chips">
-            <span
+            <a
               v-for="location in somaLocations"
-              class="card-chip"
+              class="card-chip card-chip-link"
               :key="location.id"
+              :href="`${appURL}/?view=cards&location=${location.id}`"
+              target="_blank"
+              rel="noopener noreferrer"
               @mouseenter="showSomaLocation(location.name)"
               @mouseleave="showSomaLocation()"
-              @click="openCellTypeExplorer(location.id)"
             >
               {{ location.name }}
-            </span>
+            </a>
           </div>
         </div>
         <div v-if="cellType.circuitRole" class="card-section">
@@ -162,6 +164,11 @@ export default {
     },
   },
   emits: ['open', 'close', 'soma-location-hovered'],
+  data() {
+    return {
+      appURL: APP_URL,
+    };
+  },
   computed: {
     cardStyleVars: function() {
       return {
@@ -301,9 +308,6 @@ export default {
     },
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
-    },
-    openCellTypeExplorer: function (somaLocationId) {
-      window.open(`${APP_URL}/?view=cards&location=${somaLocationId}`, '_blank');
     },
   }
 }
@@ -450,9 +454,16 @@ export default {
   .card-details & {
     padding: 4px 8px;
     border: 1px solid #dcdcdc;
+
+  }
+
+  &.card-chip-link {
+    color: #606266;
+    text-decoration: none;
     cursor: pointer;
 
     &:hover {
+      color: $app-primary-color;
       background-color: #e0e0e0;
     }
   }
