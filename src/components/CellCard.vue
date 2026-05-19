@@ -139,6 +139,7 @@ import {
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
 import EventBus from './EventBus.js'
+import { capitalise } from '../utils/common.js';
 
 const APP_URL = `https://nervosensus.netlify.app`;
 const LOCATION_ID_MAP = {
@@ -265,7 +266,7 @@ export default {
         const isClustered = this.cellType.clusterAttributes?.[locationKey];
         if (isClustered) {
           return {
-            name: location,
+            name: capitalise(location),
             id: locationKey,
           }
         }
