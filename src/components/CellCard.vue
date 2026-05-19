@@ -60,13 +60,14 @@
           <div class="card-section-title">Soma Location</div>
           <div class="card-chips">
             <span
-              v-for="somaLocation in cellType.somaLocations"
+              v-for="location in somaLocations"
               class="card-chip"
-              :key="somaLocation"
-              @mouseenter="showSomaLocation(somaLocation)"
+              :key="location.id"
+              @mouseenter="showSomaLocation(location.name)"
               @mouseleave="showSomaLocation()"
+              @click="openCellTypeExplorer(location.id)"
             >
-              {{ somaLocation }}
+              {{ location.name }}
             </span>
           </div>
         </div>
@@ -136,6 +137,12 @@ import {
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
 import EventBus from './EventBus.js'
+
+const APP_URL = `https://nervosensus.netlify.app`;
+const LOCATION_ID_MAP = {
+  'soma_tg': 'trigeminal ganglion',
+  'soma_drg': 'dorsal root ganglion',
+};
 
 export default {
   name: 'CellCard',
@@ -245,6 +252,20 @@ export default {
 
       return contentArray.join('\n');
     },
+    somaLocations: function() {
+      const mappedLocations = this.cellType.somaLocations.map((location) => {
+        const locationKey = Object.keys(LOCATION_ID_MAP).find((key) => LOCATION_ID_MAP[key] === location) || '';
+        const isClustered = this.cellType.clusterAttributes?.[locationKey];
+        if (isClustered) {
+          return {
+            name: location,
+            id: locationKey,
+          }
+        }
+        return false;
+      });
+      return mappedLocations;
+    },
   },
   methods: {
     sanitizeMarkerGeneUri: function(uri, expression = '') {
@@ -280,6 +301,9 @@ export default {
     },
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
+    },
+    openCellTypeExplorer: function (somaLocationId) {
+      window.open(`${APP_URL}/?view=cards&location=${somaLocationId}`, '_blank');
     },
   }
 }
@@ -421,11 +445,16 @@ export default {
   padding: 2px 8px;
   background-color: #f0f0f0;
   border-radius: 12px;
+  transition: background-color 0.2s ease;
 
   .card-details & {
     padding: 4px 8px;
     border: 1px solid #dcdcdc;
-    cursor: default;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
   }
 }
 
