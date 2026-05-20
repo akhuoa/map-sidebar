@@ -124,6 +124,28 @@
             </a>
           </p>
         </div>
+        <div
+          class="card-section"
+          v-if="cellType.alertNotes?.length || cellType.curatorNotes?.length"
+        >
+          <div class="card-section-title">Notes</div>
+          <div class="alert-block">
+            <div class="alert-block-section" v-if="cellType.alertNotes?.length">
+              <div class="alert-block-title">Alert Notes:</div>
+              <div v-for="note in cellType.alertNotes"
+                v-html="formatAlertText(note)"
+                class="alert-block-note"
+              ></div>
+            </div>
+            <div class="alert-block-section" v-if="cellType.curatorNotes?.length">
+              <div class="alert-block-title">Curator Notes:</div>
+              <div v-for="note in cellType.curatorNotes"
+                v-html="formatAlertText(note)"
+                class="alert-block-note"
+              ></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -309,6 +331,29 @@ export default {
     },
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
+    },
+    formatAlertText: function (text) {
+      if (!text) return '';
+      const escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      const linkified = escaped.replace(
+        /(https?:\/\/[^\s"<>\[]+)/g,
+        (url) => {
+          const parts = url.match(/^(.*?)([\].,;:!?]*)$/);
+          const cleanUrl = parts ? parts[1] : url;
+          const suffix = parts ? parts[2] : '';
+          return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>${suffix}`;
+        }
+      );
+
+      const normalised = linkified
+        .replace(/\\n/g, '\n')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+
+      return normalised;
     },
   }
 }
@@ -625,6 +670,41 @@ export default {
 
   &.secondary {
     background-color: white !important;
+  }
+}
+
+.alert-block {
+  background-color: var(--el-color-warning-light-9);
+  border: 1px dashed var(--el-color-warning);
+  padding: 0.75rem;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  :deep(a) {
+    color: $app-primary-color;
+    word-break: break-all;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.alert-block-section {
+  .alert-block-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .alert-block-note {
+    color: #606266;
+    padding-left: 0.5rem;
+
+    + .alert-block-note {
+      margin-top: 0.5rem;
+    }
   }
 }
 </style>
