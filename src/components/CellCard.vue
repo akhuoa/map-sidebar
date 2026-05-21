@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="cardElementRef"
     class="card"
     :class="{ active: isActive }"
     :style="cardStyleVars"
@@ -77,6 +78,42 @@
               @mouseleave="showSomaLocation()"
             >
               <span>{{ location.name }}</span>
+              <div class="card-list-search">
+                <el-popover
+                  width="150"
+                  trigger="hover"
+                  :teleported="true"
+                  :append-to="cardElement"
+                  popper-class="popover-origin-help"
+                >
+                  <template #reference>
+                    <el-icon
+                      class="status-search-icon"
+                      @click="$emit('dataset-search', location.name)"
+                    >
+                      <el-icon-search />
+                    </el-icon>
+                  </template>
+                  <span>Search dataset</span>
+                </el-popover>
+                <el-popover
+                  width="150"
+                  trigger="hover"
+                  :teleported="true"
+                  :append-to="cardElement"
+                  popper-class="popover-origin-help"
+                >
+                  <template #reference>
+                    <el-icon
+                      class="status-search-icon"
+                      @click="$emit('connectivity-search', location.name)"
+                    >
+                      <el-icon-search />
+                    </el-icon>
+                  </template>
+                  <span>Search connectivity</span>
+                </el-popover>
+              </div>
             </div>
           </div>
         </div>
@@ -200,6 +237,14 @@ export default {
     },
   },
   emits: ['open', 'close', 'soma-location-hovered'],
+  data() {
+    return {
+      cardElement: null,
+    };
+  },
+  mounted: function () {
+    this.cardElement = this.$refs.cardElementRef;
+  },
   computed: {
     cardStyleVars: function() {
       return {
@@ -561,6 +606,41 @@ export default {
   > span {
     line-height: 1.5em;
     font-weight: 500;
+  }
+}
+
+.card-list-search {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.status-search-icon {
+	font-size: 16px;
+	color: $app-primary-color;
+	cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+	&:hover {
+		color: #ac76c5;
+	}
+}
+
+.card-list-item:hover .status-search-icon {
+  opacity: 1;
+}
+
+:deep(.popover-origin-help.el-popover) {
+  text-transform: none !important; // need to overide the tooltip text transform
+  border: 1px solid $app-primary-color;
+  font-weight: 400;
+  font-family: Asap, sans-serif, Helvetica;
+
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
+      background-color: #ffffff;
+    }
   }
 }
 
