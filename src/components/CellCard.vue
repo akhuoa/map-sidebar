@@ -615,15 +615,15 @@ export default {
 }
 
 .status-search-icon {
-	font-size: 16px;
-	color: $app-primary-color;
-	cursor: pointer;
+  font-size: 16px;
+  color: $app-primary-color;
+  cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s ease;
 
-	&:hover {
-		color: #ac76c5;
-	}
+  &:hover {
+    color: #ac76c5;
+  }
 }
 
 .card-list-item:hover .status-search-icon {
@@ -808,6 +808,7 @@ export default {
       border-color: $app-primary-color !important;
       border-radius: 50%;
     }
+
     &.is-disabled {
       border-color: #dab3ec !important;
     }
