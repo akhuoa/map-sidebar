@@ -104,6 +104,7 @@
             >
               <span>{{ markerGene.name }}</span>
               <sup v-if="markerGene.expression">{{ markerGene.expression }}</sup>
+              <IconOpenExternal class="external-link-icon" />
             </a>
           </div>
         </div>
@@ -131,6 +132,7 @@
               rel="noopener noreferrer"
             >
               {{ cellType.sourceNomenclatureLabel }}
+              <IconOpenExternal class="external-link-icon" />
             </a>
           </p>
         </div>
@@ -174,6 +176,7 @@ import {
 import '@abi-software/map-utilities/dist/style.css';
 import EventBus from './EventBus.js'
 import { capitalise, formatAlertText as formatAlertTextUtil, scrollToRef } from '../utils/common.js';
+import IconOpenExternal from './icons/IconOpenExternal.vue';
 
 const APP_URL = `https://nervosensus.netlify.app`;
 const LOCATION_ID_MAP = {
@@ -188,6 +191,7 @@ export default {
     Icon,
     ElIconWarning,
     CopyToClipboard,
+    IconOpenExternal,
   },
   props: {
     cellType: {
@@ -602,6 +606,17 @@ export default {
     font-size: 0.75em;
     line-height: 1;
   }
+}
+
+.external-link-icon {
+  display: inline-flex;
+  align-items: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+  color: currentColor;
+  opacity: 0.7;
+  vertical-align: middle;
 }
 
 .source-publication-chip,
