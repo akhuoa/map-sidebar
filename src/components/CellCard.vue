@@ -161,7 +161,7 @@ import {
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
 import EventBus from './EventBus.js'
-import { capitalise } from '../utils/common.js';
+import { capitalise, formatAlertText as formatAlertTextUtil } from '../utils/common.js';
 
 const APP_URL = `https://nervosensus.netlify.app`;
 const LOCATION_ID_MAP = {
@@ -333,27 +333,7 @@ export default {
       this.$emit('soma-location-hovered', name);
     },
     formatAlertText: function (text) {
-      if (!text) return '';
-      const escaped = text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-      const linkified = escaped.replace(
-        /(https?:\/\/[^\s"<>\[]+)/g,
-        (url) => {
-          const parts = url.match(/^(.*?)([\].,;:!?]*)$/);
-          const cleanUrl = parts ? parts[1] : url;
-          const suffix = parts ? parts[2] : '';
-          return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>${suffix}`;
-        }
-      );
-
-      const normalised = linkified
-        .replace(/\\n/g, '\n')
-        .replace(/\r\n/g, '\n')
-        .replace(/\r/g, '\n');
-
-      return normalised;
+      return formatAlertTextUtil(text);
     },
   }
 }
