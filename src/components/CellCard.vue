@@ -173,7 +173,7 @@ import {
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
 import EventBus from './EventBus.js'
-import { capitalise, formatAlertText as formatAlertTextUtil } from '../utils/common.js';
+import { capitalise, formatAlertText as formatAlertTextUtil, scrollToRef } from '../utils/common.js';
 
 const APP_URL = `https://nervosensus.netlify.app`;
 const LOCATION_ID_MAP = {
@@ -346,16 +346,7 @@ export default {
       this.$emit('soma-location-hovered', name);
     },
     showAlertMessage: function () {
-      this.$nextTick(() => {
-        const alertElement = this.$refs.alertElement;
-        if (alertElement) {
-          alertElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-            inline: 'nearest',
-          });
-        }
-      });
+      scrollToRef(this, 'alertElement');
     },
     formatAlertText: function (text) {
       return formatAlertTextUtil(text);

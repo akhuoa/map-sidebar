@@ -56,3 +56,16 @@ export function formatAlertText(text, { formatLines = false } = {}) {
     })
     .join('\n');
 }
+
+export function scrollToRef(vm, refName) {
+  vm?.$nextTick(() => {
+    const element = vm?.$refs?.[refName];
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest',
+      });
+    }
+  });
+}

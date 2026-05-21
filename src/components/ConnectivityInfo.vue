@@ -330,7 +330,7 @@ import {
   ExternalResourceCard,
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
-import { capitalise, formatAlertText as formatAlertTextUtil } from '../utils/common.js'
+import { capitalise, formatAlertText as formatAlertTextUtil, scrollToRef } from '../utils/common.js'
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => {
@@ -929,17 +929,7 @@ export default {
       EventBus.emit('trackEvent', data);
     },
     showAlertMessage: function () {
-      // scroll to alert message
-      this.$nextTick(() => {
-        const alertElement = this.$refs.alertElement;
-        if (alertElement) {
-          alertElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-            inline: 'nearest',
-          });
-        }
-      });
+      scrollToRef(this, 'alertElement');
     },
     formatAlertText: function (text) {
       return formatAlertTextUtil(text, { formatLines: true });
