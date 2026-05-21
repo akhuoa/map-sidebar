@@ -89,6 +89,8 @@
         :isActive="activeCardId === cellType.id"
         @open="openCard(cellType.id)"
         @close="closeCard"
+        @dataset-search="onDatasetSearch"
+        @connectivity-search="onConnectivitySearch"
         @soma-location-hovered="showSomaLocation"
       />
       <el-pagination
@@ -136,6 +138,7 @@ export default {
     Pagination,
   },
   name: 'CellCardExplorer',
+  emits: ['soma-location-hovered', 'dataset-search', 'connectivity-search'],
   props: {
     envVars: {
       type: Object,
@@ -591,6 +594,12 @@ export default {
     },
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
+    },
+    onDatasetSearch: function (query) {
+      this.$emit('dataset-search', query);
+    },
+    onConnectivitySearch: function (query) {
+      this.$emit('connectivity-search', query);
     },
   },
 }

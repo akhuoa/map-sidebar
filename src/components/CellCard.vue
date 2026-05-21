@@ -89,7 +89,7 @@
                   <template #reference>
                     <el-icon
                       class="status-search-icon"
-                      @click="$emit('dataset-search', location.name)"
+                      @click="openDatasetSearch(location.name)"
                     >
                       <el-icon-search />
                     </el-icon>
@@ -106,7 +106,7 @@
                   <template #reference>
                     <el-icon
                       class="status-search-icon"
-                      @click="$emit('connectivity-search', location.name)"
+                      @click="openConnectivitySearch(location.name)"
                     >
                       <el-icon-search />
                     </el-icon>
@@ -236,7 +236,7 @@ export default {
       default: false,
     },
   },
-  emits: ['open', 'close', 'soma-location-hovered'],
+  emits: ['open', 'close', 'soma-location-hovered', 'dataset-search', 'connectivity-search'],
   data() {
     return {
       cardElement: null,
@@ -400,6 +400,12 @@ export default {
     },
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
+    },
+    openDatasetSearch: function (query) {
+      this.$emit('dataset-search', query);
+    },
+    openConnectivitySearch: function (query) {
+      this.$emit('connectivity-search', query);
     },
     showAlertMessage: function () {
       scrollToRef(this, 'alertElement');

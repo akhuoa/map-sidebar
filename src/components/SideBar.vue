@@ -71,6 +71,8 @@
                 v-show="tab.id === activeTabId"
                 :envVars="envVars"
                 :activeSpecies="activeSpeciesForEntries"
+                @dataset-search="openSearch([], $event)"
+                @connectivity-search="openConnectivitySearch([], $event)"
                 @soma-location-hovered="showSomaLocation"
               />
             </template>
