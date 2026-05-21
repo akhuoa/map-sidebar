@@ -69,18 +69,15 @@
         <div v-if="cellType.somaLocations?.length" class="card-section">
           <div class="card-section-title">Soma Location</div>
           <div class="card-chips">
-            <a
+            <div
               v-for="location in somaLocations"
-              class="card-chip card-chip-link"
+              class="card-chip card-chip-hover"
               :key="location.id"
-              :href="`${appURL}/?view=cards&location=${location.id}`"
-              target="_blank"
-              rel="noopener noreferrer"
               @mouseenter="showSomaLocation(location.name)"
               @mouseleave="showSomaLocation()"
             >
               {{ location.name }}
-            </a>
+            </div>
           </div>
         </div>
         <div v-if="cellType.circuitRole" class="card-section">
@@ -178,7 +175,6 @@ import EventBus from './EventBus.js'
 import { capitalise, formatAlertText as formatAlertTextUtil, scrollToRef } from '../utils/common.js';
 import IconOpenExternal from './icons/IconOpenExternal.vue';
 
-const APP_URL = `https://nervosensus.netlify.app`;
 const LOCATION_ID_MAP = {
   'soma_tg': 'trigeminal ganglion',
   'soma_drg': 'dorsal root ganglion',
@@ -204,11 +200,6 @@ export default {
     },
   },
   emits: ['open', 'close', 'soma-location-hovered'],
-  data() {
-    return {
-      appURL: APP_URL,
-    };
-  },
   computed: {
     cardStyleVars: function() {
       return {
@@ -525,10 +516,8 @@ export default {
 
   }
 
-  &.card-chip-link {
+  &.card-chip-hover {
     color: #606266;
-    text-decoration: none;
-    cursor: pointer;
 
     &:hover {
       color: $app-primary-color;
