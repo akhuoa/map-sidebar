@@ -243,6 +243,8 @@ export default {
         fiberTypeString,
         physiologyString,
         relatedCells,
+        alertNotes,
+        curatorNotes,
         sourceNomenclature,
         sourceNomenclatureLabel
       } = this.cellType;
@@ -291,6 +293,20 @@ export default {
           ? `${sourceNomenclatureLabel} (<a href="${sourceNomenclature}">${sourceNomenclature}</a>)`
           : sourceNomenclatureLabel;
         contentArray.push(`<div><strong>Source Publication:</strong> ${sourceLabel}</div>`);
+      }
+
+      if (alertNotes?.length) {
+        const alertContent = alertNotes
+          .map((note) => formatAlertTextUtil(note))
+          .join('\n');
+        contentArray.push(`<div><strong>Alert Notes:</strong></div>\n${alertContent}`);
+      }
+
+      if (curatorNotes?.length) {
+        const curatorContent = curatorNotes
+          .map((note) => formatAlertTextUtil(note))
+          .join('\n');
+        contentArray.push(`<div><strong>Curator Notes:</strong></div>\n${curatorContent}`);
       }
 
       return contentArray.join('\n');
