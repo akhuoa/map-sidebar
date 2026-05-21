@@ -68,15 +68,15 @@
         </div>
         <div v-if="cellType.somaLocations?.length" class="card-section">
           <div class="card-section-title">Soma Location</div>
-          <div class="card-chips">
+          <div class="card-list-items">
             <div
               v-for="location in somaLocations"
-              class="card-chip card-chip-hover"
+              class="card-list-item"
               :key="location.id"
               @mouseenter="showSomaLocation(location.name)"
               @mouseleave="showSomaLocation()"
             >
-              {{ location.name }}
+              <span>{{ location.name }}</span>
             </div>
           </div>
         </div>
@@ -371,6 +371,7 @@ export default {
   position: relative;
   font-family: Asap;
   font-size: 14px;
+  box-sizing: border-box;
 
   &::before {
     content: '';
@@ -381,6 +382,7 @@ export default {
     height: calc(100% - 10px);
     border: 3px solid transparent;
     border-radius: 5px;
+    box-sizing: border-box;
     z-index: 1;
   }
 
@@ -410,6 +412,13 @@ export default {
 
   &.active {
     background-color: #f7faff;
+
+    &::before {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
 
     .card-header {
       cursor: default;
@@ -515,14 +524,43 @@ export default {
     border: 1px solid #dcdcdc;
 
   }
+}
 
-  &.card-chip-hover {
-    color: #606266;
+.card-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  box-sizing: border-box;
+  position: relative;
+}
 
-    &:hover {
-      color: $app-primary-color;
-      background-color: #e0e0e0;
-    }
+.card-list-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  position: relative;
+  box-sizing: border-box;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    background-color: rgba($app-primary-color, 0.04);
+    border-left: 4px solid rgba($app-primary-color, 0.16);
+  }
+
+  &:hover::before {
+    background-color: rgba($app-primary-color, 0.07);
+    border-left-color: rgba($app-primary-color, 0.24);
+  }
+
+  > span {
+    line-height: 1.5em;
+    font-weight: 500;
   }
 }
 
