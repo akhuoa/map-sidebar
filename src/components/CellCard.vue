@@ -26,6 +26,16 @@
             {{ cellType.sourceNomenclatureLabel }}
           </span>
         </div>
+        <el-button
+          v-if="isActive && (cellType.alertNotes?.length || cellType.curatorNotes?.length)"
+          round
+          size="small"
+          class="alert-chip"
+          @click.stop="showAlertMessage"
+        >
+          <el-icon class="alert"><el-icon-warn-triangle-filled /></el-icon>
+          Notes
+        </el-button>
       </div>
       <div class="title-buttons" @click.stop>
         <CopyToClipboard @copied="onCopied" :content="updatedCopyContent" />
@@ -127,6 +137,7 @@
         <div
           class="card-section"
           v-if="cellType.alertNotes?.length || cellType.curatorNotes?.length"
+          ref="alertElement"
         >
           <div class="card-section-title">Notes</div>
           <div class="alert-block">
@@ -156,6 +167,7 @@ import {
   ElButton as Button,
   ElIcon as Icon,
 } from 'element-plus'
+import { Warning as ElIconWarning } from '@element-plus/icons-vue'
 import {
   CopyToClipboard,
 } from '@abi-software/map-utilities';
@@ -174,6 +186,7 @@ export default {
   components: {
     Button,
     Icon,
+    ElIconWarning,
     CopyToClipboard,
   },
   props: {
@@ -332,6 +345,18 @@ export default {
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
     },
+    showAlertMessage: function () {
+      this.$nextTick(() => {
+        const alertElement = this.$refs.alertElement;
+        if (alertElement) {
+          alertElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest',
+          });
+        }
+      });
+    },
     formatAlertText: function (text) {
       return formatAlertTextUtil(text);
     },
@@ -438,6 +463,12 @@ export default {
 .card-header,
 .card-details-inner {
   padding: 1rem;
+}
+
+.title-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .card-title {
@@ -578,6 +609,30 @@ export default {
 
 .source-publication-chip {
   padding: 2px 6px;
+}
+
+.alert-chip {
+  margin-top: 5px;
+  background-color: $app-primary-color;
+  border-color: $app-primary-color;
+  color: #fff;
+
+  &:hover {
+    color: #fff !important;
+    background-color: #ac76c5 !important;
+    border: 1px solid #ac76c5 !important;
+  }
+
+  :deep(> span) {
+    gap: 2px;
+  }
+
+  .alert {
+    width: 1rem;
+    height: 1rem;
+    color: inherit;
+    margin: 0;
+  }
 }
 
 .source-publication-link {
