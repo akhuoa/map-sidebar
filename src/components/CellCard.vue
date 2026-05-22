@@ -85,10 +85,13 @@
                   :teleported="true"
                   :append-to="cardElement"
                   popper-class="popover-origin-help popover-search-actions"
+                  @show="onSearchPopoverShow(location.id)"
+                  @hide="onSearchPopoverHide(location.id)"
                 >
                   <template #reference>
                     <el-icon
                       class="status-search-icon"
+                      :class="{ 'is-visible': activeSearchPopoverLocationId === location.id }"
                     >
                       <el-icon-search />
                     </el-icon>
@@ -237,6 +240,7 @@ export default {
   data() {
     return {
       cardElement: null,
+      activeSearchPopoverLocationId: null,
     };
   },
   mounted: function () {
@@ -403,6 +407,14 @@ export default {
     },
     openConnectivitySearch: function (query) {
       this.$emit('connectivity-search', query);
+    },
+    onSearchPopoverShow: function (locationId) {
+      this.activeSearchPopoverLocationId = locationId;
+    },
+    onSearchPopoverHide: function (locationId) {
+      if (this.activeSearchPopoverLocationId === locationId) {
+        this.activeSearchPopoverLocationId = null;
+      }
     },
     showAlertMessage: function () {
       scrollToRef(this, 'alertElement');
@@ -623,6 +635,10 @@ export default {
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s ease;
+
+  &.is-visible {
+    opacity: 1;
+  }
 
   &:hover {
     color: #ac76c5;
