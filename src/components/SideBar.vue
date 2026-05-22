@@ -71,7 +71,7 @@
                 v-show="tab.id === activeTabId"
                 :envVars="envVars"
                 :activeSpecies="activeSpeciesForEntries"
-                @dataset-search="openSearch([], $event)"
+                @dataset-search="openDatasetSearchFromCellCard($event)"
                 @connectivity-search="openConnectivitySearch([], $event)"
                 @soma-location-hovered="showSomaLocation"
               />
@@ -324,6 +324,32 @@ export default {
         const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer', true);
         datasetExplorerTabRef.openSearch(facets, query);
       })
+    },
+    openDatasetSearchFromCellCard: function (payload) {
+      if (!payload || typeof payload !== 'object') {
+        this.openSearch([], payload);
+        return;
+      }
+
+      const facets = [];
+      if (payload.species) {
+        facets.push({
+          facet: payload.species,
+          term: 'Species',
+          facetPropPath: 'organisms.primary.species.name',
+        });
+      }
+
+      if (payload.location) {
+        facets.push({
+          facet: payload.location,
+          term: 'Anatomical structure',
+          facetPropPath: 'anatomy.organ.category.name',
+          AND: true,
+        });
+      }
+
+      this.openSearch(facets, '');
     },
     /**
      * Get the ref id of the tab by id and type.

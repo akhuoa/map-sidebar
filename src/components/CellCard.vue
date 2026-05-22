@@ -403,7 +403,10 @@ export default {
       this.$emit('soma-location-hovered', name);
     },
     openDatasetSearch: function (query) {
-      this.$emit('dataset-search', query);
+      this.$emit('dataset-search', {
+        species: capitalise(this.cellType?.species),
+        location: query,
+      });
     },
     openConnectivitySearch: function (query) {
       this.$emit('connectivity-search', query);
