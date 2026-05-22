@@ -80,38 +80,35 @@
               <span>{{ location.name }}</span>
               <div class="card-list-search">
                 <el-popover
-                  width="150"
+                  width="180"
                   trigger="hover"
                   :teleported="true"
                   :append-to="cardElement"
-                  popper-class="popover-origin-help"
+                  popper-class="popover-origin-help popover-search-actions"
                 >
                   <template #reference>
                     <el-icon
                       class="status-search-icon"
+                    >
+                      <el-icon-search />
+                    </el-icon>
+                  </template>
+                  <div class="search-action-list">
+                    <button
+                      type="button"
+                      class="search-action-button"
                       @click="openDatasetSearch(location.name)"
                     >
-                      <el-icon-search />
-                    </el-icon>
-                  </template>
-                  <span>Search dataset</span>
-                </el-popover>
-                <el-popover
-                  width="150"
-                  trigger="hover"
-                  :teleported="true"
-                  :append-to="cardElement"
-                  popper-class="popover-origin-help"
-                >
-                  <template #reference>
-                    <el-icon
-                      class="status-search-icon"
+                      Search dataset
+                    </button>
+                    <button
+                      type="button"
+                      class="search-action-button"
                       @click="openConnectivitySearch(location.name)"
                     >
-                      <el-icon-search />
-                    </el-icon>
-                  </template>
-                  <span>Search connectivity</span>
+                      Search connectivity
+                    </button>
+                  </div>
                 </el-popover>
               </div>
             </div>
@@ -651,6 +648,34 @@ export default {
       border-color: $app-primary-color;
       background-color: #ffffff;
     }
+  }
+}
+
+:deep(.popover-search-actions.el-popover) {
+  padding: 6px;
+}
+
+.search-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.search-action-button {
+  border: 0;
+  width: 100%;
+  padding: 6px 8px;
+  text-align: left;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  color: #303133;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba($app-primary-color, 0.12);
+    color: $app-primary-color;
   }
 }
 
