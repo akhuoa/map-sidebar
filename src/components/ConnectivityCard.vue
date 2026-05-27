@@ -126,6 +126,10 @@ export default {
 .card-details {
   line-height: 1.5;
   letter-spacing: 1.05px;
+
+  + .card-details {
+    margin-top: 0.25em;
+  }
 }
 
 .el-tag {
