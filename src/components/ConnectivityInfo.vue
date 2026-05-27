@@ -27,7 +27,7 @@
             </button>
           </div>
           <div class="subtitle">
-            <strong>Id: </strong>{{ entry.featureId[0] }}
+            <span class="id-tag">{{ entry.featureId[0] }}</span>
             <el-button
               round
               size="small"
@@ -991,6 +991,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../assets/connectivity-explorer.scss';
+
 .connectivity-info-title {
   padding: 0;
   display: flex;
@@ -1153,6 +1155,10 @@ export default {
   font-weight: 600;
   /* font-weight: bold; */
   text-transform: uppercase;
+}
+
+.subtitle + .subtitle {
+  margin-top: 0.25em;
 }
 
 .button {
