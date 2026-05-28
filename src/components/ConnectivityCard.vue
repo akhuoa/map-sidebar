@@ -21,8 +21,8 @@
             <span class="id-tag" v-else>{{ entry[field] }}</span>
           </div>
         </template>
-        <div v-if="entry.species?.length" class="card-details">
-          <span class="icon-tag" v-for="species in entry.species" :key="species.name">
+        <div v-if="uniqueSpecies.length" class="card-details">
+          <span class="icon-tag" v-for="species in uniqueSpecies" :key="species.iconClass">
             <i :class="species.iconClass"></i>
           </span>
         </div>
@@ -79,6 +79,25 @@ export default {
         return !cEntry.ready;
       }
       return false;
+    },
+    // Get unique species based on iconClass to avoid duplicates in display,
+    // mainly used for human.
+    uniqueSpecies: function () {
+      if (!Array.isArray(this.entry?.species)) {
+        return [];
+      }
+
+      const seenIconClasses = new Set();
+      return this.entry.species.filter((species) => {
+        if (!species?.iconClass) {
+          return false;
+        }
+        if (seenIconClasses.has(species.iconClass)) {
+          return false;
+        }
+        seenIconClasses.add(species.iconClass);
+        return true;
+      });
     },
   },
   methods: {
