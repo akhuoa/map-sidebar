@@ -2,10 +2,14 @@
  * Common styles for connectivity explorer components
  */
 
-.id-tag {
+.id-tag,
+.icon-tag {
   color: #555;
-  background: #e0e0e0;
   padding: 2px 4px;
-  border-radius: 4px;
   font-size: .75rem !important;
+}
+
+.id-tag {
+  background: #e0e0e0;
+  border-radius: 4px;
 }

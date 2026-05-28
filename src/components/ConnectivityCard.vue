@@ -21,6 +21,11 @@
             <span class="id-tag" v-else>{{ entry[field] }}</span>
           </div>
         </template>
+        <div v-if="entry.species?.length" class="card-details">
+          <span class="icon-tag" v-for="species in entry.species" :key="species.name">
+            <i :class="species.iconClass"></i>
+          </span>
+        </div>
       </div>
     </div>
   </div>
