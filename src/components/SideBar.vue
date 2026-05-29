@@ -74,6 +74,7 @@
                 @dataset-search="openDatasetSearchFromCellCard($event)"
                 @connectivity-search="openConnectivitySearch($event.facets, $event.query)"
                 @soma-location-hovered="showSomaLocation"
+                @soma-locations-ready="onSomaLocationsReady"
               />
             </template>
             <template v-else>
@@ -260,6 +261,9 @@ export default {
      */
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
+    },
+    onSomaLocationsReady: function (somaLocations) {
+      this.$emit('soma-locations-ready', somaLocations);
     },
     /**
      * This event is emitted when the show connectivity button is clicked.

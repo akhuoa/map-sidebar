@@ -138,7 +138,7 @@ export default {
     Pagination,
   },
   name: 'CellCardExplorer',
-  emits: ['soma-location-hovered', 'dataset-search', 'connectivity-search'],
+  emits: ['soma-location-hovered', 'dataset-search', 'connectivity-search', 'soma-locations-ready'],
   props: {
     envVars: {
       type: Object,
@@ -270,6 +270,7 @@ export default {
             this.setGeneMappings(data.DEFAULT_GENES);
             this.allCellTypes = loadedCellTypes;
             this.filterOptions = this.buildFilterOptions(loadedCellTypes);
+            this.emitSomaLocations(this.filterOptions);
             this.syncActiveSpeciesFilters();
           }
         } catch (error) {
@@ -510,6 +511,14 @@ export default {
       ];
 
       return options.filter((option) => option.children.length > 0);
+    },
+    emitSomaLocations: function(filterOptions) {
+      const somaLocationOption = (filterOptions || []).find((option) => option.key === 'somaLocations');
+      const somaLocations = (somaLocationOption?.children || [])
+        .map((child) => child?.label)
+        .filter(Boolean);
+
+      this.$emit('soma-locations-ready', [...new Set(somaLocations)]);
     },
     buildGeneFacetChildren: function(cellTypes) {
       const values = new Set();
