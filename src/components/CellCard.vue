@@ -415,14 +415,18 @@ export default {
       const locationCurie = Object.keys(availableData).find(
         (curie) => availableData[curie].toLowerCase() === query.toLowerCase()
       );
-      this.$emit('connectivity-search', [
+      const facets = locationCurie ? [
         {
           "facet": `[\"${locationCurie}\",[]]`,
           "facetPropPath": "flatmap.connectivity.source.all",
           "tagLabel": query,
           "term": "All"
         }
-      ]);
+      ] : [];
+      this.$emit('connectivity-search', {
+        facets: facets,
+        query: query,
+      });
     },
     onSearchPopoverShow: function (locationId) {
       this.activeSearchPopoverLocationId = locationId;
