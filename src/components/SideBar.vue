@@ -72,7 +72,7 @@
                 :envVars="envVars"
                 :activeSpecies="activeSpeciesForEntries"
                 @dataset-search="openDatasetSearchFromCellCard($event)"
-                @connectivity-search="openConnectivitySearch([], $event)"
+                @connectivity-search="openConnectivitySearch($event)"
                 @soma-location-hovered="showSomaLocation"
               />
             </template>

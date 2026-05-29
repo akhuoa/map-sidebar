@@ -409,7 +409,20 @@ export default {
       });
     },
     openConnectivitySearch: function (query) {
-      this.$emit('connectivity-search', query);
+      // Find the UBERON term from query value (label)
+      const availableDataRaw = localStorage.getItem('available-name-curie-mapping');
+      const availableData = availableDataRaw ? JSON.parse(availableDataRaw) : {};
+      const locationCurie = Object.keys(availableData).find(
+        (curie) => availableData[curie].toLowerCase() === query.toLowerCase()
+      );
+      this.$emit('connectivity-search', [
+        {
+          "facet": `[\"${locationCurie}\",[]]`,
+          "facetPropPath": "flatmap.connectivity.source.all",
+          "tagLabel": query,
+          "term": "All"
+        }
+      ]);
     },
     onSearchPopoverShow: function (locationId) {
       this.activeSearchPopoverLocationId = locationId;
