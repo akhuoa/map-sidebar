@@ -514,11 +514,27 @@ export default {
     },
     emitSomaLocations: function(filterOptions) {
       const somaLocationOption = (filterOptions || []).find((option) => option.key === 'somaLocations');
+      const availableDataRaw = localStorage.getItem('available-name-curie-mapping');
+      const availableData = availableDataRaw ? JSON.parse(availableDataRaw) : {};
       const somaLocations = (somaLocationOption?.children || [])
-        .map((child) => child?.label)
-        .filter(Boolean);
+        .map((child) => String(child?.label || '').trim())
+        .filter(Boolean)
+        .map((label) => {
+          const uberonTerm = Object.keys(availableData).find(
+            (curie) => String(availableData[curie] || '').toLowerCase() === label.toLowerCase()
+          ) || '';
 
-      this.$emit('soma-locations-ready', [...new Set(somaLocations)]);
+          return {
+            label,
+            uberonTerm,
+          };
+        });
+
+      const uniqueSomaLocations = [...new Map(
+        somaLocations.map((item) => [item.label.toLowerCase(), item])
+      ).values()];
+
+      this.$emit('soma-locations-ready', uniqueSomaLocations);
     },
     buildGeneFacetChildren: function(cellTypes) {
       const values = new Set();
