@@ -516,6 +516,14 @@ export default {
       const somaLocationOption = (filterOptions || []).find((option) => option.key === 'somaLocations');
       const availableDataRaw = localStorage.getItem('available-name-curie-mapping');
       const availableData = availableDataRaw ? JSON.parse(availableDataRaw) : {};
+      const somaLocationCounts = this.allCellTypes.reduce((counts, cellType) => {
+        (Array.isArray(cellType?.somaLocations) ? cellType.somaLocations : []).forEach((location) => {
+          const normalizedLocation = String(location || '').trim().toLowerCase();
+          if (!normalizedLocation) return;
+          counts.set(normalizedLocation, (counts.get(normalizedLocation) || 0) + 1);
+        });
+        return counts;
+      }, new Map());
       const somaLocations = (somaLocationOption?.children || [])
         .map((child) => String(child?.label || '').trim())
         .filter(Boolean)
@@ -527,6 +535,7 @@ export default {
           return {
             label,
             curie,
+            count: somaLocationCounts.get(label.toLowerCase()) || 0,
           };
         });
 
