@@ -229,6 +229,7 @@ export default {
       this.activeFilters = [...nonSpeciesFilters, ...speciesFilters];
       this.syncCascaderFromActiveFilters();
       this.applyFilters(this.activeFilters);
+      this.emitSomaLocations(this.filterOptions);
     },
     getCellCardsData: async function(url) {
       if (cachedCellCardsData) {
@@ -396,6 +397,18 @@ export default {
         return availableSpecies.has(species);
       });
     },
+    getCellTypesForActiveSpecies: function() {
+      const normalizedActiveSpecies = this.getValidatedActiveSpecies();
+      if (!normalizedActiveSpecies.length) {
+        return this.allCellTypes;
+      }
+
+      const activeSpeciesSet = new Set(normalizedActiveSpecies);
+      return this.allCellTypes.filter((cellType) => {
+        const normalizedCellTypeSpecies = this.normalizeActiveSpeciesFilterTerm(cellType?.species);
+        return activeSpeciesSet.has(normalizedCellTypeSpecies);
+      });
+    },
     // To update the species from the flatmap,
     // mainly from "human male" and "human female" to "human".
     normalizeActiveSpeciesFilterTerm: function(value) {
@@ -516,7 +529,8 @@ export default {
       const somaLocationOption = (filterOptions || []).find((option) => option.key === 'somaLocations');
       const availableDataRaw = localStorage.getItem('available-name-curie-mapping');
       const availableData = availableDataRaw ? JSON.parse(availableDataRaw) : {};
-      const somaLocationCounts = this.allCellTypes.reduce((counts, cellType) => {
+      const scopedCellTypes = this.getCellTypesForActiveSpecies();
+      const somaLocationCounts = scopedCellTypes.reduce((counts, cellType) => {
         (Array.isArray(cellType?.somaLocations) ? cellType.somaLocations : []).forEach((location) => {
           const normalizedLocation = String(location || '').trim().toLowerCase();
           if (!normalizedLocation) return;
