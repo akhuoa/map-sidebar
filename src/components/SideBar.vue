@@ -329,6 +329,16 @@ export default {
         datasetExplorerTabRef.openSearch(facets, query);
       })
     },
+    openCellCardExplorerSearch: function (filters, query) {
+      this.drawerOpen = true
+      // Because refs are in v-for, nextTick is needed here
+      this.$nextTick(() => {
+        const cellCardExplorerTabRef = this.getTabRef(undefined, 'cellCardExplorer', true);
+        if (cellCardExplorerTabRef && typeof cellCardExplorerTabRef.openSearch === 'function') {
+          cellCardExplorerTabRef.openSearch(filters, query);
+        }
+      })
+    },
     openDatasetSearchFromCellCard: function (payload) {
       if (!payload || typeof payload !== 'object') {
         this.openSearch([], payload);

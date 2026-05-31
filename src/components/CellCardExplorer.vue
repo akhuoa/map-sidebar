@@ -290,6 +290,16 @@ export default {
     closeCard: function() {
       this.activeCardId = null;
     },
+    openSearch: function(filters, query) {
+      this.searchInput = String(query || '').trim();
+      this.activeFilters = Array.isArray(filters) ? [...filters] : [];
+      this.page = 1;
+      this.start = 0;
+      this.syncCascaderFromActiveFilters();
+      this.applyFilters(this.activeFilters);
+      this.searchHistoryUpdate(this.activeFilters, this.searchInput);
+      this.$nextTick(() => this.scrollToTop());
+    },
     clearSearchClicked: function() {
       this.searchInput = '';
       this.searchAndFilterUpdate();
