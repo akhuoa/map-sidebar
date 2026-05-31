@@ -520,13 +520,13 @@ export default {
         .map((child) => String(child?.label || '').trim())
         .filter(Boolean)
         .map((label) => {
-          const uberonTerm = Object.keys(availableData).find(
+          const curie = Object.keys(availableData).find(
             (curie) => String(availableData[curie] || '').toLowerCase() === label.toLowerCase()
           ) || '';
 
           return {
             label,
-            uberonTerm,
+            curie,
           };
         });
 
