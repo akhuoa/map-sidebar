@@ -538,7 +538,7 @@ export default {
         },
         {
           key: 'somaLocations',
-          label: 'Soma Location',
+          label: 'Soma location',
           children: this.buildFacetChildren(cellTypes, 'somaLocations'),
         },
         {
