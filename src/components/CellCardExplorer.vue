@@ -291,12 +291,32 @@ export default {
       this.activeCardId = null;
     },
     openSearch: function(filters, query) {
-      this.searchInput = String(query || '').trim();
-      this.activeFilters = Array.isArray(filters) ? [...filters] : [];
       this.page = 1;
       this.start = 0;
+      this.searchInput = String(query || '').trim();
+
+      const openSearchFilters = filters.map((filter) => {
+        return {
+          facetPropPath: 'somaLocations',
+          facet: capitalise(filter.facet || ''),
+          term: filter.term || '',
+          tagLabel: capitalise(filter.facet || ''),
+        };
+      });
+      const normalizedActiveSpecies = this.getValidatedActiveSpecies();
+      const speciesFilters = normalizedActiveSpecies.map((species) => {
+        return {
+          facetPropPath: 'species',
+          facet: capitalise(species),
+          term: 'Species',
+          tagLabel: capitalise(species),
+        };
+      });
+
+      this.activeFilters = [...openSearchFilters, ...speciesFilters];
       this.syncCascaderFromActiveFilters();
       this.applyFilters(this.activeFilters);
+      this.emitSomaLocations(this.filterOptions);
       this.searchHistoryUpdate(this.activeFilters, this.searchInput);
       this.$nextTick(() => this.scrollToTop());
     },
