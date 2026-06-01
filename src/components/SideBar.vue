@@ -67,6 +67,7 @@
             </template>
             <template v-else-if="tab.type === 'cellCardExplorer' && showCellCards">
               <CellCardExplorer
+                :ref="'cellCardExplorerTab_' + tab.id"
                 class="sidebar-content-container"
                 v-show="tab.id === activeTabId"
                 :envVars="envVars"
