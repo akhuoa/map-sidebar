@@ -8,7 +8,6 @@
         </div>
         <template v-for="field in displayFields" :key="field">
           <div class="card-details" v-if="entry[field]">
-            <strong>{{ field }}: </strong>
             <div v-if="field === 'nerve-label'" class="card-tags">
               <div v-for="nerve in entry[field]" :key="nerve.nerve">
                 <el-tag type="primary" size="small">
@@ -19,9 +18,14 @@
                 </el-tag>
               </div>
             </div>
-            <span v-else>{{ entry[field] }}</span>
+            <span class="id-tag" v-else>{{ entry[field] }}</span>
           </div>
         </template>
+        <div v-if="uniqueSpecies.length" class="card-details">
+          <span class="icon-tag" v-for="species in uniqueSpecies" :key="species.iconClass">
+            <i :class="species.iconClass"></i>
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -76,6 +80,25 @@ export default {
       }
       return false;
     },
+    // Get unique species based on iconClass to avoid duplicates in display,
+    // mainly used for human.
+    uniqueSpecies: function () {
+      if (!Array.isArray(this.entry?.species)) {
+        return [];
+      }
+
+      const seenIconClasses = new Set();
+      return this.entry.species.filter((species) => {
+        if (!species?.iconClass) {
+          return false;
+        }
+        if (seenIconClasses.has(species.iconClass)) {
+          return false;
+        }
+        seenIconClasses.add(species.iconClass);
+        return true;
+      });
+    },
   },
   methods: {
     capitalise: function (text) {
@@ -98,6 +121,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../assets/connectivity-explorer.scss';
+
 .connectivity-card {
   padding-left: 5px;
   position: relative;
@@ -111,7 +136,7 @@ export default {
 }
 
 .card-title {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   font-weight: bold;
   line-height: 1.5;
   letter-spacing: 1.05px;
@@ -125,6 +150,10 @@ export default {
 .card-details {
   line-height: 1.5;
   letter-spacing: 1.05px;
+
+  + .card-details {
+    margin-top: 0.25em;
+  }
 }
 
 .el-tag {
