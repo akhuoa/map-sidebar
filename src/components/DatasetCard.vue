@@ -187,22 +187,22 @@ export default {
       this.currentCategory = name
     },
     createSciCurnchItems: function () {
-      if (this.entry.detailsReady) {
+      this.createDatasetItem()
+      if (this.entry.s3uri) {
         this.updateS3Bucket(this.entry.s3uri)
-        this.createDatasetItem()
-        this.createFlatmapItems()
-        this.createScaffoldItems()
-        this.createSimulationItems()
-        this.createPlotItems()
       }
+      this.createFlatmapItems()
+      this.createScaffoldItems()
+      this.createSimulationItems()
+      this.createPlotItems()
       /* Disable these two
       this.createImageItems();
       this.createVideoItems();
       */
     },
     createDatasetItem: function () {
-      const link = `${this.envVars.ROOT_URL}/datasets/${this.discoverId}?type=dataset`
-      if (this.thumbnail) {
+      if (this.discoverId && this.thumbnail) {
+        const link = `${this.envVars.ROOT_URL}/datasets/${this.discoverId}?type=dataset`
         this.items['Dataset'].push({
           id: -1,
           //Work around gallery requires a truthy string
