@@ -505,7 +505,6 @@ export default {
           additionalLinks: element.additionalLinks,
           detailsReady: true,
         })
-        this.results[i] = this.results[i]
       })
     },
     createfilterParams: function (params) {

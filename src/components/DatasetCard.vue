@@ -638,14 +638,19 @@ export default {
     },
   },
   created: function () {
-    this.getBanner()
+    if (this.entry.detailsReady) {
+      this.getBanner()
+    }
   },
   watch: {
-    // currently not using card overflow
-    'entry.description': function () {
-      // watch it
-      this.getBanner()
-    },
+    'entry.detailsReady':{
+      immediate: true,
+      handler: function (val) {
+        if (val === true) {
+          this.getBanner()
+        }
+      },
+    }
   },
 }
 </script>
