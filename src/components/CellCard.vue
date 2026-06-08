@@ -425,7 +425,7 @@ export default {
       ] : [];
       this.$emit('connectivity-search', {
         facets: facets,
-        query: query,
+        query: '',
       });
     },
     onSearchPopoverShow: function (locationId) {
