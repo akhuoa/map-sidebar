@@ -340,11 +340,13 @@ export default {
         this.$refs.searchHistory.selectValue = 'Search history';
       }
       this.applyFilters(this.activeFilters);
+      this.emitSomaLocations(this.filterOptions);
     },
     searchAndFilterUpdate: function() {
       this.page = 1;
       this.start = 0;
       this.applyFilters(this.activeFilters);
+      this.emitSomaLocations(this.filterOptions);
       this.searchHistoryUpdate(this.activeFilters, this.searchInput);
     },
     filterUpdate: function(filters) {
@@ -404,6 +406,14 @@ export default {
     },
     normalizeFacetValue: function(value) {
       return String(value || '').trim().toLowerCase();
+    },
+    getSelectedSomaLocationFilters: function() {
+      return (this.activeFilters || [])
+        .filter((filter) => {
+          return this.normalizeFacetValue(filter?.term) === 'soma location';
+        })
+        .map((filter) => this.normalizeFacetValue(filter?.facet))
+        .filter(Boolean);
     },
     getAvailableSpeciesSet: function() {
       const availableSpecies = new Set();
@@ -559,6 +569,9 @@ export default {
       const somaLocationOption = (filterOptions || []).find((option) => option.key === 'somaLocations');
       const availableDataRaw = localStorage.getItem('available-name-curie-mapping');
       const availableData = availableDataRaw ? JSON.parse(availableDataRaw) : {};
+      const selectedSomaLocationFilters = this.getSelectedSomaLocationFilters();
+      const shouldFilterBySelectedSomaLocations = (this.activeFilters || []).length > 0 && selectedSomaLocationFilters.length > 0;
+      const selectedSomaLocationSet = new Set(selectedSomaLocationFilters);
       const scopedCellTypes = this.getCellTypesForActiveSpecies();
       const somaLocationCounts = scopedCellTypes.reduce((counts, cellType) => {
         (Array.isArray(cellType?.somaLocations) ? cellType.somaLocations : []).forEach((location) => {
@@ -571,6 +584,13 @@ export default {
       const somaLocations = (somaLocationOption?.children || [])
         .map((child) => String(child?.label || '').trim())
         .filter(Boolean)
+        .filter((label) => {
+          if (!shouldFilterBySelectedSomaLocations) {
+            return true;
+          }
+
+          return selectedSomaLocationSet.has(label.toLowerCase());
+        })
         .map((label) => {
           const curie = Object.keys(availableData).find(
             (curie) => String(availableData[curie] || '').toLowerCase() === label.toLowerCase()
