@@ -354,6 +354,7 @@ export default {
       this.page = 1;
       this.start = 0;
       this.applyFilters(this.activeFilters);
+      this.emitSomaLocations(this.filterOptions);
       this.searchHistoryUpdate(this.activeFilters, this.searchInput);
       this.loadingCards = false;
     },
@@ -399,6 +400,8 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes();
         }
       }
+
+      this.emitSomaLocations(this.filterOptions);
     },
     cascaderReady: function() {
       this.cascaderIsReady = true;
