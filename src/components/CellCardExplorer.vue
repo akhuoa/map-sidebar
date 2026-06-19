@@ -702,6 +702,13 @@ export default {
     onConnectivitySearch: function (query) {
       this.$emit('connectivity-search', query);
     },
+    getSearch: function () {
+      return this.searchInput;
+    },
+    getFilters: function () {
+      const hasFilters = this.activeFilters.some((f) => f.facet.toLowerCase() !== 'show all');
+      return hasFilters ? this.activeFilters : [];
+    },
   },
 }
 </script>
