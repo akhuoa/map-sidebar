@@ -72,6 +72,7 @@
                 v-show="tab.id === activeTabId"
                 :envVars="envVars"
                 :activeSpecies="activeSpeciesForEntries"
+                @search-changed="searchChanged(tab.id, $event)"
                 @dataset-search="openDatasetSearchFromCellCard($event)"
                 @connectivity-search="openConnectivitySearch($event.facets, $event.query)"
                 @soma-location-hovered="showSomaLocation"

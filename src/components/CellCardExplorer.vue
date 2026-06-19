@@ -341,6 +341,12 @@ export default {
       }
       this.applyFilters(this.activeFilters);
       this.emitSomaLocations(this.filterOptions);
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_action_filter`,
+        'category': `reset`,
+        'location': 'map_sidebar_cell_card_explorer',
+      });
     },
     searchAndFilterUpdate: function() {
       this.page = 1;
@@ -692,6 +698,12 @@ export default {
       if (!this.cellTypes.some((cellType) => cellType.id === this.activeCardId)) {
         this.activeCardId = null;
       }
+
+      this.$emit('search-changed', {
+        query: this.searchInput,
+        filter: filters,
+        tabType: "cellType",
+      });
     },
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
