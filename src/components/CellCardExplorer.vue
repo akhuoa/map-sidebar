@@ -366,13 +366,29 @@ export default {
     },
     numberPerPageUpdate: function(value) {
       this.numberPerPage = parseInt(value, 10) || 10;
-      this.pageChange(1);
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_cell_card_perPage`,
+        'category': value + '',
+        'location': 'map_sidebar_cell_card_explorer',
+      });
+
+      const preventPaginationTracking = this.page === 1;
+      this.pageChange(1, preventPaginationTracking);
     },
-    pageChange: function(page) {
+    pageChange: function(page, preventTracking = false) {
       this.page = page;
       this.start = (page - 1) * this.numberPerPage;
       this.applyFilters(this.activeFilters);
       this.scrollToTop();
+
+      if (!preventTracking) {
+        EventBus.emit('trackEvent', {
+          'event_name': `portal_maps_cell_card_pagination`,
+          'category': `page_${this.page}`,
+          'location': 'map_sidebar_cell_card_explorer',
+        });
+      }
     },
     scrollToTop: function() {
       if (this.$refs.content) {
