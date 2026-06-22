@@ -435,7 +435,10 @@ export default {
     getSelectedSomaLocationFilters: function() {
       return (this.activeFilters || [])
         .filter((filter) => {
-          return this.normalizeFacetValue(filter?.term) === 'soma location';
+          return (
+            this.normalizeFacetValue(filter?.term) === 'soma location' &&
+            this.normalizeFacetValue(filter?.facet) !== 'show all'
+          );
         })
         .map((filter) => this.normalizeFacetValue(filter?.facet))
         .filter(Boolean);
