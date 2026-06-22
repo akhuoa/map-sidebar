@@ -586,6 +586,14 @@ export default {
           label: 'Source',
           children: this.buildFacetChildren(cellTypes, 'sourceNomenclatureLabel'),
         },
+        {
+          key: 'notes',
+          label: 'Notes',
+          children: [
+            { label: 'with notes' },
+            { label: 'without notes' },
+          ],
+        },
       ];
 
       return options.filter((option) => option.children.length > 0);
@@ -681,6 +689,13 @@ export default {
 
       if (filterTerm === 'source') {
         return this.normalizeFacetValue(cellType.sourceNomenclatureLabel) === filterFacet;
+      }
+
+      if (filterTerm === 'notes') {
+        const hasNotes = (cellType.alertNotes?.length > 0 || cellType.curatorNotes?.length > 0);
+        if (filterFacet === 'with notes') return hasNotes;
+        if (filterFacet === 'without notes') return !hasNotes;
+        return false;
       }
 
       return false;
