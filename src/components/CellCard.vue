@@ -812,7 +812,6 @@ export default {
 .source-publication-chip,
 .source-publication-link {
   display: inline-block;
-  border: 1px solid var(--cell-card-source-color);
   border-radius: 4px;
   color: white !important;
   text-decoration: none;
@@ -820,7 +819,8 @@ export default {
 }
 
 .source-publication-chip {
-  padding: 2px 6px;
+  padding: 2px 8px;
+  font-size: 13px;
 }
 
 .alert-chip {
