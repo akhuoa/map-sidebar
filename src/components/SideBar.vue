@@ -72,6 +72,7 @@
                 v-show="tab.id === activeTabId"
                 :envVars="envVars"
                 :activeSpecies="activeSpeciesForEntries"
+                @search-changed="searchChanged(tab.id, $event)"
                 @dataset-search="openDatasetSearchFromCellCard($event)"
                 @connectivity-search="openConnectivitySearch($event.facets, $event.query)"
                 @soma-location-hovered="showSomaLocation"
@@ -218,7 +219,11 @@ export default {
           search: '',
           filters: [],
         },
-        connectivity:  {
+        connectivity: {
+          search: '',
+          filters: [],
+        },
+        cellCards: {
           search: '',
           filters: [],
         },
@@ -504,6 +509,13 @@ export default {
         this.state.connectivity.filters = connectivityExplorerTabRef.getFilters();
       }
 
+      // Update cell card explorer state if available
+      const cellCardExplorerTabRef = this.getTabRef(undefined, 'cellCardExplorer');
+      if (cellCardExplorerTabRef) {
+        this.state.cellCards.search = cellCardExplorerTabRef.getSearch();
+        this.state.cellCards.filters = cellCardExplorerTabRef.getFilters();
+      }
+
       // Update connectivity entries if available
       if (this.connectivityEntry && this.connectivityEntry.length > 0) {
         this.state.connectivityEntries = this.connectivityEntry.map((entry) => entry.id);
@@ -533,11 +545,15 @@ export default {
     setState: function (state) {
       // if state is not provided or formatted incorrectly, do nothing
       if (!state || !state.dataset || !state.connectivity) return;
-      this.state = JSON.parse(JSON.stringify(state)); // deep copy to avoid reference issues
-      const datasetFilters = state.dataset.filters;
-      const connectivityFilters = state.connectivity.filters;
-      const datasetSearch = state.dataset.search;
-      const connectivitySearch = state.connectivity.search;
+      // Create a deep copy while preserving the original state structure for future extensibility
+      const newState = JSON.parse(JSON.stringify(state));
+      this.state = { ...this.state, ...newState };
+      const datasetFilters = this.state.dataset.filters;
+      const connectivityFilters = this.state.connectivity.filters;
+      const datasetSearch = this.state.dataset.search;
+      const connectivitySearch = this.state.connectivity.search;
+      const cellCardFilters = this.state.cellCards.filters || [];
+      const cellCardSearch = this.state.cellCards.search || '';
 
       if (datasetFilters.length || datasetSearch) {
         this.openSearch(datasetFilters, datasetSearch);
@@ -545,6 +561,10 @@ export default {
 
       if (connectivityFilters.length || connectivitySearch) {
         this.openConnectivitySearch(connectivityFilters, connectivitySearch);
+      }
+
+      if (cellCardFilters.length || cellCardSearch) {
+        this.openCellCardExplorerSearch(cellCardFilters, cellCardSearch);
       }
 
       if (state.activeTabId) {
