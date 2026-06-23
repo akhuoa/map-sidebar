@@ -341,6 +341,12 @@ export default {
       }
       this.applyFilters(this.activeFilters);
       this.emitSomaLocations(this.filterOptions);
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_action_filter`,
+        'category': `reset`,
+        'location': 'map_sidebar_cell_card_explorer',
+      });
     },
     searchAndFilterUpdate: function() {
       this.page = 1;
@@ -354,18 +360,35 @@ export default {
       this.page = 1;
       this.start = 0;
       this.applyFilters(this.activeFilters);
+      this.emitSomaLocations(this.filterOptions);
       this.searchHistoryUpdate(this.activeFilters, this.searchInput);
       this.loadingCards = false;
     },
     numberPerPageUpdate: function(value) {
       this.numberPerPage = parseInt(value, 10) || 10;
-      this.pageChange(1);
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_cell_card_perPage`,
+        'category': value + '',
+        'location': 'map_sidebar_cell_card_explorer',
+      });
+
+      const preventPaginationTracking = this.page === 1;
+      this.pageChange(1, preventPaginationTracking);
     },
-    pageChange: function(page) {
+    pageChange: function(page, preventTracking = false) {
       this.page = page;
       this.start = (page - 1) * this.numberPerPage;
       this.applyFilters(this.activeFilters);
       this.scrollToTop();
+
+      if (!preventTracking) {
+        EventBus.emit('trackEvent', {
+          'event_name': `portal_maps_cell_card_pagination`,
+          'category': `page_${this.page}`,
+          'location': 'map_sidebar_cell_card_explorer',
+        });
+      }
     },
     scrollToTop: function() {
       if (this.$refs.content) {
@@ -399,6 +422,8 @@ export default {
           this.$refs.filtersRef.checkShowAllBoxes();
         }
       }
+
+      this.emitSomaLocations(this.filterOptions);
     },
     cascaderReady: function() {
       this.cascaderIsReady = true;
@@ -410,7 +435,10 @@ export default {
     getSelectedSomaLocationFilters: function() {
       return (this.activeFilters || [])
         .filter((filter) => {
-          return this.normalizeFacetValue(filter?.term) === 'soma location';
+          return (
+            this.normalizeFacetValue(filter?.term) === 'soma location' &&
+            this.normalizeFacetValue(filter?.facet) !== 'show all'
+          );
         })
         .map((filter) => this.normalizeFacetValue(filter?.facet))
         .filter(Boolean);
@@ -561,6 +589,14 @@ export default {
           label: 'Source',
           children: this.buildFacetChildren(cellTypes, 'sourceNomenclatureLabel'),
         },
+        {
+          key: 'notes',
+          label: 'Notes',
+          children: [
+            { label: 'with notes' },
+            { label: 'without notes' },
+          ],
+        },
       ];
 
       return options.filter((option) => option.children.length > 0);
@@ -658,6 +694,13 @@ export default {
         return this.normalizeFacetValue(cellType.sourceNomenclatureLabel) === filterFacet;
       }
 
+      if (filterTerm === 'notes') {
+        const hasNotes = (cellType.alertNotes?.length > 0 || cellType.curatorNotes?.length > 0);
+        if (filterFacet === 'with notes') return hasNotes;
+        if (filterFacet === 'without notes') return !hasNotes;
+        return false;
+      }
+
       return false;
     },
     applyFilters: function(filters) {
@@ -689,6 +732,12 @@ export default {
       if (!this.cellTypes.some((cellType) => cellType.id === this.activeCardId)) {
         this.activeCardId = null;
       }
+
+      this.$emit('search-changed', {
+        query: this.searchInput,
+        filter: filters,
+        tabType: "cellType",
+      });
     },
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
@@ -698,6 +747,13 @@ export default {
     },
     onConnectivitySearch: function (query) {
       this.$emit('connectivity-search', query);
+    },
+    getSearch: function () {
+      return this.searchInput;
+    },
+    getFilters: function () {
+      const hasFilters = this.activeFilters.some((f) => f.facet.toLowerCase() !== 'show all');
+      return hasFilters ? this.activeFilters : [];
     },
   },
 }

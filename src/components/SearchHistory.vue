@@ -334,7 +334,8 @@ export default {
     getParentComponentName: function () {
       const isConnectivity = this.localStorageKey?.indexOf('connectivity') !== -1;
       const isDataset = this.localStorageKey?.indexOf('dataset') !== -1;
-      const location = isConnectivity ? 'connectivity' : isDataset ? 'dataset' : '';
+      const isCellCard = this.localStorageKey?.indexOf('cell-card') !== -1;
+      const location = isConnectivity ? 'connectivity' : isDataset ? 'dataset' : isCellCard ? 'cell_card' : '';
       return location;
     },
     search: function (item) {

@@ -395,9 +395,21 @@ export default {
     },
     openCard: function() {
       this.$emit('open', this.cellType.id);
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_cell_card_open`,
+        'category': this.cellType.id || '',
+        'location': 'map_sidebar_cell_card',
+      });
     },
     closeCard: function() {
       this.$emit('close');
+
+      EventBus.emit('trackEvent', {
+        'event_name': `portal_maps_cell_card_close`,
+        'category': this.cellType.id || '',
+        'location': 'map_sidebar_cell_card',
+      });
     },
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
@@ -800,7 +812,6 @@ export default {
 .source-publication-chip,
 .source-publication-link {
   display: inline-block;
-  border: 1px solid var(--cell-card-source-color);
   border-radius: 4px;
   color: white !important;
   text-decoration: none;
@@ -808,7 +819,8 @@ export default {
 }
 
 .source-publication-chip {
-  padding: 2px 6px;
+  padding: 2px 8px;
+  font-size: 13px;
 }
 
 .alert-chip {
