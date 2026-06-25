@@ -92,6 +92,7 @@
         @dataset-search="onDatasetSearch"
         @connectivity-search="onConnectivitySearch"
         @soma-location-hovered="showSomaLocation"
+        @related-cell-click="onRelatedCellClick"
       />
       <el-pagination
         class="pagination"
@@ -737,6 +738,52 @@ export default {
         query: this.searchInput,
         filter: filters,
         tabType: "cellType",
+      });
+    },
+    onRelatedCellClick: function(relatedCell) {
+      const species = relatedCell.species;
+      const label = relatedCell.label;
+
+      // Normalize species (e.g., "human male" -> "human")
+      const normalizedSpecies = this.normalizeActiveSpeciesFilterTerm(species);
+
+      // Check if this species filter already exists
+      const speciesFilterExists = this.activeFilters.some(function(filter) {
+        return this.normalizeFacetValue(filter.term) === 'species'
+          && this.normalizeFacetValue(filter.facet) === this.normalizeFacetValue(normalizedSpecies);
+      }, this);
+
+      // Add species filter if not already present
+      if (!speciesFilterExists && normalizedSpecies) {
+        this.activeFilters.push({
+          facetPropPath: 'species',
+          facet: capitalise(normalizedSpecies),
+          term: 'Species',
+          tagLabel: capitalise(normalizedSpecies),
+        });
+      }
+
+      // Clear search input to avoid text search interfering
+      this.searchInput = '';
+      this.page = 1;
+      this.start = 0;
+
+      // Apply filters and sync cascader UI
+      this.applyFilters(this.activeFilters);
+      this.syncCascaderFromActiveFilters();
+      this.emitSomaLocations(this.filterOptions);
+
+      // Find the matching cell type by preferredLabel and open its card
+      const matchingCellType = this.allCellTypes.find(function(ct) {
+        return (ct.preferredLabel || '').toLowerCase() === (label || '').toLowerCase();
+      });
+
+      if (matchingCellType) {
+        this.activeCardId = matchingCellType.id;
+      }
+
+      this.$nextTick(function() {
+        this.scrollToTop();
       });
     },
     showSomaLocation: function (name) {
