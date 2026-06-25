@@ -609,8 +609,8 @@ export default {
       const selectedSomaLocationFilters = this.getSelectedSomaLocationFilters();
       const shouldFilterBySelectedSomaLocations = (this.activeFilters || []).length > 0 && selectedSomaLocationFilters.length > 0;
       const selectedSomaLocationSet = new Set(selectedSomaLocationFilters);
-      const scopedCellTypes = this.getCellTypesForActiveSpecies();
-      const somaLocationCounts = scopedCellTypes.reduce((counts, cellType) => {
+      const filteredCellTypes = this.getFilteredCellTypes(this.activeFilters, this.searchInput);
+      const somaLocationCounts = filteredCellTypes.reduce((counts, cellType) => {
         (Array.isArray(cellType?.somaLocations) ? cellType.somaLocations : []).forEach((location) => {
           const normalizedLocation = String(location || '').trim().toLowerCase();
           if (!normalizedLocation) return;
@@ -704,8 +704,8 @@ export default {
 
       return false;
     },
-    applyFilters: function(filters) {
-      const searchTerms = this.normalizeSearchTerms(this.searchInput);
+    getFilteredCellTypes: function(filters = this.activeFilters, searchInput = this.searchInput) {
+      const searchTerms = this.normalizeSearchTerms(searchInput);
       const activeFilters = (filters || []).filter((filter) => {
         return filter?.term && filter?.facet && this.normalizeFacetValue(filter.facet) !== 'show all';
       });
@@ -721,11 +721,16 @@ export default {
 
       const filterGroups = Object.values(filtersByTerm);
 
-      const filtered = this.allCellTypes.filter((cellType) => {
-        return filterGroups.every((termGroup) => {
-          return termGroup.some((filter) => this.matchFieldFilter(cellType, filter));
-        });
-      }).filter((cellType) => this.matchSearchQuery(cellType, searchTerms));
+      return this.allCellTypes
+        .filter((cellType) => {
+          return filterGroups.every((termGroup) => {
+            return termGroup.some((filter) => this.matchFieldFilter(cellType, filter));
+          });
+        })
+        .filter((cellType) => this.matchSearchQuery(cellType, searchTerms));
+    },
+    applyFilters: function(filters) {
+      const filtered = this.getFilteredCellTypes(filters, this.searchInput);
 
       this.totalFilteredCount = filtered.length;
       this.cellTypes = filtered.slice(this.start, this.start + this.numberPerPage);
