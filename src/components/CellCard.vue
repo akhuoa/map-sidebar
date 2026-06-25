@@ -152,8 +152,16 @@
         </div>
         <div v-if="cellType.relatedCells?.length" class="card-section">
           <div class="card-section-title">Related Species Variants</div>
-          <ul v-for="relatedCell in cellType.relatedCells" :key="relatedCell">
-            <li>{{ relatedCell.label }}</li>
+          <ul class="related-cell-list">
+            <li v-for="relatedCell in cellType.relatedCells" :key="relatedCell">
+              <button
+                class="related-cell-item"
+                @click.stop="$emit('related-cell-click', relatedCell)"
+                title="Click to view this cell type"
+              >
+                {{ relatedCell.label }}
+              </button>
+            </li>
           </ul>
         </div>
         <div v-if="cellType.sourceNomenclature" class="card-section source-publication-section">
@@ -236,7 +244,7 @@ export default {
       default: false,
     },
   },
-  emits: ['open', 'close', 'soma-location-hovered', 'dataset-search', 'connectivity-search'],
+  emits: ['open', 'close', 'soma-location-hovered', 'dataset-search', 'connectivity-search', 'related-cell-click'],
   data() {
     return {
       cardElement: null,
@@ -741,6 +749,11 @@ export default {
     margin: 0;
     padding-left: 1rem;
 
+    &.related-cell-list {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
     li {
       color: #606266;
     }
@@ -953,6 +966,29 @@ export default {
     + .alert-block-note {
       margin-top: 0.5rem;
     }
+  }
+}
+
+.related-cell-list {
+  li + li {
+    margin-top: 0.5rem;
+  }
+}
+
+.related-cell-item {
+  cursor: pointer;
+  color: $app-primary-color;
+  background: none;
+  border: 1px solid $app-primary-color;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  transition: background-color 0.2s ease, border-color 0.2s ease, text-decoration-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba($app-primary-color, 0.08);
   }
 }
 </style>
