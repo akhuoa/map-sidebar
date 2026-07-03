@@ -303,6 +303,20 @@
         ></div>
       </div>
     </div>
+
+    <div
+      class="content-container"
+      v-if="expertConsultants?.length"
+    >
+      <div class="block attribute-title-container">
+        <span class="attribute-title">Expert Consultants</span>
+      </div>
+      <ul class="block consultant-block">
+        <li v-for="consultant in expertConsultants" :key="consultant.url">
+          <a :href="consultant.url" target="_blank">{{ consultant.name }}</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -401,6 +415,7 @@ export default {
       connectivityFromMap: null,
       isTitleExpanded: false,
       showTitleToggle: false,
+      expertConsultants: [],
     };
   },
   computed: {
@@ -474,6 +489,12 @@ export default {
     },
   },
   watch: {
+    entryData: {
+      deep: true,
+      handler: function () {
+        this.fetchExpertConsultants();
+      },
+    },
     entry: {
       deep: true,
       immediate: true,
@@ -829,6 +850,53 @@ export default {
       });
       return data
     },
+    fetchExpertConsultants: async function () {
+      const expertConsultantURLs = this.entryData['expert-consultants'] || [];
+      const consultants = [];
+      for (const url of expertConsultantURLs) {
+        const scicrunchURL = url.startsWith('https://scicrunch.org');
+        const APIURL = scicrunchURL ? url + '.json' : url;
+        const proxyURL = `http://localhost:8787/cors-proxy?target=${APIURL}`;
+
+        try {
+          const response = await fetch(proxyURL, {
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          const data = await response.json();
+          if (scicrunchURL) {
+            const { hits } = data?.hits || {};
+            if (hits?.length) {
+              const name = hits[0]?._source?.item?.name;
+              if (name) {
+                consultants.push({
+                  name,
+                  url
+                });
+              }
+            }
+          } else {
+            const nameInfo = data?.person?.name;
+            if (nameInfo) {
+              const givenName = nameInfo['given-names']?.value || '';
+              const familyName = nameInfo['family-name']?.value || '';
+              const creditName = nameInfo['credit-name']?.value || '';
+              const fullName = creditName || `${givenName} ${familyName}`.trim();
+              if (fullName) {
+                consultants.push({
+                  name: fullName,
+                  url: url
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching expert consultant:', error);
+        }
+      }
+      this.expertConsultants = consultants;
+    },
     onConnectivityHovered: function (label) {
       const payload = {
         connectivityInfo: this.entry,
@@ -981,6 +1049,7 @@ export default {
   mounted: function () {
     this.updatedCopyContent = this.getUpdateCopyContent();
     this.updateTitleToggleVisibility();
+    this.fetchExpertConsultants();
 
     EventBus.on('connectivity-error', (errorInfo) => {
       const connectivityError = this.getConnectivityError(errorInfo);
@@ -1544,6 +1613,14 @@ export default {
     &:hover {
       opacity: 0.8;
     }
+  }
+}
+
+.consultant-block {
+  padding-left: 1rem;
+
+  a {
+    color: $app-primary-color;
   }
 }
 
