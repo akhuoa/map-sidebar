@@ -304,16 +304,18 @@
       </div>
     </div>
 
-    <div
-      class="content-container"
-      v-if="expertConsultants?.length"
-    >
+    <div class="content-container" v-if="expertConsultants.length">
       <div class="block attribute-title-container">
         <span class="attribute-title">Expert Consultants</span>
       </div>
       <ul class="block consultant-block">
         <li v-for="consultant in expertConsultants" :key="consultant.url">
-          <a :href="consultant.url" target="_blank">{{ consultant.name }}</a>
+          <a :href="consultant.url" target="_blank" v-if="consultant.name">
+            {{ consultant.name }}
+          </a>
+          <div class="consultant-loading" v-else>
+            <span>Loading {{ consultant.url }}</span>
+          </div>
         </li>
       </ul>
     </div>
@@ -486,6 +488,9 @@ export default {
     },
     flatmapApi: function () {
       return this.envVars.FLATMAPAPI_LOCATION;
+    },
+    expertConsultantURLs: function () {
+      return this.entryData['expert-consultants'] || [];
     },
   },
   watch: {
@@ -851,29 +856,38 @@ export default {
       return data
     },
     fetchExpertConsultants: async function () {
-      const expertConsultantURLs = this.entryData['expert-consultants'] || [];
-      const consultants = [];
-      for (const url of expertConsultantURLs) {
-        const scicrunchURL = url.startsWith('https://scicrunch.org');
-        const APIURL = scicrunchURL ? url + '.json' : url;
-        const proxyURL = `http://localhost:8787/cors-proxy?target=${APIURL}`;
+      this.expertConsultants = this.expertConsultantURLs.map(url => ({ name: '', url }));
+
+      for (const url of this.expertConsultantURLs) {
+        const isScicrunchURL = url.startsWith('https://scicrunch.org');
+        const isOrcidURL = url.startsWith('https://orcid.org');
+
+        if (!isScicrunchURL && !isOrcidURL) {
+          console.warn(`Unsupported expert consultant URL: ${url}`);
+          continue;
+        }
+
+        // TEMPORARY: Use a CORS proxy for SciCrunch API requests
+        const scicrunchAPIURL = (targetURL) => `http://localhost:8787/cors-proxy?target=${targetURL}.json`;
+        const orcidAPIURL = (targetURL) => targetURL.replace('orcid.org', 'pub.orcid.org/v2.1');
+        const APIURL = isScicrunchURL ? scicrunchAPIURL(url) : orcidAPIURL(url);
 
         try {
-          const response = await fetch(proxyURL, {
+          const response = await fetch(APIURL, {
             headers: {
               'Accept': 'application/json'
             }
           });
           const data = await response.json();
-          if (scicrunchURL) {
+          if (isScicrunchURL) {
             const { hits } = data?.hits || {};
             if (hits?.length) {
               const name = hits[0]?._source?.item?.name;
               if (name) {
-                consultants.push({
-                  name,
-                  url
-                });
+                const consultantIndex = this.expertConsultants.findIndex((consultant) => consultant.url === url);
+                if (consultantIndex !== -1) {
+                  this.expertConsultants[consultantIndex].name = name;
+                }
               }
             }
           } else {
@@ -884,10 +898,10 @@ export default {
               const creditName = nameInfo['credit-name']?.value || '';
               const fullName = creditName || `${givenName} ${familyName}`.trim();
               if (fullName) {
-                consultants.push({
-                  name: fullName,
-                  url: url
-                });
+                const consultantIndex = this.expertConsultants.findIndex((consultant) => consultant.url === url);
+                if (consultantIndex !== -1) {
+                  this.expertConsultants[consultantIndex].name = fullName;
+                }
               }
             }
           }
@@ -895,7 +909,6 @@ export default {
           console.error('Error fetching expert consultant:', error);
         }
       }
-      this.expertConsultants = consultants;
     },
     onConnectivityHovered: function (label) {
       const payload = {
@@ -1619,8 +1632,43 @@ export default {
 .consultant-block {
   padding-left: 1rem;
 
+  li + li {
+    margin-top: 0.5rem;
+  }
+
   a {
     color: $app-primary-color;
+  }
+}
+
+.consultant-loading {
+  margin: 0;
+  position: relative;
+
+  span {
+    position: static;
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  &::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation-duration: 3s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: loadingAnimation;
+    animation-timing-function: linear;
+    background: linear-gradient(to right,
+      var(--el-bg-color-page) 5%,
+      var(--el-color-info-light-8) 15%,
+      var(--el-bg-color-page) 30%
+    );
   }
 }
 
@@ -1645,6 +1693,25 @@ export default {
     height: 1rem;
     color: inherit;
     margin: 0;
+  }
+}
+
+.sr-only {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@keyframes loadingAnimation {
+  0% {
+    background-position: -30vw 0;
+  }
+  100% {
+    background-position: 70vw 0;
   }
 }
 </style>
