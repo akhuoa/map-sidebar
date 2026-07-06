@@ -48,7 +48,9 @@ export default {
     },
 
     rrid: function () {
-      return this.contributor.url.indexOf('RRID:') > -1 ? this.contributor.url.split('RRID:')[1] : ''
+      return this.contributor.url.indexOf('RRID:') > -1
+        ? 'RRID:' + this.contributor.url.split('RRID:')[1]
+        : ''
     }
   }
 }
