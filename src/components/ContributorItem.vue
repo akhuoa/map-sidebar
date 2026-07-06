@@ -14,7 +14,7 @@
           <a :href="contributor.url" target="_blank">{{ orcidId }}</a>
         </div>
         <div class="popover-url" v-if="rrid">
-          <strong>Resource ID</strong>:
+          <strong>RRID</strong>:
           <a :href="contributor.url" target="_blank">{{ rrid }}</a>
         </div>
         <div class="popover-organization" v-if="contributor.organization">
