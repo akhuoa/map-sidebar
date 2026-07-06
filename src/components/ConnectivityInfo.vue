@@ -310,9 +310,9 @@
       </div>
       <ul class="block consultant-block">
         <li v-for="consultant in expertConsultants" :key="consultant.url">
-          <a :href="consultant.url" target="_blank" v-if="consultant.name">
-            {{ consultant.name }}
-          </a>
+          <template v-if="consultant.name">
+            <contributor-item :contributor="consultant" />
+          </template>
           <div class="consultant-loading" v-else>
             <span>Loading {{ consultant.url }}</span>
           </div>
@@ -336,7 +336,7 @@ import {
   ElContainer as Container,
   ElIcon as Icon,
 } from 'element-plus'
-
+import ContributorItem from './ContributorItem.vue'
 import EventBus from './EventBus.js'
 import {
   CopyToClipboard,
@@ -374,6 +374,7 @@ export default {
     ConnectivityGraph,
     ConnectivityList,
     ConnectivityReconciliationList,
+    ContributorItem,
   },
   props: {
     connectivityEntry: {
@@ -901,6 +902,12 @@ export default {
                 const consultantIndex = this.expertConsultants.findIndex((consultant) => consultant.url === url);
                 if (consultantIndex !== -1) {
                   this.expertConsultants[consultantIndex].name = fullName;
+                  const orcidId = data['orcid-identifier']?.path || '';
+                  this.expertConsultants[consultantIndex].orcidId = orcidId;
+                  const employmentSummary = data?.['activities-summary']?.['employments']?.['employment-summary'] || [];
+                  const latestEmployment = employmentSummary[0] || {};
+                  this.expertConsultants[consultantIndex].organization = latestEmployment?.organization?.name || '';
+                  this.expertConsultants[consultantIndex].role = latestEmployment?.['role-title'] || '';
                 }
               }
             }
