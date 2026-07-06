@@ -6,6 +6,7 @@
       trigger="hover"
       popper-class="contributor-popover"
       :disabled="!hasOrcid"
+      :teleported="false"
     >
       <div class="popover-content">
         <div class="popover-name">{{ contributor.name }}</div>
@@ -55,40 +56,54 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../assets/_variables.scss';
+
 .contributor-item {
   display: inline;
 
   &.has-orcid {
     text-decoration: underline;
-    color: #8300bf;
-    cursor: pointer;
+    color: $app-primary-color;
   }
 }
 </style>
+
 <style lang="scss">
-.contributor-popover {
+@import '../assets/_variables.scss';
+
+.contributor-popover.el-popover {
+  font-family: $font-family;
+  background: #f3ecf6 !important;
+  border: 1px solid $app-primary-color !important;
+  border-radius: 4px !important;
+  color: $grey !important;
+  text-transform: none !important;
+  font-weight: 400;
+
+  .el-popper__arrow::before {
+    background: #f3ecf6 !important;
+    border-color: $app-primary-color !important;
+    background-color: #ffffff;
+  }
+
   .popover-content {
-    line-height: 1.6;
+    line-height: inherit;
   }
 
   .popover-name {
-    font-size: 1.15em;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+    font-size: 1.3em;
+    margin-bottom: 0.25em;
   }
 
   .popover-orcid {
-    margin-bottom: 0.4em;
-
     a {
-      color: #8300bf;
+      color: $app-primary-color;
       word-break: break-all;
     }
   }
 
   .popover-organization,
   .popover-role {
-    margin-bottom: 0.25em;
     word-break: normal;
   }
 }
