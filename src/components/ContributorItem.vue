@@ -1,18 +1,21 @@
 <template>
-  <div class="contributor-item" :class="{ 'has-orcid': hasOrcid }">
+  <div class="contributor-item">
     <el-popover
       placement="top-start"
       width="320"
       trigger="hover"
       popper-class="contributor-popover"
-      :disabled="!hasOrcid"
       :teleported="false"
     >
       <div class="popover-content">
         <div class="popover-name">{{ contributor.name }}</div>
-        <div class="popover-orcid">
+        <div class="popover-url" v-if="contributor.orcidId">
           <strong>ORCID iD</strong>:
-          <a :href="orcidUri" target="_blank">{{ orcidId }}</a>
+          <a :href="contributor.url" target="_blank">{{ orcidId }}</a>
+        </div>
+        <div class="popover-url" v-if="rrid">
+          <strong>Resource ID</strong>:
+          <a :href="contributor.url" target="_blank">{{ rrid }}</a>
         </div>
         <div class="popover-organization" v-if="contributor.organization">
           <strong>Organization</strong>: {{ contributor.organization }}
@@ -44,12 +47,8 @@ export default {
       return this.contributor.orcidId || ''
     },
 
-    orcidUri: function () {
-      return this.orcidId ? `https://orcid.org/${this.orcidId}` : ''
-    },
-
-    hasOrcid: function () {
-      return Boolean(this.orcidId)
+    rrid: function () {
+      return this.contributor.url.indexOf('RRID:') > -1 ? this.contributor.url.split('RRID:')[1] : ''
     }
   }
 }
@@ -60,11 +59,8 @@ export default {
 
 .contributor-item {
   display: inline;
-
-  &.has-orcid {
-    text-decoration: underline;
-    color: $app-primary-color;
-  }
+  text-decoration: underline;
+  color: $app-primary-color;
 }
 </style>
 
@@ -95,7 +91,7 @@ export default {
     margin-bottom: 0.25em;
   }
 
-  .popover-orcid {
+  .popover-url {
     a {
       color: $app-primary-color;
       word-break: break-all;
