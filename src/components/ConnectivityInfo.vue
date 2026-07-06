@@ -418,6 +418,7 @@ export default {
       connectivityFromMap: null,
       isTitleExpanded: false,
       showTitleToggle: false,
+      storedReferences: null,
       expertConsultants: [],
     };
   },
@@ -644,6 +645,7 @@ export default {
       this.$emit('show-reference-connectivities', refSource);
     },
     onReferencesLoaded: function (references) {
+      this.storedReferences = references;
       this.updatedCopyContent = this.getUpdateCopyContent(references);
     },
     getUpdateCopyContent: function (references) {
@@ -825,6 +827,47 @@ export default {
         contentArray.push(contentString);
       }
 
+      // Expert Consultants
+      if (this.expertConsultants?.length) {
+        let contentString = `<div><strong>Expert Consultants</strong></div>`;
+        contentString += '\n';
+        const contentList = this.expertConsultants
+          .filter((consultant) => consultant.name)
+          .map((consultant) => {
+            const fields = [`<div><strong>${consultant.name}</strong></div>`];
+
+            if (consultant.orcidId) {
+              fields.push(`<div>`)
+              fields.push(`<strong>ORCID iD</strong>: <span>${consultant.orcidId}</span>`)
+              fields.push(`(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`)
+              fields.push(`</div>`);
+            }
+
+            const rrid = consultant.url.indexOf('RRID:') > -1
+              ? 'RRID:' + consultant.url.split('RRID:')[1]
+              : '';
+            if (rrid) {
+              fields.push(`<div>`)
+              fields.push(`<strong>RRID</strong>: <span>${rrid}</span>`)
+              fields.push(`(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`)
+              fields.push(`</div>`);
+            }
+
+            if (consultant.organization) {
+              fields.push(`<div><strong>Organization</strong>: ${consultant.organization}</div>`);
+            }
+
+            if (consultant.role) {
+              fields.push(`<div><strong>Title</strong>: ${consultant.role}</div>`);
+            }
+
+            return `<li>${fields.join('\n')}</li>`;
+          })
+          .join('\n');
+        contentString += `<ul>${contentList}</ul>`;
+        contentArray.push(contentString);
+      }
+
       // Alert (Notes)
       if (this.entry.featuresAlert?.length) {
         const alertContent = this.entry.featuresAlert
@@ -916,6 +959,8 @@ export default {
           console.error('Error fetching expert consultant:', error);
         }
       }
+
+      this.updatedCopyContent = this.getUpdateCopyContent(this.storedReferences);
     },
     onConnectivityHovered: function (label) {
       const payload = {
