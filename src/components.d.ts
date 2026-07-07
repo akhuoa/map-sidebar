@@ -14,6 +14,7 @@ declare module 'vue' {
     ConnectivityCard: typeof import('./components/ConnectivityCard.vue')['default']
     ConnectivityExplorer: typeof import('./components/ConnectivityExplorer.vue')['default']
     ConnectivityInfo: typeof import('./components/ConnectivityInfo.vue')['default']
+    ContributorItem: typeof import('./components/ContributorItem.vue')['default']
     DatasetCard: typeof import('./components/DatasetCard.vue')['default']
     DatasetExplorer: typeof import('./components/DatasetExplorer.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
