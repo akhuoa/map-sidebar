@@ -303,6 +303,22 @@
         ></div>
       </div>
     </div>
+
+    <div class="content-container" v-if="expertConsultants.length">
+      <div class="block attribute-title-container">
+        <span class="attribute-title">Expert Consultants</span>
+      </div>
+      <ul class="block consultant-block">
+        <li v-for="consultant in expertConsultants" :key="consultant.url">
+          <template v-if="consultant.name">
+            <contributor-item :contributor="consultant" />
+          </template>
+          <div class="consultant-loading" v-else>
+            <span>Loading {{ consultant.url }}</span>
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -320,7 +336,7 @@ import {
   ElContainer as Container,
   ElIcon as Icon,
 } from 'element-plus'
-
+import ContributorItem from './ContributorItem.vue'
 import EventBus from './EventBus.js'
 import {
   CopyToClipboard,
@@ -354,6 +370,7 @@ export default {
     ConnectivityGraph,
     ConnectivityList,
     ConnectivityReconciliationList,
+    ContributorItem,
   },
   props: {
     connectivityEntry: {
@@ -397,6 +414,8 @@ export default {
       connectivityFromMap: null,
       isTitleExpanded: false,
       showTitleToggle: false,
+      storedReferences: null,
+      expertConsultants: [],
     };
   },
   computed: {
@@ -468,8 +487,17 @@ export default {
     flatmapApi: function () {
       return this.envVars.FLATMAPAPI_LOCATION;
     },
+    expertConsultantURLs: function () {
+      return this.entryData['expert-consultants'] || [];
+    },
   },
   watch: {
+    entryData: {
+      deep: true,
+      handler: function () {
+        this.fetchExpertConsultants();
+      },
+    },
     entry: {
       deep: true,
       immediate: true,
@@ -613,6 +641,7 @@ export default {
       this.$emit('show-reference-connectivities', refSource);
     },
     onReferencesLoaded: function (references) {
+      this.storedReferences = references;
       this.updatedCopyContent = this.getUpdateCopyContent(references);
     },
     getUpdateCopyContent: function (references) {
@@ -794,6 +823,47 @@ export default {
         contentArray.push(contentString);
       }
 
+      // Expert Consultants
+      if (this.expertConsultants?.length) {
+        let contentString = `<div><strong>Expert Consultants</strong></div>`;
+        contentString += '\n';
+        const contentList = this.expertConsultants
+          .filter((consultant) => consultant.name)
+          .map((consultant) => {
+            const fields = [`<div><strong>${consultant.name}</strong></div>`];
+
+            if (consultant.orcidId) {
+              fields.push(`<div>`)
+              fields.push(`<strong>ORCID iD</strong>: <span>${consultant.orcidId}</span>`)
+              fields.push(`(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`)
+              fields.push(`</div>`);
+            }
+
+            const rrid = consultant.url.indexOf('RRID:') > -1
+              ? 'RRID:' + consultant.url.split('RRID:')[1]
+              : '';
+            if (rrid) {
+              fields.push(`<div>`)
+              fields.push(`<strong>RRID</strong>: <span>${rrid}</span>`)
+              fields.push(`(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`)
+              fields.push(`</div>`);
+            }
+
+            if (consultant.organization) {
+              fields.push(`<div><strong>Organization</strong>: ${consultant.organization}</div>`);
+            }
+
+            if (consultant.role) {
+              fields.push(`<div><strong>Title</strong>: ${consultant.role}</div>`);
+            }
+
+            return `<li>${fields.join('\n')}</li>`;
+          })
+          .join('\n');
+        contentString += `<ul>${contentList}</ul>`;
+        contentArray.push(contentString);
+      }
+
       // Alert (Notes)
       if (this.entry.featuresAlert?.length) {
         const alertContent = this.entry.featuresAlert
@@ -824,6 +894,70 @@ export default {
         }
       });
       return data
+    },
+    fetchExpertConsultants: async function () {
+      this.expertConsultants = this.expertConsultantURLs.map(url => ({ name: '', url }));
+
+      for (const url of this.expertConsultantURLs) {
+        const isScicrunchURL = url.startsWith('https://scicrunch.org');
+        const isOrcidURL = url.startsWith('https://orcid.org');
+
+        if (!isScicrunchURL && !isOrcidURL) {
+          console.warn(`Unsupported expert consultant URL: ${url}`);
+          continue;
+        }
+
+        // TEMPORARY: Use a CORS proxy for SciCrunch API requests
+        const corsProxy = this.envVars.CORS_PROXY_API;
+        const scicrunchAPIURL = (targetURL) => `${corsProxy}?target=${targetURL}.json`;
+        const orcidAPIURL = (targetURL) => targetURL.replace('orcid.org', 'pub.orcid.org/v2.1');
+        const APIURL = isScicrunchURL ? scicrunchAPIURL(url) : orcidAPIURL(url);
+
+        try {
+          const response = await fetch(APIURL, {
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          const data = await response.json();
+          if (isScicrunchURL) {
+            const { hits } = data?.hits || {};
+            if (hits?.length) {
+              const name = hits[0]?._source?.item?.name;
+              if (name) {
+                const consultantIndex = this.expertConsultants.findIndex((consultant) => consultant.url === url);
+                if (consultantIndex !== -1) {
+                  this.expertConsultants[consultantIndex].name = name;
+                }
+              }
+            }
+          } else {
+            const nameInfo = data?.person?.name;
+            if (nameInfo) {
+              const givenName = nameInfo['given-names']?.value || '';
+              const familyName = nameInfo['family-name']?.value || '';
+              const creditName = nameInfo['credit-name']?.value || '';
+              const fullName = creditName || `${givenName} ${familyName}`.trim();
+              if (fullName) {
+                const consultantIndex = this.expertConsultants.findIndex((consultant) => consultant.url === url);
+                if (consultantIndex !== -1) {
+                  this.expertConsultants[consultantIndex].name = fullName;
+                  const orcidId = data['orcid-identifier']?.path || '';
+                  this.expertConsultants[consultantIndex].orcidId = orcidId;
+                  const employmentSummary = data?.['activities-summary']?.['employments']?.['employment-summary'] || [];
+                  const latestEmployment = employmentSummary[0] || {};
+                  this.expertConsultants[consultantIndex].organization = latestEmployment?.organization?.name || '';
+                  this.expertConsultants[consultantIndex].role = latestEmployment?.['role-title'] || '';
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching expert consultant:', error);
+        }
+      }
+
+      this.updatedCopyContent = this.getUpdateCopyContent(this.storedReferences);
     },
     onConnectivityHovered: function (label) {
       const payload = {
@@ -938,6 +1072,7 @@ export default {
   mounted: function () {
     this.updatedCopyContent = this.getUpdateCopyContent();
     this.updateTitleToggleVisibility();
+    this.fetchExpertConsultants();
 
     EventBus.on('connectivity-error', (errorInfo) => {
       const connectivityError = this.getConnectivityError(errorInfo);
@@ -1504,6 +1639,49 @@ export default {
   }
 }
 
+.consultant-block {
+  padding-left: 1rem;
+
+  li + li {
+    margin-top: 0.5rem;
+  }
+
+  a {
+    color: $app-primary-color;
+  }
+}
+
+.consultant-loading {
+  margin: 0;
+  position: relative;
+
+  span {
+    position: static;
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  &::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation-duration: 3s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: loadingAnimation;
+    animation-timing-function: linear;
+    background: linear-gradient(to right,
+      var(--el-bg-color-page) 5%,
+      var(--el-color-info-light-8) 15%,
+      var(--el-bg-color-page) 30%
+    );
+  }
+}
+
 .alert-chip {
   margin-left: 5px;
   background-color: $app-primary-color;
@@ -1525,6 +1703,25 @@ export default {
     height: 1rem;
     color: inherit;
     margin: 0;
+  }
+}
+
+.sr-only {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@keyframes loadingAnimation {
+  0% {
+    background-position: -30vw 0;
+  }
+  100% {
+    background-position: 70vw 0;
   }
 }
 </style>
