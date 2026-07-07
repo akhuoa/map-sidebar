@@ -912,7 +912,8 @@ export default {
         }
 
         // TEMPORARY: Use a CORS proxy for SciCrunch API requests
-        const scicrunchAPIURL = (targetURL) => `http://localhost:8787/cors-proxy?target=${targetURL}.json`;
+        const corsProxy = this.envVars.CORS_PROXY_API;
+        const scicrunchAPIURL = (targetURL) => `${corsProxy}?target=${targetURL}.json`;
         const orcidAPIURL = (targetURL) => targetURL.replace('orcid.org', 'pub.orcid.org/v2.1');
         const APIURL = isScicrunchURL ? scicrunchAPIURL(url) : orcidAPIURL(url);
 
