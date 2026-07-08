@@ -320,7 +320,9 @@
             <template v-if="consultant.refreshable">
               <br />
               Please try again.
-              <span class="reload-button" @click="reloadConsultant(consultant)">Reload</span>
+              <span class="reload-button" @click="reloadConsultant(consultant)">
+                Reload
+              </span>
             </template>
           </div>
         </li>
@@ -1811,6 +1813,14 @@ export default {
       var(--el-bg-color-page) 30%
     );
   }
+}
+
+.consultant-error {
+  padding: 0.25rem 0.5rem;
+  font-style: italic;
+  color: var(--el-color-info);
+  border: 1px dotted red;
+  border-radius: 4px;
 }
 
 .alert-chip {
