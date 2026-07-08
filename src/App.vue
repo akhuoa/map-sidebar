@@ -137,7 +137,6 @@ export default {
         ROOT_URL: import.meta.env.VITE_APP_ROOT_URL,
         FLATMAPAPI_LOCATION: import.meta.env.VITE_FLATMAPAPI_LOCATION,
         CELL_CARDS_API: import.meta.env.VITE_APP_CELL_CARDS_API,
-        CORS_PROXY_API: import.meta.env.VITE_CORS_PROXY_API,
       },
       connectivityEntry: [],
       createData: {
