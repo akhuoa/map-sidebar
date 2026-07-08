@@ -310,11 +310,18 @@
       </div>
       <ul class="block consultant-block">
         <li v-for="consultant in expertConsultants" :key="consultant.url">
-          <template v-if="consultant.name">
-            <contributor-item :contributor="consultant" />
-          </template>
-          <div class="consultant-loading" v-else>
+          <contributor-item :contributor="consultant" v-if="consultant.name" />
+          <div class="consultant-loading" v-else-if="!consultant.error">
             <span>Loading {{ consultant.url }}</span>
+          </div>
+          <div class="consultant-error" v-if="consultant.error">
+            <span v-if="consultant.errorMessage">{{ consultant.errorMessage }}</span>
+            <span v-else>Sorry, something went wrong.</span>
+            <template v-if="consultant.refreshable">
+              <br />
+              Please try again.
+              <span class="reload-button" @click="reloadConsultant(consultant)">Reload</span>
+            </template>
           </div>
         </li>
       </ul>
@@ -900,69 +907,148 @@ export default {
       return data
     },
     fetchExpertConsultants: async function () {
-      this.expertConsultants = this.expertConsultantURLs.map(url => ({ name: '', url }));
+      this.expertConsultants = this.expertConsultantURLs.map((url) => ({
+        name: '',
+        url,
+        error: false,
+        errorMessage: '',
+        refreshable: false,
+      }));
 
       for (const url of this.expertConsultantURLs) {
-        const scicrunchBase = 'https://scicrunch.org';
-        const orcidBase = 'https://orcid.org';
-        const orcidAPIBase = 'https://pub.orcid.org/v2.1';
-        const apiLocationBase = (this.envVars.API_LOCATION ?? '').replace(/\/?$/, '/');
-        const isScicrunchURL = url.startsWith(scicrunchBase);
-        const isOrcidURL = url.startsWith(orcidBase);
-
-        if (!isScicrunchURL && !isOrcidURL) {
-          console.warn(`Unsupported expert consultant URL: ${url}`);
-          continue;
-        }
-
-        const scicrunchAPIURL = (targetURL) => targetURL.replace(scicrunchBase, `${apiLocationBase}scicrunch`);
-        const orcidAPIURL = (targetURL) => targetURL.replace(orcidBase, orcidAPIBase);
-        const APIURL = isScicrunchURL ? scicrunchAPIURL(url) : orcidAPIURL(url);
-
-        try {
-          const response = await fetch(APIURL, {
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
-          const data = await response.json();
-          if (isScicrunchURL) {
-            const { hits } = data?.hits || {};
-            if (hits?.length) {
-              const name = hits[0]?._source?.item?.name;
-              if (name) {
-                const consultantIndex = this.expertConsultants.findIndex((consultant) => consultant.url === url);
-                if (consultantIndex !== -1) {
-                  this.expertConsultants[consultantIndex].name = name;
-                }
-              }
-            }
-          } else {
-            const nameInfo = data?.person?.name;
-            if (nameInfo) {
-              const givenName = nameInfo['given-names']?.value || '';
-              const familyName = nameInfo['family-name']?.value || '';
-              const creditName = nameInfo['credit-name']?.value || '';
-              const fullName = creditName || `${givenName} ${familyName}`.trim();
-              if (fullName) {
-                const consultantIndex = this.expertConsultants.findIndex((consultant) => consultant.url === url);
-                if (consultantIndex !== -1) {
-                  this.expertConsultants[consultantIndex].name = fullName;
-                  const orcidId = data['orcid-identifier']?.path || '';
-                  this.expertConsultants[consultantIndex].orcidId = orcidId;
-                  const employmentSummary = data?.['activities-summary']?.['employments']?.['employment-summary'] || [];
-                  const latestEmployment = employmentSummary[0] || {};
-                  this.expertConsultants[consultantIndex].organization = latestEmployment?.organization?.name || '';
-                  this.expertConsultants[consultantIndex].role = latestEmployment?.['role-title'] || '';
-                }
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching expert consultant:', error);
-        }
+        await this.fetchSingleExpertConsultant(url);
       }
 
+      this.updatedCopyContent = this.getUpdateCopyContent(this.storedReferences);
+    },
+    buildExpertConsultantRequestInfo: function (url) {
+      const scicrunchBase = 'https://scicrunch.org';
+      const orcidBase = 'https://orcid.org';
+      const orcidAPIBase = 'https://pub.orcid.org/v2.1';
+      const apiLocationBase = (this.envVars.API_LOCATION ?? '').replace(/\/?$/, '/');
+      const isScicrunchURL = url.startsWith(scicrunchBase);
+      const isOrcidURL = url.startsWith(orcidBase);
+
+      if (!isScicrunchURL && !isOrcidURL) {
+        return null;
+      }
+
+      const APIURL = isScicrunchURL
+        ? url.replace(scicrunchBase, `${apiLocationBase}scicrunch`)
+        : url.replace(orcidBase, orcidAPIBase);
+
+      return {
+        APIURL,
+        isScicrunchURL,
+      };
+    },
+    fetchSingleExpertConsultant: async function (url) {
+      const requestInfo = this.buildExpertConsultantRequestInfo(url);
+      if (!requestInfo) {
+        console.warn(`Unsupported expert consultant URL: ${url}`);
+        this.updateExpertConsultantByURL(url, {
+          name: '',
+          error: true,
+          errorMessage: 'Unsupported expert consultant URL.',
+          refreshable: false,
+          orcidId: '',
+          organization: '',
+          role: '',
+        });
+        return;
+      }
+
+      const { APIURL, isScicrunchURL } = requestInfo;
+
+      // Reset the consultant data before fetching
+      this.updateExpertConsultantByURL(url, {
+        name: '',
+        error: false,
+        errorMessage: '',
+        refreshable: false,
+        orcidId: '',
+        organization: '',
+        role: '',
+      });
+
+      try {
+        const response = await fetch(APIURL, {
+          headers: {
+            Accept: 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (isScicrunchURL) {
+          const { hits } = data?.hits || {};
+          const name = hits?.[0]?._source?.item?.name || '';
+
+          if (!name) {
+            throw new Error('No consultant data returned from SciCrunch.');
+          }
+
+          this.updateExpertConsultantByURL(url, {
+            name,
+            error: false,
+            errorMessage: '',
+            refreshable: false,
+          });
+        } else {
+          const nameInfo = data?.person?.name;
+          const givenName = nameInfo?.['given-names']?.value || '';
+          const familyName = nameInfo?.['family-name']?.value || '';
+          const creditName = nameInfo?.['credit-name']?.value || '';
+          const fullName = creditName || `${givenName} ${familyName}`.trim();
+
+          if (!fullName) {
+            throw new Error('No consultant data returned from ORCID.');
+          }
+
+          const orcidId = data?.['orcid-identifier']?.path || '';
+          const employmentSummary = data?.['activities-summary']?.['employments']?.['employment-summary'] || [];
+          const latestEmployment = employmentSummary[0] || {};
+
+          this.updateExpertConsultantByURL(url, {
+            name: fullName,
+            error: false,
+            errorMessage: '',
+            refreshable: false,
+            orcidId,
+            organization: latestEmployment?.organization?.name || '',
+            role: latestEmployment?.['role-title'] || '',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching expert consultant:', error);
+        this.updateExpertConsultantByURL(url, {
+          name: '',
+          error: true,
+          errorMessage: 'Failed to fetch expert consultant data.',
+          refreshable: true,
+          orcidId: '',
+          organization: '',
+          role: '',
+        });
+      }
+    },
+    updateExpertConsultantByURL: function (url, fields = {}) {
+      const consultantIndex = this.expertConsultants.findIndex((consultant) => consultant.url === url);
+      if (consultantIndex === -1) {
+        return;
+      }
+
+      this.expertConsultants.splice(consultantIndex, 1, {
+        ...this.expertConsultants[consultantIndex],
+        ...fields,
+      });
+    },
+    reloadConsultant: async function (consultant) {
+      await this.fetchSingleExpertConsultant(consultant.url);
       this.updatedCopyContent = this.getUpdateCopyContent(this.storedReferences);
     },
     onConnectivityHovered: function (label) {
@@ -1759,6 +1845,12 @@ export default {
   position: absolute;
   white-space: nowrap;
   width: 1px;
+}
+
+.reload-button {
+  color: $app-primary-color;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 @keyframes loadingAnimation {
