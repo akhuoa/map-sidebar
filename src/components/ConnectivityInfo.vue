@@ -903,18 +903,20 @@ export default {
       this.expertConsultants = this.expertConsultantURLs.map(url => ({ name: '', url }));
 
       for (const url of this.expertConsultantURLs) {
-        const isScicrunchURL = url.startsWith('https://scicrunch.org');
-        const isOrcidURL = url.startsWith('https://orcid.org');
+        const scicrunchBase = 'https://scicrunch.org';
+        const orcidBase = 'https://orcid.org';
+        const orcidAPIBase = 'https://pub.orcid.org/v2.1';
+        const apiLocationBase = (this.envVars.API_LOCATION ?? '').replace(/\/?$/, '/');
+        const isScicrunchURL = url.startsWith(scicrunchBase);
+        const isOrcidURL = url.startsWith(orcidBase);
 
         if (!isScicrunchURL && !isOrcidURL) {
           console.warn(`Unsupported expert consultant URL: ${url}`);
           continue;
         }
 
-        // TEMPORARY: Use a CORS proxy for SciCrunch API requests
-        const corsProxy = this.envVars.CORS_PROXY_API;
-        const scicrunchAPIURL = (targetURL) => `${corsProxy}?target=${targetURL}.json`;
-        const orcidAPIURL = (targetURL) => targetURL.replace('orcid.org', 'pub.orcid.org/v2.1');
+        const scicrunchAPIURL = (targetURL) => targetURL.replace(scicrunchBase, `${apiLocationBase}scicrunch`);
+        const orcidAPIURL = (targetURL) => targetURL.replace(orcidBase, orcidAPIBase);
         const APIURL = isScicrunchURL ? scicrunchAPIURL(url) : orcidAPIURL(url);
 
         try {
