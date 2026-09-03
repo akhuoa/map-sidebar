@@ -1,4 +1,7 @@
 
+@use '_variables' as *;
+@forward '_variables';
+
 .filter-help-popover {
   font-family: 'Asap', sans-serif;
   background: #f3ecf6 !important;

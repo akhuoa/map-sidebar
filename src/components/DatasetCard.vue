@@ -217,6 +217,7 @@ export default {
     },
     createFlatmapItems: function () {
       if (this.entry.flatmaps) {
+        const flatmaps = []
         this.entry.flatmaps.forEach((flatmap) => {
           if (flatmap.associated_flatmap?.identifier) {
             const filePath = flatmap.dataset.path
@@ -245,7 +246,7 @@ export default {
               doi: this.entry.doi,
               version: this.version,
             }
-            this.items['Flatmaps'].push({
+            flatmaps.push({
               id,
               title: baseName(filePath),
               type: 'Flatmap',
@@ -256,6 +257,7 @@ export default {
             })
           }
         })
+        this.items['Flatmaps'].push(...flatmaps.sort((a, b) => a.title.localeCompare(b.title)))
       }
     },
     createImageItems: function () {
@@ -276,6 +278,7 @@ export default {
     },
     createPlotItems: function () {
       if (this.entry.plots) {
+        const plots = []
         this.entry.plots.forEach((plot) => {
           const filePath = plot.dataset.path
           const id = plot.identifier
@@ -333,7 +336,7 @@ export default {
             discoverId: this.discoverId,
             version: this.version,
           }
-          this.items['Plots'].push({
+          plots.push({
             id,
             title: baseName(filePath),
             type: 'Plot',
@@ -343,11 +346,14 @@ export default {
             mimetype,
           })
         })
+        this.items['Plots'].push(...plots.sort((a, b) => a.title.localeCompare(b.title)))
+
       }
     },
     createScaffoldItems: function () {
       if (this.entry.scaffolds) {
         let index = 0
+        const scaffolds = []
         this.entry.scaffolds.forEach((scaffold, i) => {
           const filePath = scaffold.dataset.path
           const id = scaffold.identifier
@@ -381,7 +387,7 @@ export default {
             s3uri: this.entry.s3uri,
             contextCardUrl: this.getContextCardUrl(i),
           }
-          this.items['Scaffolds'].push({
+          scaffolds.push({
             id,
             title: baseName(filePath),
             type: 'Scaffold',
@@ -391,10 +397,12 @@ export default {
             mimetype,
           })
         })
+        this.items['Scaffolds'].push(...scaffolds.sort((a, b) => a.title.localeCompare(b.title)))
       }
     },
     createSimulationItems: function () {
       if (this.entry.simulation) {
+        const simulations = []
         this.entry.simulation.forEach((simulation) => {
           if (simulation.additional_mimetype.name === "application/x.vnd.abi.simulation+json") {
             let action = {
@@ -409,7 +417,7 @@ export default {
               discoverId: this.discoverId,
               dataset: `${this.envVars.ROOT_URL}/datasets/${this.discoverId}?type=dataset`,
             }
-            this.items['Simulations'].push({
+            simulations.push({
               id: 'simulation',
               title: ' ',
               type: 'Simulation',
@@ -448,7 +456,7 @@ export default {
               doi: this.entry.doi,
               version: this.version,
             }
-            this.items['Simulations'].push({
+            simulations.push({
               id,
               title: baseName(filePath),
               type: 'Simulation',
@@ -459,6 +467,7 @@ export default {
             })
           }
         })
+        this.items['Simulations'].push(...simulations.sort((a, b) => a.title.localeCompare(b.title)))
       }
     },
     createVideoItems: function () {

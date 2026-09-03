@@ -28,30 +28,41 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@': resolve(__dirname, './src'),
+            '@': resolve(import.meta.dirname, './src'),
         }
     },
     build: {
         lib: {
-            entry: resolve(__dirname, "./src/components/index.js"),
+            entry: resolve(import.meta.dirname, "./src/components/index.js"),
             name: "MapSideBar",
             fileName: 'map-side-bar',
         },
         rollupOptions: {
-            external: ["vue", "@abi-software/map-utilities", "@element-plus/icons-vue"],
+            external: [
+              "vue",
+              "@abi-software/map-utilities",
+              "@element-plus/icons-vue",
+              "@abi-software/map-utilities/dist/style.css"
+            ],
             output: {
               globals: {
                 vue: "Vue",
                 "@abi-software/map-utilities": "@abi-software/map-utilities",
                 "@element-plus/icons-vue": "@element-plus/icons-vue"
               },
+              // keep css output name stable for the "./dist/style.css" export/import paths
+              assetFileNames: (assetInfo) =>
+                assetInfo.name?.endsWith(".css")
+                  ? "style.css"
+                  : "assets/[name][extname]",
             },
         },
     },
     css: {
         preprocessorOptions: {
             scss: {
-                additionalData: `@use './src/assets/styles' as *;`
+                api: 'modern-compiler',
+                additionalData: `@use '@/assets/styles' as *;`
             }
         }
     }

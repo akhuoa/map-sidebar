@@ -1,7 +1,10 @@
 {
   "name": "@abi-software/map-side-bar",
-  "version": "2.14.7",
+  "version": "2.17.0",
   "license": "Apache-2.0",
+  "engines": {
+    "node": "^24.20.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ABI-Software/map-sidebar.git"
@@ -17,6 +20,7 @@
     "serve": "vite --host",
     "build-bundle": "vite build",
     "preview": "vite preview",
+    "lint": "eslint .",
     "test": "cypress run --component",
     "cypress:open": "cypress open",
     "release:beta": "npm version prerelease --preid=beta; npm publish --tag beta",
@@ -43,40 +47,55 @@
     "./src/*": "./src/*"
   },
   "dependencies": {
-    "@abi-software/gallery": "1.3.0",
-    "@abi-software/map-utilities": "1.8.3",
-    "@abi-software/svg-sprite": "^1.0.2",
-    "@element-plus/icons-vue": "^2.3.1",
-    "algoliasearch": "^4.10.5",
-    "element-plus": "2.8.4",
-    "js-base64": "^3.7.7",
-    "marked": "^4.1.1",
+    "@abi-software/gallery": "1.4.0",
+    "@abi-software/map-utilities": "1.10.0",
+    "@abi-software/svg-sprite": "1.2.0",
+    "@element-plus/icons-vue": "^2.3.2",
+    "algoliasearch": "^4.27.0",
+    "element-plus": "^2.14.5",
+    "js-base64": "^3.9.2",
+    "marked": "^8.0.1",
     "mitt": "^3.0.1",
-    "unplugin-vue-components": "^0.26.0",
-    "vue": "^3.4.21",
-    "xss": "^1.0.14"
+    "vue": "^3.5.41",
+    "xss": "^1.0.15"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.6.2",
-    "@vue/compiler-sfc": "^3.3.13",
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "unplugin-vue-components": "^32.1.0",
+    "@vue/compiler-sfc": "^3.5.41",
     "@vuese/markdown-render": "^2.11.3",
-    "auto-changelog": "^2.4.0",
-    "autoprefixer": "^10.4.17",
-    "chokidar": "^3.6.0",
-    "concurrently": "^8.2.2",
-    "cypress": "^13.13.0",
-    "cypress-multi-reporters": "^1.6.4",
-    "cypress-wait-until": "^3.0.1",
-    "eslint": "^8.56.0",
-    "eslint-plugin-vue": "^9.19.2",
-    "mochawesome": "^7.1.3",
-    "raw-loader": "^0.5.1",
-    "sass": "^1.70.0",
+    "auto-changelog": "^2.6.0",
+    "autoprefixer": "^10.5.4",
+    "chokidar": "^5.0.0",
+    "concurrently": "^9.2.4",
+    "cypress": "^15.21.0",
+    "cypress-multi-reporters": "^2.0.5",
+    "cypress-wait-until": "^3.0.2",
+    "eslint": "^10.9.1",
+    "eslint-plugin-vue": "^10.10.0",
+    "globals": "^17.11.0",
+    "mochawesome": "^8.0.1",
+    "raw-loader": "^4.0.2",
+    "sass": "^1.103.1",
     "transform-loader": "^0.2.4",
-    "typescript": "^4.4.3",
-    "vite": "^5.0.10",
-    "vitepress": "^1.0.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1",
+    "vitepress": "^1.6.4",
     "vue-custom-element": "^3.3.0",
     "vue-docgen-api": "^4.79.2"
+  },
+  "optionalDependencies": {
+    "@esbuild/darwin-arm64": "0.28.2",
+    "@esbuild/linux-x64": "0.28.2",
+    "@rollup/rollup-darwin-arm64": "4.63.0",
+    "@rollup/rollup-linux-x64-gnu": "4.63.0",
+    "@rollup/rollup-win32-x64-msvc": "4.63.0"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "cypress@15.21.1": true,
+    "fsevents@2.3.3": true,
+    "esbuild@0.21.5": true
   }
 }
