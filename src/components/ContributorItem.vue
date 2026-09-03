@@ -57,7 +57,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../assets/_variables.scss';
+@use '../assets/_variables.scss';
 
 .contributor-item {
   display: inline;
@@ -67,7 +67,7 @@ export default {
 </style>
 
 <style lang="scss">
-@import '../assets/_variables.scss';
+@use '../assets/_variables.scss';
 
 .contributor-popover.el-popover {
   font-family: $font-family;

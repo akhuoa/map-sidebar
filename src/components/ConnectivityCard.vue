@@ -97,7 +97,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../assets/connectivity-explorer.scss';
+@use '../assets/connectivity-explorer.scss';
 
 .connectivity-card {
   padding-left: 5px;

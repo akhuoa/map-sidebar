@@ -843,7 +843,7 @@ export default {
 
             if (consultant.orcidId) {
               fields.push(`<div>`)
-              fields.push(`<strong>ORCID iD</strong>: <span>${consultant.orcidId}</span>`)
+              fields.push(`<strong>ORCID iD</strong>: <span>${consultant.orcidId}</span> `)
               fields.push(`(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`)
               fields.push(`</div>`);
             }
@@ -853,7 +853,7 @@ export default {
               : '';
             if (rrid) {
               fields.push(`<div>`)
-              fields.push(`<strong>RRID</strong>: <span>${rrid}</span>`)
+              fields.push(`<strong>RRID</strong>: <span>${rrid}</span> `)
               fields.push(`(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`)
               fields.push(`</div>`);
             }
@@ -1173,7 +1173,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../assets/connectivity-explorer.scss';
+@use '../assets/connectivity-explorer.scss';
 
 .connectivity-info-title {
   padding: 0;

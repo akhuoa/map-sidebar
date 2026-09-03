@@ -1,9 +1,5 @@
 <template>
   <div id="app">
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap"
-    />
     <div class="options-container">
       <div>Click arrow to open sidebar</div>
       <el-button @click="openSearch">search Uberon from refs</el-button>
@@ -396,6 +392,7 @@ export default {
 }
 body {
   margin: 0px;
+  font-family: $font-family;
 }
 .map-icon {
   color: $app-primary-color;
