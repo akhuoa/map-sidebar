@@ -53,10 +53,6 @@ const baseName = (str) => {
   return str.split('\\').pop().split('/').pop();
 };
 
-const capitalise = function (string) {
-  return string.replace(/\b\w/g, (v) => v.toUpperCase());
-};
-
 import { View as ElIconView } from '@element-plus/icons-vue';
 import BadgesGroup from './BadgesGroup.vue';
 import EventBus from './EventBus.js';
@@ -69,11 +65,6 @@ import '@abi-software/map-utilities/dist/style.css';
 import GalleryHelper from '@abi-software/gallery/src/mixins/GalleryHelpers.js';
 
 export default {
-  data() {
-    return {
-      ElIconView,
-    };
-  },
   name: 'DatasetCard',
   components: {
     BadgesGroup,
@@ -97,6 +88,7 @@ export default {
   },
   data: function () {
     return {
+      ElIconView,
       thumbnail: MissingImage,
       dataLocation: this.entry.doi,
       discoverId: undefined,
