@@ -30,14 +30,12 @@
               size="small"
               class="button"
               :icon="ElIconView"
-              >View repository</el-button
             >
+              View repository
+            </el-button>
           </div>
           <div class="badges-container">
-            <BadgesGroup
-              :items="items"
-              @categoryChanged="categoryChanged"
-            />
+            <BadgesGroup :items="items" @categoryChanged="categoryChanged" />
           </div>
 
           <!-- Copy to clipboard button container -->
@@ -53,34 +51,31 @@
 <script>
 /* eslint-disable no-alert, no-console */
 const baseName = (str) => {
-  return str.split('\\').pop().split('/').pop()
-}
+  return str.split('\\').pop().split('/').pop();
+};
 
 const capitalise = function (string) {
-  return string.replace(/\b\w/g, (v) => v.toUpperCase())
-}
+  return string.replace(/\b\w/g, (v) => v.toUpperCase());
+};
 
 /* eslint-disable no-alert, no-console */
-import { View as ElIconView } from '@element-plus/icons-vue'
-import BadgesGroup from './BadgesGroup.vue'
-import {
-  ElButton as Button,
-  ElIcon as Icon
-} from 'element-plus'
-import EventBus from './EventBus.js'
-import speciesMap from './species-map.js'
-import ImageGallery from './ImageGallery.vue'
-import MissingImage from '@/../assets/missing-image.svg'
+import { View as ElIconView } from '@element-plus/icons-vue';
+import BadgesGroup from './BadgesGroup.vue';
+import { ElButton as Button, ElIcon as Icon } from 'element-plus';
+import EventBus from './EventBus.js';
+import speciesMap from './species-map.js';
+import ImageGallery from './ImageGallery.vue';
+import MissingImage from '@/../assets/missing-image.svg';
 import { CopyToClipboard } from '@abi-software/map-utilities';
 import S3Bucket from '../mixins/S3Bucket.vue';
 import '@abi-software/map-utilities/dist/style.css';
-import GalleryHelper from '@abi-software/gallery/src/mixins/GalleryHelpers.js'
+import GalleryHelper from '@abi-software/gallery/src/mixins/GalleryHelpers.js';
 
 export default {
   data() {
     return {
       ElIconView,
-    }
+    };
   },
   name: 'DatasetCard',
   components: {
@@ -112,7 +107,7 @@ export default {
       discoverId: undefined,
       items: {
         Dataset: [],
-        Flatmaps:[],
+        Flatmaps: [],
         Images: [],
         Scaffolds: [],
         Simulations: [],
@@ -124,56 +119,56 @@ export default {
       lastDoi: undefined,
       currentCategory: 'All',
       copyContent: '',
-    }
+    };
   },
   computed: {
     contributors: function () {
-      let text = ''
+      let text = '';
       if (this.entry.contributors) {
         if (this.entry.contributors.length === 1) {
-          text = this.lastName(this.entry.contributors[0].name)
+          text = this.lastName(this.entry.contributors[0].name);
         } else if (this.entry.contributors.length === 2) {
           text =
             this.lastName(this.entry.contributors[0].name) +
             ' & ' +
-            this.lastName(this.entry.contributors[1].name)
+            this.lastName(this.entry.contributors[1].name);
         } else if (this.entry.contributors.length > 2) {
-          text = this.lastName(this.entry.contributors[0].name) + ' et al.'
+          text = this.lastName(this.entry.contributors[0].name) + ' et al.';
         }
       }
-      return text
+      return text;
     },
     samples: function () {
-      let text = ''
+      let text = '';
       if (this.entry.species) {
         if (speciesMap[this.entry.species[0].toLowerCase()]) {
-          text = `${speciesMap[this.entry.species[0].toLowerCase()]}`
+          text = `${speciesMap[this.entry.species[0].toLowerCase()]}`;
         } else {
-          text = `${this.entry.species}`
+          text = `${this.entry.species}`;
         }
       }
       if (this.entry.numberSamples > 0) {
-        text += ' ('
+        text += ' (';
         if (this.entry.numberSamples === 1) {
-          text += `${this.entry.numberSamples} sample`
+          text += `${this.entry.numberSamples} sample`;
         } else if (this.entry.numberSamples > 1) {
-          text += `${this.entry.numberSamples} samples`
+          text += `${this.entry.numberSamples} samples`;
         }
         if (this.entry.numberSubjects === 1) {
-          text += ` from ${this.entry.numberSubjects} subject`
+          text += ` from ${this.entry.numberSubjects} subject`;
         } else if (this.entry.numberSamples > 1) {
-          text += ` from ${this.entry.numberSubjects} subjects`
+          text += ` from ${this.entry.numberSubjects} subjects`;
         }
-        text += ')'
+        text += ')';
       }
 
-      return text
+      return text;
     },
     label: function () {
-      return this.entry.organs ? this.entry.organs[0] : this.entry.name
+      return this.entry.organs ? this.entry.organs[0] : this.entry.name;
     },
     publishYear: function () {
-      return this.entry.publishDate.split('-')[0]
+      return this.entry.publishDate.split('-')[0];
     },
   },
   mounted: function () {
@@ -181,19 +176,19 @@ export default {
   },
   methods: {
     cardClicked: function () {
-      this.openDataset()
+      this.openDataset();
     },
     categoryChanged: function (name) {
-      this.currentCategory = name
+      this.currentCategory = name;
     },
     createSciCurnchItems: function () {
       if (this.entry.detailsReady) {
-        this.updateS3Bucket(this.entry.s3uri)
-        this.createDatasetItem()
-        this.createFlatmapItems()
-        this.createScaffoldItems()
-        this.createSimulationItems()
-        this.createPlotItems()
+        this.updateS3Bucket(this.entry.s3uri);
+        this.createDatasetItem();
+        this.createFlatmapItems();
+        this.createScaffoldItems();
+        this.createSimulationItems();
+        this.createPlotItems();
       }
       /* Disable these two
       this.createImageItems();
@@ -201,7 +196,7 @@ export default {
       */
     },
     createDatasetItem: function () {
-      const link = `${this.envVars.ROOT_URL}/datasets/${this.discoverId}?type=dataset`
+      const link = `${this.envVars.ROOT_URL}/datasets/${this.discoverId}?type=dataset`;
       if (this.thumbnail) {
         this.items['Dataset'].push({
           id: -1,
@@ -212,30 +207,27 @@ export default {
           link,
           hideType: true,
           hideTitle: true,
-        })
+        });
       }
     },
     createFlatmapItems: function () {
       if (this.entry.flatmaps) {
-        const flatmaps = []
+        const flatmaps = [];
         this.entry.flatmaps.forEach((flatmap) => {
           if (flatmap.associated_flatmap?.identifier) {
-            const filePath = flatmap.dataset.path
-            const id = flatmap.identifier
-            const thumbnail = this.getThumbnailForPlot(
-              flatmap,
-              this.entry.thumbnails
-            )
-            let thumbnailURL = undefined
-            let mimetype = ''
+            const filePath = flatmap.dataset.path;
+            const id = flatmap.identifier;
+            const thumbnail = this.getThumbnailForPlot(flatmap, this.entry.thumbnails);
+            let thumbnailURL = undefined;
+            let mimetype = '';
             if (thumbnail) {
               thumbnailURL = this.getImageURL(this.envVars.API_LOCATION, {
                 id,
                 prefix: this.getS3Prefix(),
                 file_path: thumbnail.dataset.path,
                 s3Bucket: this.s3Bucket,
-              })
-              mimetype = thumbnail.mimetype.name
+              });
+              mimetype = thumbnail.mimetype.name;
             }
             let action = {
               label: baseName(filePath),
@@ -245,7 +237,7 @@ export default {
               discoverId: this.discoverId,
               doi: this.entry.doi,
               version: this.version,
-            }
+            };
             flatmaps.push({
               id,
               title: baseName(filePath),
@@ -254,49 +246,45 @@ export default {
               userData: action,
               hideType: true,
               mimetype,
-            })
+            });
           }
-        })
-        this.items['Flatmaps'].push(...flatmaps.sort((a, b) => a.title.localeCompare(b.title)))
+        });
+        this.items['Flatmaps'].push(...flatmaps.sort((a, b) => a.title.localeCompare(b.title)));
       }
     },
     createImageItems: function () {
       if (this.entry.images) {
         this.entry.images.forEach((image) => {
-          const filePath = image.dataset.path
-          const id = image.identifier
-          const linkUrl = `${this.envVars.ROOT_URL}/datasets/imageviewer?dataset_id=${this.discoverId}&dataset_version=${this.version}&file_path=${filePath}&mimetype=${image.mimetype.name}`
+          const filePath = image.dataset.path;
+          const id = image.identifier;
+          const linkUrl = `${this.envVars.ROOT_URL}/datasets/imageviewer?dataset_id=${this.discoverId}&dataset_version=${this.version}&file_path=${filePath}&mimetype=${image.mimetype.name}`;
           this.items['Images'].push({
             id,
             title: baseName(filePath),
             type: 'Image',
             link: linkUrl,
             hideType: true,
-          })
-        })
+          });
+        });
       }
     },
     createPlotItems: function () {
       if (this.entry.plots) {
-        const plots = []
+        const plots = [];
         this.entry.plots.forEach((plot) => {
-          const filePath = plot.dataset.path
-          const id = plot.identifier
-          const thumbnail = this.getThumbnailForPlot(
-            plot,
-            this.entry.thumbnails
-          )
-          let thumbnailURL = undefined
-          let mimetype = ''
+          const filePath = plot.dataset.path;
+          const id = plot.identifier;
+          const thumbnail = this.getThumbnailForPlot(plot, this.entry.thumbnails);
+          let thumbnailURL = undefined;
+          let mimetype = '';
           if (thumbnail) {
-
             thumbnailURL = this.getImageURL(this.envVars.API_LOCATION, {
               id,
               prefix: this.getS3Prefix(),
               file_path: thumbnail.dataset.path,
               s3Bucket: this.s3Bucket,
-            })
-            mimetype = thumbnail.mimetype.name
+            });
+            mimetype = thumbnail.mimetype.name;
           }
           const plotAnnotation = plot.datacite;
           const filePathPrefix = `${this.envVars.API_LOCATION}/s3-resource/${this.getS3Prefix()}files/`;
@@ -304,27 +292,25 @@ export default {
 
           //plotAnnotation.supplemental_json_metadata.description can be undefined or
           //contain an empty string causing an error with JSON.parse
-          let metadata = {}
+          let metadata = {};
           try {
-            metadata = JSON.parse(
-              plotAnnotation.supplemental_json_metadata.description
-            )
+            metadata = JSON.parse(plotAnnotation.supplemental_json_metadata.description);
           } catch (error) {
-            console.warn(error)
+            console.warn(error);
           }
 
-          let supplementalData = []
+          let supplementalData = [];
           if (plotAnnotation.isDescribedBy) {
             supplementalData.push({
               url: filePathPrefix + plotAnnotation.isDescribedBy.path,
-            })
+            });
           }
 
           const resource = {
             dataSource: { url: sourceUrl },
             metadata,
             supplementalData,
-          }
+          };
 
           let action = {
             label: baseName(filePath),
@@ -335,7 +321,7 @@ export default {
             doi: this.entry.doi,
             discoverId: this.discoverId,
             version: this.version,
-          }
+          };
           plots.push({
             id,
             title: baseName(filePath),
@@ -344,41 +330,40 @@ export default {
             userData: action,
             hideType: true,
             mimetype,
-          })
-        })
-        this.items['Plots'].push(...plots.sort((a, b) => a.title.localeCompare(b.title)))
-
+          });
+        });
+        this.items['Plots'].push(...plots.sort((a, b) => a.title.localeCompare(b.title)));
       }
     },
     createScaffoldItems: function () {
       if (this.entry.scaffolds) {
-        let index = 0
-        const scaffolds = []
+        let index = 0;
+        const scaffolds = [];
         this.entry.scaffolds.forEach((scaffold, i) => {
-          const filePath = scaffold.dataset.path
-          const id = scaffold.identifier
+          const filePath = scaffold.dataset.path;
+          const id = scaffold.identifier;
           const thumbnail = this.getThumbnailForScaffold(
             scaffold,
             this.entry.scaffoldViews,
             this.entry.thumbnails,
-            index
-          )
-          let mimetype = ''
-          let thumbnailURL = undefined
+            index,
+          );
+          let mimetype = '';
+          let thumbnailURL = undefined;
           if (thumbnail) {
             thumbnailURL = this.getImageURL(this.envVars.API_LOCATION, {
               id,
               prefix: this.getS3Prefix(),
               file_path: thumbnail.dataset.path,
               s3Bucket: this.s3Bucket,
-            })
-            mimetype = thumbnail.mimetype.name
+            });
+            mimetype = thumbnail.mimetype.name;
           }
           let action = {
             label: baseName(filePath),
             resource: `${this.envVars.API_LOCATION}s3-resource/${this.getS3Prefix()}files/${filePath}${this.getS3Args()}`,
-            title: "View 3D scaffold",
-            type: "Scaffold",
+            title: 'View 3D scaffold',
+            type: 'Scaffold',
             discoverId: this.discoverId,
             doi: this.entry.doi,
             apiLocation: this.envVars.API_LOCATION,
@@ -386,7 +371,7 @@ export default {
             banner: this.thumbnail,
             s3uri: this.entry.s3uri,
             contextCardUrl: this.getContextCardUrl(i),
-          }
+          };
           scaffolds.push({
             id,
             title: baseName(filePath),
@@ -395,16 +380,16 @@ export default {
             userData: action,
             hideType: true,
             mimetype,
-          })
-        })
-        this.items['Scaffolds'].push(...scaffolds.sort((a, b) => a.title.localeCompare(b.title)))
+          });
+        });
+        this.items['Scaffolds'].push(...scaffolds.sort((a, b) => a.title.localeCompare(b.title)));
       }
     },
     createSimulationItems: function () {
       if (this.entry.simulation) {
-        const simulations = []
+        const simulations = [];
         this.entry.simulation.forEach((simulation) => {
-          if (simulation.additional_mimetype.name === "application/x.vnd.abi.simulation+json") {
+          if (simulation.additional_mimetype.name === 'application/x.vnd.abi.simulation+json') {
             let action = {
               label: undefined,
               apiLocation: this.envVars.API_LOCATION,
@@ -416,7 +401,7 @@ export default {
               description: this.entry.description,
               discoverId: this.discoverId,
               dataset: `${this.envVars.ROOT_URL}/datasets/${this.discoverId}?type=dataset`,
-            }
+            };
             simulations.push({
               id: 'simulation',
               title: ' ',
@@ -424,28 +409,25 @@ export default {
               hideType: true,
               hideTitle: true,
               userData: action,
-            })
+            });
           } else {
-            const filePath = simulation.dataset.path
-            const id = simulation.identifier
+            const filePath = simulation.dataset.path;
+            const id = simulation.identifier;
             //Despite of the name, this method can be used to retreive
             //the thumbnail information for any none scaffold type thumbnail
-            const thumbnail = this.getThumbnailForPlot(
-              simulation,
-              this.entry.thumbnails
-            )
-            let thumbnailURL = undefined
-            let mimetype = ''
+            const thumbnail = this.getThumbnailForPlot(simulation, this.entry.thumbnails);
+            let thumbnailURL = undefined;
+            let mimetype = '';
             if (thumbnail) {
               thumbnailURL = this.getImageURL(this.envVars.API_LOCATION, {
                 id,
                 prefix: this.getS3Prefix(),
                 file_path: thumbnail.dataset.path,
                 s3Bucket: this.s3Bucket,
-              })
-              mimetype = thumbnail.mimetype.name
+              });
+              mimetype = thumbnail.mimetype.name;
             }
-            const resource = `${this.envVars.API_LOCATION}s3-resource/${this.getS3Prefix()}files/${filePath}${this.getS3Args()}`
+            const resource = `${this.envVars.API_LOCATION}s3-resource/${this.getS3Prefix()}files/${filePath}${this.getS3Args()}`;
             let action = {
               label: baseName(filePath),
               resource: resource,
@@ -455,7 +437,7 @@ export default {
               discoverId: this.discoverId,
               doi: this.entry.doi,
               version: this.version,
-            }
+            };
             simulations.push({
               id,
               title: baseName(filePath),
@@ -464,126 +446,122 @@ export default {
               userData: action,
               hideType: true,
               mimetype,
-            })
+            });
           }
-        })
-        this.items['Simulations'].push(...simulations.sort((a, b) => a.title.localeCompare(b.title)))
+        });
+        this.items['Simulations'].push(
+          ...simulations.sort((a, b) => a.title.localeCompare(b.title)),
+        );
       }
     },
     createVideoItems: function () {
       if (this.entry.videos) {
         this.entry.videos.forEach((video) => {
-          const filePath = this.getS3FilePath(
-            this.discoverId,
-            this.version,
-            video.dataset.path
-          )
-          const linkUrl = `${this.envVars.ROOT_URL}/datasets/videoviewer?dataset_version=${this.version}&dataset_id=${this.discoverId}&file_path=${filePath}&mimetype=${video.mimetype.name}`
+          const filePath = this.getS3FilePath(this.discoverId, this.version, video.dataset.path);
+          const linkUrl = `${this.envVars.ROOT_URL}/datasets/videoviewer?dataset_version=${this.version}&dataset_id=${this.discoverId}&file_path=${filePath}&mimetype=${video.mimetype.name}`;
           this.items['Videos'].push({
             title: video.name,
             type: 'Video',
             thumbnail: this.defaultVideoImg,
             hideType: true,
             link: linkUrl,
-          })
-        })
+          });
+        });
       }
     },
     galleryClicked: function (payload) {
-      this.propogateCardAction(payload)
+      this.propogateCardAction(payload);
     },
     galleryDatalinkClicked: function (payload) {
       EventBus.emit('datalink-clicked', payload); // Pass to mapintegratedvuer
     },
-    getContextCardUrl: function(scaffoldIndex){
-      if(!this.entry.contextualInformation || this.entry.contextualInformation.length == 0){
-        return undefined
+    getContextCardUrl: function (scaffoldIndex) {
+      if (!this.entry.contextualInformation || this.entry.contextualInformation.length == 0) {
+        return undefined;
       } else {
         // The line below checks if there is a context file for each scaffold. If there is not, we use the first context card for each scaffold.
-        let contextIndex = this.entry['abi-contextual-information'].length == this.entry.scaffolds.length ? scaffoldIndex : 0
-        return `${this.envVars.API_LOCATION}s3-resource/${this.getS3Prefix()}files/${this.entry.contextualInformation[contextIndex]}${this.getS3Args()}`
+        let contextIndex =
+          this.entry['abi-contextual-information'].length == this.entry.scaffolds.length
+            ? scaffoldIndex
+            : 0;
+        return `${this.envVars.API_LOCATION}s3-resource/${this.getS3Prefix()}files/${this.entry.contextualInformation[contextIndex]}${this.getS3Args()}`;
       }
     },
-    getImageURL: function(apiEndpoint, info) {
-      let url = `${apiEndpoint}/s3-resource/${info.prefix}files/${info.file_path}?encodeBase64=true`
+    getImageURL: function (apiEndpoint, info) {
+      let url = `${apiEndpoint}/s3-resource/${info.prefix}files/${info.file_path}?encodeBase64=true`;
       if (info.s3Bucket) {
-        url = url + `&s3BucketName=${info.s3Bucket}`
+        url = url + `&s3BucketName=${info.s3Bucket}`;
       }
-      return url
+      return url;
     },
     openDataset: function () {
-      window.open(this.dataLocation, '_blank')
+      window.open(this.dataLocation, '_blank');
     },
     openRepository: function () {
-      let apiLocation = this.envVars.API_LOCATION
+      let apiLocation = this.envVars.API_LOCATION;
       this.entry.additionalLinks.forEach(function (el) {
         if (el.description == 'Repository') {
-          let xmlhttp = new XMLHttpRequest()
-          xmlhttp.open('POST', apiLocation + '/pmr_latest_exposure', true)
-          xmlhttp.setRequestHeader('Content-type', 'application/json')
+          let xmlhttp = new XMLHttpRequest();
+          xmlhttp.open('POST', apiLocation + '/pmr_latest_exposure', true);
+          xmlhttp.setRequestHeader('Content-type', 'application/json');
           xmlhttp.onreadystatechange = () => {
             if (xmlhttp.readyState === 4) {
-              let url = ''
+              let url = '';
               if (xmlhttp.status === 200) {
-                url = JSON.parse(xmlhttp.responseText)['url']
+                url = JSON.parse(xmlhttp.responseText)['url'];
               }
               if (url === '') {
-                url = el.uri
+                url = el.uri;
               }
-              window.open(url, '_blank')
+              window.open(url, '_blank');
             }
-          }
-          xmlhttp.send(JSON.stringify({ workspace_url: el.uri }))
+          };
+          xmlhttp.send(JSON.stringify({ workspace_url: el.uri }));
         }
-      })
+      });
     },
     propogateCardAction: function (action) {
-      EventBus.emit('PopoverActionClick', action)
-      EventBus.emit('contextUpdate', action) // Pass to mapintegratedvuer
+      EventBus.emit('PopoverActionClick', action);
+      EventBus.emit('contextUpdate', action); // Pass to mapintegratedvuer
     },
     splitDOI: function (doi) {
-      return [
-        doi.split('/')[doi.split('/').length - 2],
-        doi.split('/')[doi.split('/').length - 1],
-      ]
+      return [doi.split('/')[doi.split('/').length - 2], doi.split('/')[doi.split('/').length - 1]];
     },
     getBanner: function () {
       // Only load banner if card has changed
       if (this.lastDoi !== this.entry.doi) {
-        this.lastDoi = this.entry.doi
-        this.loading = true
-        let doi = this.splitDOI(this.entry.doi)
-        fetch(
-          `${this.envVars.PENNSIEVE_API_LOCATION}/discover/datasets/doi/${doi[0]}/${doi[1]}`
-        )
+        this.lastDoi = this.entry.doi;
+        this.loading = true;
+        let doi = this.splitDOI(this.entry.doi);
+        fetch(`${this.envVars.PENNSIEVE_API_LOCATION}/discover/datasets/doi/${doi[0]}/${doi[1]}`)
           .then((response) => {
             if (!response.ok) {
-              throw Error(response.statusText)
+              throw Error(response.statusText);
             } else {
-              return response.json()
+              return response.json();
             }
           })
           .then((data) => {
-            this.thumbnail = data.banner
-            this.discoverId = data.id
-            this.version = data.version
-            this.dataLocation = `https://sparc.science/datasets/${data.id}?type=dataset`
-            this.loading = false
+            this.thumbnail = data.banner;
+            this.discoverId = data.id;
+            this.version = data.version;
+            this.dataLocation = `https://sparc.science/datasets/${data.id}?type=dataset`;
+            this.loading = false;
             this.updateCopyContent();
           })
           .catch(() => {
             //set defaults if we hit an error
-            this.thumbnail = MissingImage
-            this.discoverId = Number(this.entry.datasetId)
-            this.loading = false
+            this.thumbnail = MissingImage;
+            this.discoverId = Number(this.entry.datasetId);
+            this.loading = false;
           })
           .finally(() => {
-            this.createSciCurnchItems()
-          })
+            this.createSciCurnchItems();
+          });
       }
     },
     lastName: function (fullName) {
-      return fullName.split(',')[0]
+      return fullName.split(',')[0];
     },
     updateCopyContent: function () {
       const contentArray = [];
@@ -648,20 +626,20 @@ export default {
   },
   created: function () {
     if (this.entry.detailsReady) {
-      this.getBanner()
+      this.getBanner();
     }
   },
   watch: {
-    'entry.detailsReady':{
+    'entry.detailsReady': {
       immediate: true,
       handler: function (val) {
         if (val === true) {
-          this.getBanner()
+          this.getBanner();
         }
       },
-    }
+    },
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>

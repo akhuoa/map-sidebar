@@ -19,21 +19,12 @@
       <el-row>
         <el-col :offset="1" :span="6">Delete this feature?</el-col>
         <el-col :offset="1" :span="3">
-          <el-button
-            class="delete-button"
-            :icon="ElIconDelete"
-            @click="$emit('confirm-delete')"
-            >
-              Delete
+          <el-button class="delete-button" :icon="ElIconDelete" @click="$emit('confirm-delete')">
+            Delete
           </el-button>
         </el-col>
         <el-col :offset="1" :span="2">
-          <el-button
-            class="delete-button"
-            @click="$emit('cancel-create')"
-            >
-              Dismiss
-          </el-button>
+          <el-button class="delete-button" @click="$emit('cancel-create')">Dismiss</el-button>
         </el-col>
       </el-row>
     </div>
@@ -44,15 +35,8 @@
 import { shallowRef } from 'vue';
 import { AnnotationPopup, CreateTooltipContent } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
-import {
-  ElButton as Button,
-  ElCol as Col,
-  ElRow as Row,
-  ElIcon as Icon,
-} from 'element-plus'
-import {
-  Delete as ElIconDelete,
-} from '@element-plus/icons-vue'
+import { ElButton as Button, ElCol as Col, ElRow as Row, ElIcon as Icon } from 'element-plus';
+import { Delete as ElIconDelete } from '@element-plus/icons-vue';
 
 export default {
   name: 'AnnotationTool',
@@ -72,7 +56,7 @@ export default {
     createData: {
       type: Object,
       default: {},
-    }
+    },
   },
   data: function () {
     return {
@@ -80,7 +64,7 @@ export default {
       annotationPopupData: null,
     };
   },
-}
+};
 </script>
 
 <style scoped lang="scss">
@@ -130,7 +114,7 @@ export default {
   .delete-button {
     pointer-events: auto;
     cursor: pointer;
-    margin-left:8px;
+    margin-left: 8px;
     padding-left: 8px;
     padding-right: 8px;
     height: 24px !important;
@@ -144,5 +128,4 @@ export default {
 .create-container.create-tooltip-content {
   background-color: #f7faff;
 }
-
 </style>

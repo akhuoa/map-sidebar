@@ -10,18 +10,22 @@
       <div class="popover-content">
         <div class="popover-name">{{ contributor.name }}</div>
         <div class="popover-url" v-if="contributor.orcidId">
-          <strong>ORCID iD</strong>:
+          <strong>ORCID iD</strong>
+          :
           <a :href="contributor.url" target="_blank">{{ orcidId }}</a>
         </div>
         <div class="popover-url" v-if="rrid">
-          <strong>RRID</strong>:
+          <strong>RRID</strong>
+          :
           <a :href="contributor.url" target="_blank">{{ rrid }}</a>
         </div>
         <div class="popover-organization" v-if="contributor.organization">
-          <strong>Organization</strong>: {{ contributor.organization }}
+          <strong>Organization</strong>
+          : {{ contributor.organization }}
         </div>
         <div class="popover-role" v-if="contributor.role">
-          <strong>Title</strong>: {{ contributor.role }}
+          <strong>Title</strong>
+          : {{ contributor.role }}
         </div>
       </div>
       <template #reference>
@@ -38,22 +42,22 @@ export default {
   props: {
     contributor: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
 
   computed: {
     orcidId: function () {
-      return this.contributor.orcidId || ''
+      return this.contributor.orcidId || '';
     },
 
     rrid: function () {
       return this.contributor.url.indexOf('RRID:') > -1
         ? 'RRID:' + this.contributor.url.split('RRID:')[1]
-        : ''
-    }
-  }
-}
+        : '';
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

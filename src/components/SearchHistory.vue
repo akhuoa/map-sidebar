@@ -2,13 +2,7 @@
   <div class="history-container" v-if="searchHistory.length">
     <div class="saved-search-history" v-if="savedSearchHistory.length">
       <template v-for="(item, i) in savedSearchHistory" :key="item.id">
-        <el-tag
-          class="search-tag"
-          v-if="i < 2"
-          v-bind:key="i"
-          @click="search(item)"
-          size="large"
-        >
+        <el-tag class="search-tag" v-if="i < 2" v-bind:key="i" @click="search(item)" size="large">
           <template v-if="item.longLabel">
             <el-popover
               width="auto"
@@ -32,10 +26,7 @@
     <div v-else>
       <span class="empty-saved-search">No Saved Searches</span>
     </div>
-    <el-dropdown
-      trigger="click"
-      :hide-on-click="false"
-    >
+    <el-dropdown trigger="click" :hide-on-click="false">
       <span class="el-dropdown-select">
         Search history
         <el-icon class="el-icon--right">
@@ -77,23 +68,26 @@
                 popper-class="popover-dropdown"
               >
                 <template #reference>
-                  <el-button circle text size="small"
+                  <el-button
+                    circle
+                    text
+                    size="small"
                     @click="toggleSavedSearch(item)"
                     :disabled="savedSearchHistory.length > 1 && !item.saved"
                   >
                     <el-icon color="#8300BF">
                       <template v-if="item.saved">
-                        <svg
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="m12 21.35-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z"></path>
+                        <svg viewBox="0 0 24 24">
+                          <path
+                            d="m12 21.35-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z"
+                          ></path>
                         </svg>
                       </template>
                       <template v-else>
-                        <svg
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3m-4.4 15.55-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05"></path>
+                        <svg viewBox="0 0 24 24">
+                          <path
+                            d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3m-4.4 15.55-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05"
+                          ></path>
                         </svg>
                       </template>
                     </el-icon>
@@ -102,12 +96,8 @@
                 <span v-if="savedSearchHistory.length > 1 && !item.saved">
                   Limit 2: Please remove a saved search before adding another.
                 </span>
-                <span v-else-if="item.saved">
-                  Remove from saved searches.
-                </span>
-                <span v-else>
-                  Add up to two saved searches.
-                </span>
+                <span v-else-if="item.saved">Remove from saved searches.</span>
+                <span v-else>Add up to two saved searches.</span>
               </el-popover>
               <el-popover
                 width="auto"
@@ -117,17 +107,13 @@
                 popper-class="popover-dropdown"
               >
                 <template #reference>
-                  <el-button circle text size="small"
-                    @click="removeFromSavedSearch(item)"
-                  >
+                  <el-button circle text size="small" @click="removeFromSavedSearch(item)">
                     <el-icon color="#8300BF">
                       <el-icon-delete />
                     </el-icon>
                   </el-button>
                 </template>
-                <span>
-                  Remove from search history.
-                </span>
+                <span>Remove from search history.</span>
               </el-popover>
             </div>
           </el-dropdown-item>
@@ -139,14 +125,9 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import {
-  ElTag as Tag,
-  ElSelect as Select,
-  ElDropdown,
-  ElIcon,
-} from 'element-plus'
+import { ElTag as Tag, ElSelect as Select, ElDropdown, ElIcon } from 'element-plus';
 
-import EventBus from './EventBus.js'
+import EventBus from './EventBus.js';
 
 const MAX_SEARCH_HISTORY = 12;
 
@@ -158,7 +139,7 @@ function generateUUID() {
   arr[8] = (arr[8] & 0x3f) | 0x80;
 
   const hex = Array.from(arr)
-    .map(byte => byte.toString(16).padStart(2, '0'))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
 
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
@@ -168,7 +149,7 @@ export default {
   name: 'SearchHistory',
   components: {
     Tag,
-    Select
+    Select,
   },
   props: {
     localStorageKey: {
@@ -180,12 +161,12 @@ export default {
     return {
       searchHistory: [],
       savedSearchHistory: [],
-    }
+    };
   },
   mounted: function () {
-    this.getSearchHistory()
+    this.getSearchHistory();
     EventBus.on('search-changed', (data) => {
-      this.setSearchHistory(data)
+      this.setSearchHistory(data);
     });
     this.updateSearchHistory();
     this.savedSearchHistory = this.searchHistory.filter((item) => item.saved);
@@ -193,14 +174,14 @@ export default {
   methods: {
     getSearchHistory() {
       if (localStorage.getItem(this.localStorageKey)) {
-        this.searchHistory = JSON.parse(localStorage.getItem(this.localStorageKey))
+        this.searchHistory = JSON.parse(localStorage.getItem(this.localStorageKey));
       } else {
-        this.searchHistory = []
+        this.searchHistory = [];
       }
     },
     clearSearchHistory() {
-      localStorage.removeItem(this.localStorageKey)
-      this.searchHistory = []
+      localStorage.removeItem(this.localStorageKey);
+      this.searchHistory = [];
     },
     sortFilters(a, b) {
       return a.facetPropPath.localeCompare(b.facetPropPath);
@@ -216,7 +197,7 @@ export default {
       return 0;
     },
     addSearchToHistory(filters = [], search = '') {
-      search = search.trim() // remove whitespace
+      search = search.trim(); // remove whitespace
 
       const isExistingItem = this.searchHistory.some((item) => {
         let historyFilters = item.filters;
@@ -229,14 +210,11 @@ export default {
         const historyFiltersString = JSON.stringify(historyFilters);
         const newFiltersString = JSON.stringify(newFilters);
 
-        return (
-          item.search === search &&
-          historyFiltersString === newFiltersString
-        );
+        return item.search === search && historyFiltersString === newFiltersString;
       });
 
       if (!isExistingItem) {
-        const {label, longLabel} = this.searchHistoryItemLabel(search, filters);
+        const { label, longLabel } = this.searchHistoryItemLabel(search, filters);
         if (label || longLabel) {
           const newItem = {
             filters: filters,
@@ -245,7 +223,7 @@ export default {
             label: label,
             longLabel: longLabel,
             id: generateUUID(),
-            updated: (new Date()).getTime(),
+            updated: new Date().getTime(),
           };
 
           this.searchHistory.push(newItem);
@@ -269,7 +247,7 @@ export default {
 
       this.searchHistory.forEach((item) => {
         const key = `${item.search}-${JSON.stringify(item.filters)}`;
-        const existingItem = keys.find(k => k.key === key);
+        const existingItem = keys.find((k) => k.key === key);
         // duplicate item
         if (existingItem) {
           // if current item is saved item
@@ -282,13 +260,15 @@ export default {
         } else {
           keys.push({
             id: item.id,
-            key: key
+            key: key,
           });
         }
       });
 
       if (duplicateItemIDs.length) {
-        this.searchHistory = this.searchHistory.filter((item) => !duplicateItemIDs.includes(item.id));
+        this.searchHistory = this.searchHistory.filter(
+          (item) => !duplicateItemIDs.includes(item.id),
+        );
       }
     },
     /**
@@ -302,10 +282,7 @@ export default {
         const unsavedItems = this.searchHistory.filter((item) => !item.saved);
         const extra = MAX_SEARCH_HISTORY - this.searchHistory.length;
 
-        this.searchHistory = [
-          ...savedItems,
-          ...unsavedItems.slice(0, extra),
-        ];
+        this.searchHistory = [...savedItems, ...unsavedItems.slice(0, extra)];
       }
     },
     updateSearchHistory: function () {
@@ -316,7 +293,7 @@ export default {
         }
 
         if (!item.label) {
-          const {label, longLabel} = this.searchHistoryItemLabel(item.search, item.filters);
+          const { label, longLabel } = this.searchHistoryItemLabel(item.search, item.filters);
           item['label'] = label;
           item['longLabel'] = longLabel;
         }
@@ -329,7 +306,7 @@ export default {
         }
 
         if (!item.updated) {
-          item['updated'] = (new Date()).getTime();
+          item['updated'] = new Date().getTime();
         }
       });
 
@@ -342,7 +319,7 @@ export default {
       this.trimSearchHistory();
 
       // Save updated data
-      localStorage.setItem(this.localStorageKey, JSON.stringify(this.searchHistory))
+      localStorage.setItem(this.localStorageKey, JSON.stringify(this.searchHistory));
     },
     getParentComponentName: function () {
       const isConnectivity = this.localStorageKey?.indexOf('connectivity') !== -1;
@@ -351,14 +328,14 @@ export default {
       return location;
     },
     search: function (item) {
-      this.$emit('search', item)
+      this.$emit('search', item);
 
       // Event tracking
       const location = this.getParentComponentName();
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_search_history_click`,
-        'category': item.longLabel || item.label,
-        'location': `map_sidebar_${location}`,
+        event_name: `portal_maps_search_history_click`,
+        category: item.longLabel || item.label,
+        location: `map_sidebar_${location}`,
       });
     },
     searchHistoryItemLabel: function (search, filters) {
@@ -393,7 +370,7 @@ export default {
         longLabel = label;
       }
 
-      return {label, longLabel};
+      return { label, longLabel };
     },
     toggleSavedSearch: function (item) {
       this.searchHistory.forEach((_item) => {
@@ -404,12 +381,14 @@ export default {
       this.savedSearchHistory = this.searchHistory.filter((item) => item.saved);
       this.updateSearchHistory();
 
-      const eventName = item.saved ? 'portal_maps_search_history_saved' : 'portal_maps_search_history_unsaved';
+      const eventName = item.saved
+        ? 'portal_maps_search_history_saved'
+        : 'portal_maps_search_history_unsaved';
       const location = this.getParentComponentName();
       EventBus.emit('trackEvent', {
-        'event_name': eventName,
-        'category': item.longLabel || item.label,
-        'location': `map_sidebar_${location}`,
+        event_name: eventName,
+        category: item.longLabel || item.label,
+        location: `map_sidebar_${location}`,
       });
     },
     removeFromSavedSearch: function (item) {
@@ -420,13 +399,13 @@ export default {
 
       const location = this.getParentComponentName();
       EventBus.emit('trackEvent', {
-        'event_name': 'portal_maps_search_history_removed',
-        'category': item.longLabel || item.label,
-        'location': `map_sidebar_${location}`,
+        event_name: 'portal_maps_search_history_removed',
+        category: item.longLabel || item.label,
+        location: `map_sidebar_${location}`,
       });
     },
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -453,9 +432,9 @@ export default {
 .search-tag.el-tag {
   margin: 0;
   cursor: pointer !important;
-  background: #f9f2fc!important;
-  border-color: $app-primary-color!important;
-  color:$app-primary-color!important;
+  background: #f9f2fc !important;
+  border-color: $app-primary-color !important;
+  color: $app-primary-color !important;
 
   :deep(.el-tag__content) {
     max-width: 15ch;
@@ -504,7 +483,7 @@ export default {
     color: var(--el-text-color-placeholder);
   }
 
-  &[aria-expanded="true"] {
+  &[aria-expanded='true'] {
     .el-icon {
       transform: rotate(180deg);
     }
@@ -533,7 +512,7 @@ export default {
 
   + .el-dropdown-menu__item {
     &::before {
-      content: "";
+      content: '';
       display: block;
       width: calc(100% - 32px);
       border-top: 1px solid var(--el-border-color);
@@ -570,7 +549,7 @@ export default {
 
   .el-button {
     background-color: transparent !important;
-    transition: all .25s ease;
+    transition: all 0.25s ease;
 
     > span {
       pointer-events: none;
