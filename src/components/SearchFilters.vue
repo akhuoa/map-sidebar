@@ -39,83 +39,81 @@
           </template>
         </el-popover>
       </div>
-      <transition name="el-zoom-in-top">
-        <span v-loading="!cascaderIsReady" class="search-filters transition-box">
-          <el-cascader
-            class="cascader"
-            ref="cascader"
-            v-model="cascadeSelected"
-            size="large"
-            placeholder=" "
-            :collapse-tags="true"
-            collapse-tags-tooltip
-            :options="options"
-            :props="cascaderProps"
-            @change="cascadeEvent($event)"
-            @expand-change="cascadeExpandChange"
-            :show-all-levels="true"
-            popper-class="sidebar-cascader-popper"
-          >
-            <template #default="{ node, data }">
-              <div v-if="isFlatmapConnectionsFilterNode(node)">
-                <div class="sidebar-cascader-search el-input">
-                  <div class="el-input__wrapper">
-                    <input
-                      class="el-input__inner"
-                      :ref="'searchInput_' + node.pathValues[0]"
-                      :value="searchInputs[node.pathValues[0]]"
-                      @input="searchInputChange($event, node)"
-                      @focus="searchInputFocusToggle($event, true)"
-                      @blur="searchInputFocusToggle($event, false)"
-                      style="width: 100%"
-                      autocomplete="off"
-                      placeholder="Search"
-                    />
-                  </div>
+      <span v-loading="!cascaderIsReady" class="search-filters transition-box">
+        <el-cascader
+          class="cascader"
+          ref="cascader"
+          v-model="cascadeSelected"
+          size="large"
+          placeholder=" "
+          :collapse-tags="true"
+          collapse-tags-tooltip
+          :options="options"
+          :props="cascaderProps"
+          @change="cascadeEvent($event)"
+          @expand-change="cascadeExpandChange"
+          :show-all-levels="true"
+          popper-class="sidebar-cascader-popper"
+        >
+          <template #default="{ node, data }">
+            <div v-if="isFlatmapConnectionsFilterNode(node)">
+              <div class="sidebar-cascader-search el-input">
+                <div class="el-input__wrapper">
+                  <input
+                    class="el-input__inner"
+                    :ref="'searchInput_' + node.pathValues[0]"
+                    :value="searchInputs[node.pathValues[0]]"
+                    @input="searchInputChange($event, node)"
+                    @focus="searchInputFocusToggle($event, true)"
+                    @blur="searchInputFocusToggle($event, false)"
+                    style="width: 100%"
+                    autocomplete="off"
+                    placeholder="Search"
+                  />
                 </div>
               </div>
-              <div v-else>
-                <el-row>
-                  <el-col :span="4" v-if="hasLineStyles(data)">
-                    <div class="path-visual" :style="getLineStyles(data)"></div>
-                  </el-col>
-                  <el-col :span="20">
-                    <span v-if="isFlatmapConnectionsNode(node)" class="sr-only">
-                      {{ getNodeKey(node.value) }}
-                    </span>
-                    <div :style="getBackgroundStyles(data)">
-                      {{ data.label }}
-                    </div>
-                  </el-col>
-                </el-row>
-              </div>
-            </template>
-          </el-cascader>
-          <div v-if="showFiltersText" class="filter-default-value">Filters</div>
-          <el-popover
-            title="How do filters work?"
-            width="250"
-            trigger="hover"
-            popper-class="filter-help-popover"
-          >
-            <template #reference>
-              <MapSvgIcon icon="help" class="help" />
-            </template>
-            <div>
-              <strong>Within categories:</strong>
-              OR
-              <br />
-              example: {{ entry.helper.within }}
-              <br />
-              <br />
-              <strong>Between categories:</strong>
-              AND
-              <br />
-              example: {{ entry.helper.between }}
             </div>
-          </el-popover>
-        </span>
-      </transition>
+            <div v-else>
+              <el-row>
+                <el-col :span="4" v-if="hasLineStyles(data)">
+                  <div class="path-visual" :style="getLineStyles(data)"></div>
+                </el-col>
+                <el-col :span="20">
+                  <span v-if="isFlatmapConnectionsNode(node)" class="sr-only">
+                    {{ getNodeKey(node.value) }}
+                  </span>
+                  <div :style="getBackgroundStyles(data)">
+                    {{ data.label }}
+                  </div>
+                </el-col>
+              </el-row>
+            </div>
+          </template>
+        </el-cascader>
+        <div v-if="showFiltersText" class="filter-default-value">Filters</div>
+        <el-popover
+          title="How do filters work?"
+          width="250"
+          trigger="hover"
+          popper-class="filter-help-popover"
+        >
+          <template #reference>
+            <MapSvgIcon icon="help" class="help" />
+          </template>
+          <div>
+            <strong>Within categories:</strong>
+            OR
+            <br />
+            example: {{ entry.helper.within }}
+            <br />
+            <br />
+            <strong>Between categories:</strong>
+            AND
+            <br />
+            example: {{ entry.helper.between }}
+          </div>
+        </el-popover>
+      </span>
     </div>
     <div class="dataset-shown">
       <span class="dataset-results-feedback">{{ numberOfResultsText }}</span>
