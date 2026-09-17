@@ -29,7 +29,7 @@
             @tabClosed="tabClosed"
             @trackEvent="trackEvent"
           />
-          <template v-for="tab in tabs" key="tab.id">
+          <template v-for="tab in tabs" :key="tab.id">
             <template v-if="tab.type === 'annotation'">
               <AnnotationTool
                 :ref="'annotationTab_' + tab.id"
@@ -111,7 +111,7 @@ export default {
   props: {
     tabs: {
       type: Array,
-      default: [
+      default: () => [
         { title: 'Dataset Explorer', id: 1, type: 'datasetExplorer', closable: false },
         { title: 'Connectivity Explorer', id: 2, type: 'connectivityExplorer', closable: false },
         { title: 'Annotation', id: 3, type: 'annotation', closable: true },
@@ -145,32 +145,32 @@ export default {
      */
     connectivityEntry: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     /**
      * The annotation data to show in sidebar.
      */
     annotationEntry: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     createData: {
       type: Object,
-      default: {
+      default: () => ({
         toBeConfirmed: false,
         points: [],
         shape: '',
         x: 0,
         y: 0,
-      },
+      }),
     },
     connectivityKnowledge: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     filterOptions: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     showVisibilityFilter: {
       type: Boolean,
