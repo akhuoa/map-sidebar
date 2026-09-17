@@ -16,7 +16,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { Close as ElIconClose } from '@element-plus/icons-vue';
 
 export default {

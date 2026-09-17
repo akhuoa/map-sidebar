@@ -49,7 +49,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 const baseName = (str) => {
   return str.split('\\').pop().split('/').pop();
 };
@@ -58,7 +57,6 @@ const capitalise = function (string) {
   return string.replace(/\b\w/g, (v) => v.toUpperCase());
 };
 
-/* eslint-disable no-alert, no-console */
 import { View as ElIconView } from '@element-plus/icons-vue';
 import BadgesGroup from './BadgesGroup.vue';
 import { ElButton as Button, ElIcon as Icon } from 'element-plus';

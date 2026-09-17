@@ -137,7 +137,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { markRaw } from 'vue';
 import {
   ElOption as Option,

@@ -325,7 +325,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import {
   Warning as ElIconWarning,
   Location as ElIconLocation,

@@ -16,7 +16,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { ElButton as Button } from 'element-plus';
 
 export default {

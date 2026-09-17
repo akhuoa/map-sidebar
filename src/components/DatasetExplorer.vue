@@ -103,7 +103,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import {
   ElButton as Button,
   ElCard as Card,

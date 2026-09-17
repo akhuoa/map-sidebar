@@ -124,7 +124,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { ElTag as Tag, ElSelect as Select, ElDropdown, ElIcon } from 'element-plus';
 
 import EventBus from './EventBus.js';
