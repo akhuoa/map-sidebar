@@ -50,7 +50,7 @@ export default {
     },
     createData: {
       type: Object,
-      default: {},
+      default: () => {},
     },
   },
   data: function () {
