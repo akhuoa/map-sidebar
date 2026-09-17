@@ -138,12 +138,6 @@
 
 <script>
 import { markRaw } from 'vue';
-import {
-  ElOption as Option,
-  ElSelect as Select,
-  ElPopover as Popover,
-  ElCascader as Cascader,
-} from 'element-plus';
 import speciesMap from './species-map.js';
 import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite';
 import '@abi-software/svg-sprite/dist/style.css';
@@ -173,10 +167,6 @@ export default {
   components: {
     MapSvgIcon,
     MapSvgSpriteColor,
-    Option,
-    Select,
-    Popover,
-    Cascader,
   },
   props: {
     /**

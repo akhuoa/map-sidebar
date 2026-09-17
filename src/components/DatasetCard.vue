@@ -59,7 +59,6 @@ const capitalise = function (string) {
 
 import { View as ElIconView } from '@element-plus/icons-vue';
 import BadgesGroup from './BadgesGroup.vue';
-import { ElButton as Button, ElIcon as Icon } from 'element-plus';
 import EventBus from './EventBus.js';
 import speciesMap from './species-map.js';
 import ImageGallery from './ImageGallery.vue';
@@ -79,8 +78,6 @@ export default {
   components: {
     BadgesGroup,
     ImageGallery,
-    Button,
-    Icon,
     CopyToClipboard,
   },
   mixins: [GalleryHelper, S3Bucket],

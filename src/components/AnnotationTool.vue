@@ -34,20 +34,15 @@
 <script>
 import { shallowRef } from 'vue';
 import { AnnotationPopup, CreateTooltipContent } from '@abi-software/map-utilities';
-import '@abi-software/map-utilities/dist/style.css';
-import { ElButton as Button, ElCol as Col, ElRow as Row, ElIcon as Icon } from 'element-plus';
 import { Delete as ElIconDelete } from '@element-plus/icons-vue';
+import '@abi-software/map-utilities/dist/style.css';
 
 export default {
   name: 'AnnotationTool',
   components: {
     AnnotationPopup,
-    Button,
     CreateTooltipContent,
-    Col,
     ElIconDelete,
-    Icon,
-    Row,
   },
   props: {
     annotationEntry: {

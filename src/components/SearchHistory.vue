@@ -124,8 +124,6 @@
 </template>
 
 <script>
-import { ElTag as Tag, ElSelect as Select, ElDropdown, ElIcon } from 'element-plus';
-
 import EventBus from './EventBus.js';
 
 const MAX_SEARCH_HISTORY = 12;
@@ -146,10 +144,6 @@ function generateUUID() {
 
 export default {
   name: 'SearchHistory',
-  components: {
-    Tag,
-    Select,
-  },
   props: {
     localStorageKey: {
       type: String,

@@ -172,15 +172,6 @@
 </template>
 
 <script>
-import {
-  ElButton as Button,
-  ElCard as Card,
-  ElCheckbox as Checkbox,
-  ElIcon as Icon,
-  ElInput as Input,
-  ElPagination as Pagination,
-  ElMessage as Message,
-} from 'element-plus';
 import 'element-plus/es/components/message/style/css';
 import EventBus from './EventBus.js';
 import SearchFilters from './SearchFilters.vue';
@@ -207,12 +198,6 @@ export default {
     SearchHistory,
     ConnectivityCard,
     ConnectivityInfo,
-    Button,
-    Card,
-    Checkbox,
-    Icon,
-    Input,
-    Pagination,
     MapSvgIcon,
     MapSvgSpriteColor,
   },
@@ -456,7 +441,7 @@ export default {
           } else {
             message = `There are no neuron populations beginning, terminating, or running through <strong>${itemLabelLowerCase}</strong>.`;
           }
-          Message({
+          ElMessage({
             dangerouslyUseHTMLString: true,
             message: message,
             appendTo: this.$el,

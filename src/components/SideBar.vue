@@ -88,7 +88,6 @@ import {
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
 } from '@element-plus/icons-vue';
-import { ElDrawer as Drawer, ElIcon as Icon } from 'element-plus';
 import DatasetExplorer from './DatasetExplorer.vue';
 import EventBus from './EventBus.js';
 import Tabs from './Tabs.vue';
@@ -105,8 +104,6 @@ export default {
     Tabs,
     ElIconArrowLeft,
     ElIconArrowRight,
-    Drawer,
-    Icon,
     AnnotationTool,
     ConnectivityExplorer,
   },

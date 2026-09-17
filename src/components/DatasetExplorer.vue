@@ -103,15 +103,6 @@
 </template>
 
 <script>
-import {
-  ElButton as Button,
-  ElCard as Card,
-  ElDrawer as Drawer,
-  ElIcon as Icon,
-  ElInput as Input,
-  ElPagination as Pagination,
-  ElMessage as Message,
-} from 'element-plus';
 import 'element-plus/es/components/message/style/css';
 import SearchFilters from './SearchFilters.vue';
 import SearchHistory from './SearchHistory.vue';
@@ -157,12 +148,6 @@ export default {
     SearchFilters,
     DatasetCard,
     SearchHistory,
-    Button,
-    Card,
-    Drawer,
-    Icon,
-    Input,
-    Pagination,
     MapSvgIcon,
     MapSvgSpriteColor,
   },
@@ -236,7 +221,7 @@ export default {
 
         // Show not found filter items warning message
         notFoundItems.forEach((notFoundItem) => {
-          Message({
+          ElMessage({
             message: `${notFoundItem.facet} cannot be found in ${notFoundItem.term}!`,
             appendTo: this.$el,
             showClose: true,

@@ -16,11 +16,8 @@
 </template>
 
 <script>
-import { ElButton as Button } from 'element-plus';
-
 export default {
   name: 'BadgesGroup',
-  components: { Button },
   props: {
     /**
      * Object containing information for

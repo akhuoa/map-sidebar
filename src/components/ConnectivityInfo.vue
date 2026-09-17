@@ -332,7 +332,6 @@ import {
   ArrowDown as ElIconArrowDown,
   ArrowUp as ElIconArrowUp,
 } from '@element-plus/icons-vue';
-import { ElButton as Button, ElContainer as Container, ElIcon as Icon } from 'element-plus';
 import ContributorItem from './ContributorItem.vue';
 import EventBus from './EventBus.js';
 import {
@@ -358,9 +357,6 @@ const capitalise = function (str) {
 export default {
   name: 'ConnectivityInfo',
   components: {
-    Button,
-    Container,
-    Icon,
     ElIconWarning,
     ElIconLocation,
     ElIconSearch,
