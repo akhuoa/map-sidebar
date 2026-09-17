@@ -42,7 +42,6 @@ export default {
   components: {
     AnnotationPopup,
     CreateTooltipContent,
-    ElIconDelete,
   },
   props: {
     annotationEntry: {

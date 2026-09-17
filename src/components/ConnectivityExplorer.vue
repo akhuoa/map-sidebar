@@ -431,7 +431,7 @@ export default {
         notFoundItems.forEach((notFoundItem) => {
           const itemLabel = notFoundItem.tagLabel || notFoundItem.facet;
           const itemLabelLowerCase = itemLabel.charAt(0).toLowerCase() + itemLabel.slice(1);
-          let message = '';
+          let message;
           if (notFoundItem.term.toLowerCase() === 'origin') {
             message = `There are no neuron populations beginning at <strong>${itemLabelLowerCase}</strong>.`;
           } else if (notFoundItem.term.toLowerCase() === 'via') {

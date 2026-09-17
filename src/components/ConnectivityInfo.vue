@@ -1174,7 +1174,7 @@ export default {
     formatAlertText: function (text) {
       if (!text) return '';
       const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      const linkified = escaped.replace(/(https?:\/\/[^\s"<>\[]+)/g, (url) => {
+      const linkified = escaped.replace(/(https?:\/\/[^\s"<>[]+)/g, (url) => {
         const parts = url.match(/^(.*?)([\].,;:!?]*)$/);
         const cleanUrl = parts ? parts[1] : url;
         const suffix = parts ? parts[2] : '';
