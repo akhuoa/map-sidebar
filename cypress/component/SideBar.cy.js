@@ -175,23 +175,20 @@ describe('<SideBar />', () => {
     // Click event in Provenance card should behave correctly
     cy.get('@wrapper').then(({ wrapper }) => {
       // Click on tabs
-      cy.get('@Search')
-        .click()
-        .then(() => {
-          expect(wrapper.emitted()['tabClicked'][0]).to.deep.equal([{ id: 1, type: 'search' }]); // Switch to Search
-        });
-      cy.get('@Connectivity')
-        .click()
-        .then(() => {
-          expect(wrapper.emitted()['tabClicked'][1]).to.deep.equal([
-            { id: 2, type: 'connectivity' },
-          ]); // Switch to Connectivity
-        });
-      cy.get('@CloseConnectivity')
-        .click()
-        .then(() => {
-          expect(wrapper.emitted()['connectivity-info-close']).to.exist; // Close Connectivity
-        });
+      cy.get('@Search').click();
+      cy.then(() => {
+        expect(wrapper.emitted()['tabClicked'][0]).to.deep.equal([{ id: 1, type: 'search' }]); // Switch to Search
+      });
+
+      cy.get('@Connectivity').click();
+      cy.then(() => {
+        expect(wrapper.emitted()['tabClicked'][1]).to.deep.equal([{ id: 2, type: 'connectivity' }]); // Switch to Connectivity
+      });
+
+      cy.get('@CloseConnectivity').click();
+      cy.then(() => {
+        expect(wrapper.emitted()['connectivity-info-close']).to.exist; // Close Connectivity
+      });
 
       // Click on buttons
       cy.window().then((window) => {
