@@ -173,7 +173,7 @@ describe('<SideBar />', () => {
     });
 
     // Click event in Provenance card should behave correctly
-    cy.get('@wrapper').then(({ wrapper, component }) => {
+    cy.get('@wrapper').then(({ wrapper }) => {
       // Click on tabs
       cy.get('@Search')
         .click()
