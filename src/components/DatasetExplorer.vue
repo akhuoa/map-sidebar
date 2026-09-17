@@ -104,6 +104,7 @@
 
 <script>
 import 'element-plus/es/components/message/style/css';
+import { ElMessage } from 'element-plus';
 import SearchFilters from './SearchFilters.vue';
 import SearchHistory from './SearchHistory.vue';
 import DatasetCard from './DatasetCard.vue';
@@ -112,7 +113,7 @@ import EventBus from './EventBus.js';
 import { AlgoliaClient } from '../algolia/algolia.js';
 import { getFilters, facetPropPathMapping } from '../algolia/utils.js';
 import { markRaw } from 'vue';
-import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite';
+import { MapSvgIcon } from '@abi-software/svg-sprite';
 
 // handleErrors: A custom fetch error handler to recieve messages from the server
 //    even when an error is found
@@ -149,7 +150,6 @@ export default {
     DatasetCard,
     SearchHistory,
     MapSvgIcon,
-    MapSvgSpriteColor,
   },
   name: 'DatasetExplorer',
   props: {
