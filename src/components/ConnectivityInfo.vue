@@ -167,12 +167,12 @@
       <div class="attribute-title-container">
         <span class="attribute-title">Nerves</span>
       </div>
-      <div v-for="(nerve, i) in entry['nerve-label']">
+      <div v-for="(nerve, i) in entry['nerve-label']" :key="i">
         <div class="attribute-content" :origin-item-label="nerve.nerve" :key="nerve.nerve">
           <span>{{ capitalise(nerve.nerve) }}</span>
         </div>
         <div
-          v-for="(subNerve, i) in nerve.subNerves"
+          v-for="subNerve in nerve.subNerves"
           class="attribute-content"
           style="margin-left: 1rem"
           :origin-item-label="subNerve"
@@ -293,7 +293,8 @@
       <div class="block">
         <div
           class="alert-block"
-          v-for="alert in entry.featuresAlert"
+          v-for="(alert, alertIndex) in entry.featuresAlert"
+          :key="alertIndex"
           v-html="formatAlertText(alert)"
         ></div>
       </div>
@@ -372,7 +373,7 @@ export default {
   props: {
     connectivityEntry: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     entryData: {
       type: Object,
@@ -1138,7 +1139,7 @@ export default {
             entry: this.entry,
             connectivitySource: 'sckan',
           });
-          throw new Error(error);
+          throw error;
         }
       }
     },

@@ -13,7 +13,12 @@
                 <el-tag type="primary" size="small">
                   {{ nerve.nerve }}
                 </el-tag>
-                <el-tag type="primary" size="small" v-for="subNerve in nerve.subNerves">
+                <el-tag
+                  type="primary"
+                  size="small"
+                  v-for="subNerve in nerve.subNerves"
+                  :key="subNerve"
+                >
                   {{ subNerve }}
                 </el-tag>
               </div>

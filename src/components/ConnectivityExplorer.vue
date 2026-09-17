@@ -173,12 +173,13 @@
 
 <script>
 import 'element-plus/es/components/message/style/css';
+import { ElMessage } from 'element-plus';
 import EventBus from './EventBus.js';
 import SearchFilters from './SearchFilters.vue';
 import SearchHistory from './SearchHistory.vue';
 import ConnectivityCard from './ConnectivityCard.vue';
 import ConnectivityInfo from './ConnectivityInfo.vue';
-import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite';
+import { MapSvgIcon } from '@abi-software/svg-sprite';
 
 var initial_state = {
   searchInput: '',
@@ -199,13 +200,12 @@ export default {
     ConnectivityCard,
     ConnectivityInfo,
     MapSvgIcon,
-    MapSvgSpriteColor,
   },
   name: 'ConnectivityExplorer',
   props: {
     connectivityKnowledge: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     entry: {
       type: Object,
@@ -217,15 +217,15 @@ export default {
     },
     connectivityEntry: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     availableAnatomyFacets: {
-      type: Object,
-      default: [],
+      type: Array,
+      default: () => [],
     },
     connectivityFilterOptions: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     showVisibilityFilter: {
       type: Boolean,
@@ -443,7 +443,7 @@ export default {
           }
           ElMessage({
             dangerouslyUseHTMLString: true,
-            message: message,
+            message,
             appendTo: this.$el,
             showClose: true,
             offset: 113,
