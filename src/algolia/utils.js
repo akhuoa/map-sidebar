@@ -1,5 +1,3 @@
-/* eslint-disable no-alert, no-console */
-
 // Mapping between display categories and their Algolia index property path
 // Used for populating the Dataset Search Results facet menu dynamically
 export const facetPropPathMapping = [

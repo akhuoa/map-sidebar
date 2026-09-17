@@ -2,7 +2,6 @@ import { defineConfig } from 'cypress';
 
 export default defineConfig({
   defaultCommandTimeout: 10000,
-  reporter: 'junit',
   experimentalMemoryManagement: true,
   numTestsKeptInMemory: 0,
   reporter: 'cypress-multi-reporters',

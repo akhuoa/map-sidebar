@@ -1,4 +1,3 @@
-/* eslint-disable no-alert, no-console */
 import algoliasearch from 'algoliasearch';
 
 const getFacetsChildrenMap = (childFacets, numberOfLayers) => {
@@ -146,9 +145,8 @@ export class AlgoliaClient {
 
   _processResultsForCards(results) {
     let newResults = [];
-    let newResult = {};
+    let newResult;
     for (let res of results) {
-      newResult = { ...res };
       newResult = {
         anatomy: res.anatomy ? res.anatomy.organ.map((organ) => organ.curie) : undefined,
         doi: res.item.curie.split(':')[1],
@@ -273,7 +271,7 @@ export class AlgoliaClient {
   }
 
   setLocalStorageForTermMapping() {
-    return new Promise((resolve) => {
+    return new Promise((_resolve) => {
       this.index
         .search('', {
           facets: ['*'],

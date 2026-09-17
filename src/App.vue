@@ -36,7 +36,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 // optionally import default styles
 import SideBar from './components/SideBar.vue';
 import EventBus from './components/EventBus.js';
