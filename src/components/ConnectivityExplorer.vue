@@ -179,7 +179,7 @@ import SearchFilters from './SearchFilters.vue';
 import SearchHistory from './SearchHistory.vue';
 import ConnectivityCard from './ConnectivityCard.vue';
 import ConnectivityInfo from './ConnectivityInfo.vue';
-import { MapSvgIcon } from '@abi-software/svg-sprite';
+import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite';
 
 var initial_state = {
   searchInput: '',
@@ -200,6 +200,7 @@ export default {
     ConnectivityCard,
     ConnectivityInfo,
     MapSvgIcon,
+    MapSvgSpriteColor,
   },
   name: 'ConnectivityExplorer',
   props: {
