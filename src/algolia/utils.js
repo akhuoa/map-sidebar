@@ -1,5 +1,3 @@
-/* eslint-disable no-alert, no-console */
-
 // Mapping between display categories and their Algolia index property path
 // Used for populating the Dataset Search Results facet menu dynamically
 export const facetPropPathMapping = [
@@ -7,7 +5,7 @@ export const facetPropPathMapping = [
     label: 'Data Type',
     id: 'item.types',
     facetPropPath: 'item.types.name',
-    facetSubpropPath: 'item.types.subcategory.name'
+    facetSubpropPath: 'item.types.subcategory.name',
   },
   {
     label: 'Anatomical Structure',
@@ -15,39 +13,39 @@ export const facetPropPathMapping = [
     facetPropPath: 'anatomy.organ.category.name',
     facetSubpropPath: 'anatomy.organ.subcategory.name',
     facetSubsubpropPath: 'anatomy.organ.subsubcategory.name',
-    facetFilterPath: 'anatomy.organ.name'
+    facetFilterPath: 'anatomy.organ.name',
   },
   {
     label: 'Species',
     id: 'organisms.primary.species',
     facetPropPath: 'organisms.primary.species.name',
-    facetSubpropPath: 'organisms.primary.species.subcategory.name'
+    facetSubpropPath: 'organisms.primary.species.subcategory.name',
   },
   {
     label: 'Experimental Approach',
     id: 'item.modalities',
     facetPropPath: 'item.modalities.keyword',
-    facetSubpropPath: 'item.modalities.subcategory.name'
+    facetSubpropPath: 'item.modalities.subcategory.name',
   },
   {
     label: 'Sex',
     id: 'attributes.subject.sex',
     facetPropPath: 'attributes.subject.sex.value',
-    facetSubpropPath: 'attributes.subject.sex.subcategory.name'
+    facetSubpropPath: 'attributes.subject.sex.subcategory.name',
   },
   {
     label: 'Age Categories',
     id: 'attributes.subject.ageCategory',
     facetPropPath: 'attributes.subject.ageCategory.value',
-    facetSubpropPath: 'attributes.subject.ageCategory.subcategory.name'
+    facetSubpropPath: 'attributes.subject.ageCategory.subcategory.name',
   },
   {
     label: 'Consortia',
     id: 'supportingAwards.consortium',
     facetPropPath: 'supportingAwards.consortium.name',
-    facetSubpropPath: 'supportingAwards.consortium.subcategory.name'
+    facetSubpropPath: 'supportingAwards.consortium.subcategory.name',
   },
-]
+];
 
 // Same as above, but these show on the sidebar filters
 export const shownFilters = {
@@ -57,70 +55,68 @@ export const shownFilters = {
   'attributes.subject.ageCategory.value': 'Age Categories',
   'supportingAwards.consortium.name': 'Consortia',
   'item.types.name': 'Data type',
-}
+};
 
 /* Returns filter for searching algolia. All facets of the same category are joined with OR,
-  * and each of those results is then joined with an AND.
-  * i.e. (color:blue OR color:red) AND (shape:circle OR shape:red) */
+ * and each of those results is then joined with an AND.
+ * i.e. (color:blue OR color:red) AND (shape:circle OR shape:red) */
 export function getFilters(selectedFacetArray = undefined) {
   // return all datasets if no filter
   if (selectedFacetArray === undefined) {
-    return 'NOT item.published.status:embargo'
+    return 'NOT item.published.status:embargo';
   }
 
   // Switch the 'term' attribute to 'label' if 'label' does not exist
-  selectedFacetArray.forEach(f => {
-    f.label = f.facet3 ? f.facet3 : f.facet2 ? f.facet2 : f.facet
-  })
+  selectedFacetArray.forEach((f) => {
+    f.label = f.facet3 ? f.facet3 : f.facet2 ? f.facet2 : f.facet;
+  });
 
-  let facets = removeShowAllFacets(selectedFacetArray)
+  let facets = removeShowAllFacets(selectedFacetArray);
   //Facet 3 Non specific is the same as facet.facet2 the subsubcategory
   facets.forEach((facet) => {
     if (facet.facet3) {
-      if (facet.facet3 === "Non specific") {
-        facet.label = facet.facet2
+      if (facet.facet3 === 'Non specific') {
+        facet.label = facet.facet2;
       }
     }
-  })
+  });
 
-  let filters = "NOT item.published.status:embargo";
+  let filters = 'NOT item.published.status:embargo';
   filters = `(${filters}) AND `;
-  const facetPropPaths = facetPropPathMapping.map(
-    (f) => [f.facetPropPath, f.facetFilterPath]
-  );
+  const facetPropPaths = facetPropPathMapping.map((f) => [f.facetPropPath, f.facetFilterPath]);
   facetPropPaths.map(([facetPropPath, facetFilterPath]) => {
-    let facetsToBool = facets.filter(
-      (facet) => facet.facetPropPath == facetPropPath
-    );
-    let orFilters = "";
-    let andFilters = "";
+    let facetsToBool = facets.filter((facet) => facet.facetPropPath == facetPropPath);
+    let orFilters = '';
+    let andFilters = '';
     facetsToBool.map((facet) => {
       // for customization
       // facetSubPropPath have the priority
-      let facetPropPathToUse = facet.facetSubPropPath ?
-        facet.facetSubPropPath : facetFilterPath ?
-          facetFilterPath : facetPropPath
+      let facetPropPathToUse = facet.facetSubPropPath
+        ? facet.facetSubPropPath
+        : facetFilterPath
+          ? facetFilterPath
+          : facetPropPath;
       if (facet.AND) {
         andFilters += `AND "${facetPropPathToUse}":"${facet.label}"`;
       } else {
         orFilters += `"${facetPropPathToUse}":"${facet.label}" OR `;
       }
     });
-    if (orFilters == "" && andFilters == "") {
+    if (orFilters == '' && andFilters == '') {
       return;
     }
-    orFilters = `(${orFilters.substring(0, orFilters.lastIndexOf(" OR "))})` // remove last OR
+    orFilters = `(${orFilters.substring(0, orFilters.lastIndexOf(' OR '))})`; // remove last OR
 
     filters += `${orFilters + andFilters} AND `; // Put them together
     // (Note that we add an extra AND in case there are facets at a higher level)
 
     filters = filters.split('()AND ').join(''); // Handle case where there where no OR facets
   });
-  return filters.substring(0, filters.lastIndexOf(" AND "));
+  return filters.substring(0, filters.lastIndexOf(' AND '));
 }
 
 function removeShowAllFacets(facetArray) {
-  return facetArray.filter(f => f.label !== 'Show all')
+  return facetArray.filter((f) => f.label !== 'Show all');
 }
 
-export { removeShowAllFacets }
+export { removeShowAllFacets };

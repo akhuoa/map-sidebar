@@ -7,12 +7,8 @@
       :class="{ 'active-tab': tab.id == activeId }"
       @click="tabClicked(tab)"
     >
-      <span class="tab-title">{{ tab.title }} </span>
-      <el-icon
-        v-if="tab.closable"
-        @click.stop="tabClosed(tab)"
-        class="tab-close-icon"
-      >
+      <span class="tab-title">{{ tab.title }}</span>
+      <el-icon v-if="tab.closable" @click.stop="tabClosed(tab)" class="tab-close-icon">
         <el-icon-close />
       </el-icon>
     </div>
@@ -20,11 +16,10 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-import { Close as ElIconClose } from "@element-plus/icons-vue";
+import { Close as ElIconClose } from '@element-plus/icons-vue';
 
 export default {
-  name: "Tabs",
+  name: 'Tabs',
   components: {
     ElIconClose,
   },
@@ -58,18 +53,18 @@ export default {
   },
   methods: {
     tabClicked: function (tab) {
-      this.$emit("tabClicked", { id: tab.id, type: tab.type });
+      this.$emit('tabClicked', { id: tab.id, type: tab.type });
 
       // To track only direct tab click events
       this.$emit('trackEvent', {
-        'event': 'interaction_event',
-        'event_name': 'portal_maps_sidebar_open_tab',
-        'category': tab.type,
-        'location': 'map_sidebar_tabs',
+        event: 'interaction_event',
+        event_name: 'portal_maps_sidebar_open_tab',
+        category: tab.type,
+        location: 'map_sidebar_tabs',
       });
     },
     tabClosed: function (tab) {
-      this.$emit("tabClosed", { id: tab.id, type: tab.type });
+      this.$emit('tabClosed', { id: tab.id, type: tab.type });
     },
   },
 };

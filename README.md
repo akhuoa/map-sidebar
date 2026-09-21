@@ -38,18 +38,14 @@ npm run build-bundle
 Import the component and the style from the package.
 
 ```javascript
-import { SideBar } from "@abi-software/map-side-bar";
-import "@abi-software/map-side-bar/dist/style.css";
+import { SideBar } from '@abi-software/map-side-bar';
+import '@abi-software/map-side-bar/dist/style.css';
 ```
 
 The code in template should looks like this
 
 ```html
-<SideBar
-  :envVars="envVars"
-  :visible="sideBarVisibility"
-  @actionClick="actionClick"
-/>
+<SideBar :envVars="envVars" :visible="sideBarVisibility" @actionClick="actionClick" />
 ```
 
 envVars contains environment variables like so:
@@ -66,6 +62,7 @@ envVars contains environment variables like so:
 actionClick event is called when an action button has been clicked on.
 
 ## Sidebar Data formats
+
 ### Algolia
 
 Data retrieved from Algolia can be found here:
@@ -113,13 +110,16 @@ TITLE = 'title'
 Note: All are optional except for ‘name’
 
 ### Sidebar input processing
+
 Sidebar input processing can be viewed here:
 https://github.com/ABI-Software/map-sidebar/blob/3310b165489b10901f50a21e5689ef046251dbd9/src/components/SidebarContent.vue#L318
 
 It is used to keep the code from attempting to access an object property that does not exist
 
 ### Context card data format
+
 All fields are strings:
+
 ```
 {
   "description": required ,
@@ -152,15 +152,14 @@ All fields are strings:
 An example context card file can be viewed here:
 https://drive.google.com/file/d/15NVRBny7WGltpMSRbsgMglXo0xOC3-Q9/view?usp=sharing
 
-
 ## API Documentation
 
 The API documentation is developed with `vitepress` and `vuese`. Documentation pages are in the `docs` folder.
 
 ### To run in local development mode
+
 ```bash
 npm run docs:watch
 ```
 
 This will start the documentation server with `vitepress` on port `:5173` and watch the components' changes.
-
