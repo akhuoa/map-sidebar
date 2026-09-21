@@ -2,7 +2,7 @@
   <el-card :body-style="bodyStyle" class="content-card">
     <template #header>
       <div class="header">
-        <div class="search-input-container" :class="{'is-focus': searchInput}">
+        <div class="search-input-container" :class="{ 'is-focus': searchInput }">
           <el-input
             class="search-input"
             placeholder="Search"
@@ -11,11 +11,7 @@
             clearable
             @clear="clearSearchClicked"
           ></el-input>
-          <el-popover
-            width="350"
-            trigger="hover"
-            popper-class="filter-help-popover"
-          >
+          <el-popover width="350" trigger="hover" popper-class="filter-help-popover">
             <template #reference>
               <MapSvgIcon icon="help" class="help" />
             </template>
@@ -23,44 +19,45 @@
               <strong>Search rules:</strong>
               <ul>
                 <li>
-                  <strong>Multiple Terms:</strong> Separate terms with a comma (<code>,</code>).
-                  This will find datasets that match any of the terms (an "OR" search).
+                  <strong>Multiple Terms:</strong>
+                  Separate terms with a comma (
+                  <code>,</code>
+                  ). This will find datasets that match any of the terms (an "OR" search).
                 </li>
                 <li>
-                  <strong>Exact Phrase:</strong> Terms within a comma block will be matched as an exact phrase.
+                  <strong>Exact Phrase:</strong>
+                  Terms within a comma block will be matched as an exact phrase.
                 </li>
               </ul>
-              <br/>
+              <br />
               <strong>Examples:</strong>
               <ul>
                 <li>
                   <strong>To find by exact phrase:</strong>
-                  Searching for <code>vagus nerve</code> will find any dataset containing <code>"vagus nerve"</code>.
+                  Searching for
+                  <code>vagus nerve</code>
+                  will find any dataset containing
+                  <code>"vagus nerve"</code>
+                  .
                 </li>
                 <li>
                   <strong>To find by multiple terms:</strong>
-                  Searching for <code>nerve, vagus</code> will find data that contains either <code>nerve</code> OR <code>vagus</code>.
+                  Searching for
+                  <code>nerve, vagus</code>
+                  will find data that contains either
+                  <code>nerve</code>
+                  OR
+                  <code>vagus</code>
+                  .
                 </li>
               </ul>
             </div>
           </el-popover>
         </div>
-        <el-button
-          type="primary"
-          class="button"
-          @click="searchEvent"
-          size="large"
-        >
+        <el-button type="primary" class="button" @click="searchEvent" size="large">
           Search
         </el-button>
-        <el-button
-          link
-          class="el-button-link"
-          @click="onResetClick"
-          size="large"
-        >
-          Reset
-        </el-button>
+        <el-button link class="el-button-link" @click="onResetClick" size="large">Reset</el-button>
       </div>
     </template>
     <SearchFilters
@@ -106,40 +103,31 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-import {
-  ElButton as Button,
-  ElCard as Card,
-  ElDrawer as Drawer,
-  ElIcon as Icon,
-  ElInput as Input,
-  ElPagination as Pagination,
-  ElMessage as Message,
-} from 'element-plus'
 import 'element-plus/es/components/message/style/css';
-import SearchFilters from './SearchFilters.vue'
-import SearchHistory from './SearchHistory.vue'
-import DatasetCard from './DatasetCard.vue'
-import EventBus from './EventBus.js'
+import { ElMessage } from 'element-plus';
+import SearchFilters from './SearchFilters.vue';
+import SearchHistory from './SearchHistory.vue';
+import DatasetCard from './DatasetCard.vue';
+import EventBus from './EventBus.js';
 
-import { AlgoliaClient } from '../algolia/algolia.js'
-import { getFilters, facetPropPathMapping } from '../algolia/utils.js'
-import { markRaw } from 'vue'
-import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import { AlgoliaClient } from '../algolia/algolia.js';
+import { getFilters, facetPropPathMapping } from '../algolia/utils.js';
+import { markRaw } from 'vue';
+import { MapSvgIcon } from '@abi-software/svg-sprite';
 
 // handleErrors: A custom fetch error handler to recieve messages from the server
 //    even when an error is found
 var handleErrors = async function (response) {
   if (!response.ok) {
-    let parse = await response.json()
+    let parse = await response.json();
     if (parse) {
-      throw new Error(parse.message)
+      throw new Error(parse.message);
     } else {
-      throw new Error(response)
+      throw new Error(response);
     }
   }
-  return response
-}
+  return response;
+};
 
 var initial_state = {
   searchInput: '',
@@ -154,21 +142,14 @@ var initial_state = {
   start: 0,
   hasSearched: false,
   contextCardEnabled: false,
-}
+};
 
 export default {
   components: {
     SearchFilters,
     DatasetCard,
     SearchHistory,
-    Button,
-    Card,
-    Drawer,
-    Icon,
-    Input,
-    Pagination,
     MapSvgIcon,
-    MapSvgSpriteColor
   },
   name: 'DatasetExplorer',
   props: {
@@ -199,7 +180,7 @@ export default {
         display: 'flex',
       },
       cascaderIsReady: false,
-    }
+    };
   },
   computed: {
     // This computed property populates filter data's entry object with $data from this sidebar
@@ -210,37 +191,37 @@ export default {
         showFilters: true,
         helper: {
           within: "'heart' OR 'colon'",
-          between: "'rat' AND 'lung'"
-        }
-      }
+          between: "'rat' AND 'lung'",
+        },
+      };
     },
   },
   methods: {
     hoverChanged: function (data) {
-      const payload = data ? { ...data, tabType: 'dataset' } : { tabType: 'dataset' }
-      this.$emit('hover-changed', payload)
+      const payload = data ? { ...data, tabType: 'dataset' } : { tabType: 'dataset' };
+      this.$emit('hover-changed', payload);
     },
     resetSearch: function () {
-      this.numberOfHits = 0
-      this.discoverIds = []
-      this._dois = []
-      this.results = []
-      this.loadingCards = false
+      this.numberOfHits = 0;
+      this.discoverIds = [];
+      this._dois = [];
+      this.results = [];
+      this.loadingCards = false;
     },
     openSearch: function (filter, search = '') {
-      this.searchInput = search
-      this.resetPageNavigation()
+      this.searchInput = search;
+      this.resetPageNavigation();
       //Proceed normally if cascader is ready
       if (this.cascaderIsReady) {
         const validatedFilters = this.$refs.filtersRef.getHierarchicalValidatedFilters(filter);
         const notFoundItems = validatedFilters.notFound
-          ? validatedFilters.notFound.filter(item => item.facet.toLowerCase() !== 'show all')
+          ? validatedFilters.notFound.filter((item) => item.facet.toLowerCase() !== 'show all')
           : [];
         this.filter = validatedFilters.result;
 
         // Show not found filter items warning message
         notFoundItems.forEach((notFoundItem) => {
-          Message({
+          ElMessage({
             message: `${notFoundItem.facet} cannot be found in ${notFoundItem.term}!`,
             appendTo: this.$el,
             showClose: true,
@@ -251,64 +232,58 @@ export default {
         //Facets provided but cannot find at least one valid
         //facet. Tell the users the search is invalid and reset
         //facets check boxes.
-        if (
-          filter &&
-          filter.length > 0 &&
-          this.filter &&
-          this.filter.length === 0
-        ) {
-          this.$refs.filtersRef.checkShowAllBoxes()
-          this.resetSearch()
+        if (filter && filter.length > 0 && this.filter && this.filter.length === 0) {
+          this.$refs.filtersRef.checkShowAllBoxes();
+          this.resetSearch();
         } else if (this.filter) {
-          this.searchAlgolia(this.filter, search)
-          this.$refs.filtersRef.setCascader(this.filter)
+          this.searchAlgolia(this.filter, search);
+          this.$refs.filtersRef.setCascader(this.filter);
           this.searchHistoryUpdate(this.filter, search);
         }
       } else {
         //cascader is not ready, perform search if no filter is set,
         //otherwise waith for cascader to be ready
-        this.filter = filter
+        this.filter = filter;
         if (!filter || filter.length == 0) {
-          this.searchAlgolia(this.filter, search)
+          this.searchAlgolia(this.filter, search);
           this.searchHistoryUpdate(this.filter, search);
         }
       }
     },
     addFilter: function (filter) {
       if (this.cascaderIsReady) {
-        this.resetPageNavigation()
+        this.resetPageNavigation();
         if (filter) {
-          if (this.$refs.filtersRef.addFilters(filter))
-            this.$refs.filtersRef.initiateSearch()
+          if (this.$refs.filtersRef.addFilters(filter)) this.$refs.filtersRef.initiateSearch();
         }
       } else {
         if (Array.isArray(this.filter)) {
-          this.filter.push(...filter)
+          this.filter.push(...filter);
         } else {
-          this.filter = [...filter]
+          this.filter = [...filter];
         }
       }
     },
     cascaderReady: function () {
-      this.cascaderIsReady = true
-      this.openSearch(this.filter, this.searchInput)
+      this.cascaderIsReady = true;
+      this.openSearch(this.filter, this.searchInput);
     },
     clearSearchClicked: function () {
       this.searchInput = '';
       this.searchAndFilterUpdate();
     },
     onResetClick: function () {
-      this.openSearch([], '')
+      this.openSearch([], '');
       this.$emit('search-changed', {
         value: this.searchInput,
         tabType: 'dataset',
         type: 'reset-update',
-      })
+      });
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_action_filter`,
-        'category': `reset`,
-        'location': 'map_sidebar_dataset',
+        event_name: `portal_maps_action_filter`,
+        category: `reset`,
+        location: 'map_sidebar_dataset',
       });
     },
     searchEvent: function (event = false) {
@@ -318,13 +293,13 @@ export default {
       }
     },
     filterUpdate: function (filters) {
-      this.filter = [...filters]
+      this.filter = [...filters];
       this.searchAndFilterUpdate();
       this.$emit('search-changed', {
         value: filters,
-        tabType: "dataset",
+        tabType: 'dataset',
         type: 'filter-update',
-      })
+      });
     },
     searchAndFilterUpdate: function () {
       this.resetPageNavigation();
@@ -340,130 +315,121 @@ export default {
     },
     searchAlgolia(filters, query = '') {
       // Algolia search
-      this.loadingCards = true
-      this.algoliaClient
-        .anatomyInSearch(getFilters(filters), query)
-        .then((r) => {
-          // Send result anatomy to the scaffold and flatmap
-          EventBus.emit('anatomy-in-datasets', r.forFlatmap)
-          EventBus.emit('number-of-datasets-for-anatomies', r.forScaffold)
-        })
+      this.loadingCards = true;
+      this.algoliaClient.anatomyInSearch(getFilters(filters), query).then((r) => {
+        // Send result anatomy to the scaffold and flatmap
+        EventBus.emit('anatomy-in-datasets', r.forFlatmap);
+        EventBus.emit('number-of-datasets-for-anatomies', r.forScaffold);
+      });
       this.algoliaClient
         .search(getFilters(filters), query, this.numberPerPage, this.page)
         .then((searchData) => {
-          this.numberOfHits = searchData.total
-          this.discoverIds = searchData.discoverIds
-          this._dois = searchData.dois
-          this.results = searchData.items
-          this.loadingCards = false
-          this.scrollToTop()
+          this.numberOfHits = searchData.total;
+          this.discoverIds = searchData.discoverIds;
+          this._dois = searchData.dois;
+          this.results = searchData.items;
+          this.loadingCards = false;
+          this.scrollToTop();
           this.$emit('search-changed', {
             value: this.searchInput,
-            tabType: "dataset",
+            tabType: 'dataset',
             type: 'query-update',
-          })
-          if (this._abortController) this._abortController.abort()
-          this._abortController = new AbortController()
-          const signal = this._abortController.signal
+          });
+          if (this._abortController) this._abortController.abort();
+          this._abortController = new AbortController();
+          const signal = this._abortController.signal;
           //Search ongoing, let the current flow progress
-          this.perItemSearch(signal, { count: 0 })
-        })
+          this.perItemSearch(signal, { count: 0 });
+        });
     },
     filtersLoading: function (val) {
-      this.loadingCards = val
+      this.loadingCards = val;
     },
     numberPerPageUpdate: function (val) {
-      this.numberPerPage = val
+      this.numberPerPage = val;
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_dataset_perPage`,
-        'category': val + '',
-        'location': 'map_sidebar_dataset',
+        event_name: `portal_maps_dataset_perPage`,
+        category: val + '',
+        location: 'map_sidebar_dataset',
       });
 
       const preventPaginationTracking = this.page === 1;
-      this.pageChange(1, preventPaginationTracking)
+      this.pageChange(1, preventPaginationTracking);
     },
     pageChange: function (page, preventPaginationTracking = false) {
-      this.start = (page - 1) * this.numberPerPage
-      this.page = page
-      this.searchAlgolia(
-        this.filter,
-        this.searchInput,
-        this.numberPerPage,
-        this.page
-      )
+      this.start = (page - 1) * this.numberPerPage;
+      this.page = page;
+      this.searchAlgolia(this.filter, this.searchInput, this.numberPerPage, this.page);
 
       if (!preventPaginationTracking) {
         EventBus.emit('trackEvent', {
-          'event_name': `portal_maps_dataset_pagination`,
-          'category': `page_${this.page}`,
-          'location': 'map_sidebar_dataset',
+          event_name: `portal_maps_dataset_pagination`,
+          category: `page_${this.page}`,
+          location: 'map_sidebar_dataset',
         });
       }
     },
     handleMissingData: function (doi) {
-      let i = this.results.findIndex((res) => res.doi === doi)
-      if (this.results[i]) this.results[i].detailsReady = true
+      let i = this.results.findIndex((res) => res.doi === doi);
+      if (this.results[i]) this.results[i].detailsReady = true;
     },
     perItemSearch: function (signal, data) {
       //Maximum 10 downloads at once to prevent long waiting time
       //between unfinished search and new search
-      const maxDownloads = 10
+      const maxDownloads = 10;
       if (maxDownloads > data.count) {
-        const doi = this._dois.shift()
+        const doi = this._dois.shift();
         if (doi) {
-          data.count++
+          data.count++;
           this.callSciCrunch(this.envVars.API_LOCATION, { dois: [doi] }, signal)
             .then((result) => {
-              if (result.numberOfHits === 0) this.handleMissingData(doi)
-              else this.resultsProcessing(result)
-              this.$refs.content.style['overflow-y'] = 'scroll'
-              data.count--
+              if (result.numberOfHits === 0) this.handleMissingData(doi);
+              else this.resultsProcessing(result);
+              this.$refs.content.style['overflow-y'] = 'scroll';
+              data.count--;
               //Async::Download finished, get the next one
-              this.perItemSearch(signal, data)
+              this.perItemSearch(signal, data);
             })
             .catch((result) => {
               if (result.name !== 'AbortError') {
-                this.handleMissingData(doi)
-                data.count--
+                this.handleMissingData(doi);
+                data.count--;
                 //Async::Download not aborted, get the next one
-                this.perItemSearch(signal, data)
+                this.perItemSearch(signal, data);
               }
-            })
+            });
           //Check and make another request until it gets to max downloads
-          this.perItemSearch(signal, data)
+          this.perItemSearch(signal, data);
         }
       }
     },
     scrollToTop: function () {
       if (this.$refs.content) {
-        this.$refs.content.scroll({ top: 0, behavior: 'smooth' })
+        this.$refs.content.scroll({ top: 0, behavior: 'smooth' });
       }
     },
     resetPageNavigation: function () {
-      this.start = 0
-      this.page = 1
+      this.start = 0;
+      this.page = 1;
     },
     resultsProcessing: function (data) {
-      this.lastSearch = this.searchInput
+      this.lastSearch = this.searchInput;
 
       if (data.results.length === 0) {
-        return
+        return;
       }
       data.results.forEach((element) => {
         // match the scicrunch result with algolia result
         let i = this.results.findIndex((res) =>
-          element.doi ? element.doi.includes(res.doi) : false
-        )
+          element.doi ? element.doi.includes(res.doi) : false,
+        );
         // Assign scicrunch results to the object
-        Object.assign(this.results[i], element)
+        Object.assign(this.results[i], element);
         // Assign the attributes that need some processing
         Object.assign(this.results[i], {
           numberSamples: element.sampleSize ? parseInt(element.sampleSize) : 0,
-          numberSubjects: element.subjectSize
-            ? parseInt(element.subjectSize)
-            : 0,
+          numberSubjects: element.subjectSize ? parseInt(element.subjectSize) : 0,
           updated:
             (element.updated && element.updated.length) > 0
               ? element.updated[0].timestamp.split('T')[0]
@@ -478,13 +444,7 @@ export default {
               : undefined,
           species: element.organisms
             ? element.organisms[0].species
-              ? [
-                  ...new Set(
-                    element.organisms.map((v) =>
-                      v.species ? v.species.name : null
-                    )
-                  ),
-                ]
+              ? [...new Set(element.organisms.map((v) => (v.species ? v.species.name : null)))]
               : undefined
             : undefined, // This processing only includes each gender once into 'sexes'
           scaffolds: element['abi-scaffold-metadata-file'],
@@ -500,55 +460,52 @@ export default {
               ? element['abi-contextual-information']
               : undefined,
           //omex format will be the preferred mimetype
-          simulation: element['abi-simulation-omex-file'] ? element['abi-simulation-omex-file'] : element['abi-simulation-file'],
+          simulation: element['abi-simulation-omex-file']
+            ? element['abi-simulation-omex-file']
+            : element['abi-simulation-file'],
           flatmaps: element['abi-flatmap-file'],
           additionalLinks: element.additionalLinks,
           detailsReady: true,
-        })
-      })
+        });
+      });
     },
     createfilterParams: function (params) {
-      let p = new URLSearchParams()
+      let p = new URLSearchParams();
       //Check if field is array or value
       for (const key in params) {
         if (Array.isArray(params[key])) {
           params[key].forEach((e) => {
-            p.append(key, e)
-          })
+            p.append(key, e);
+          });
         } else {
-          p.append(key, params[key])
+          p.append(key, params[key]);
         }
       }
-      return p.toString()
+      return p.toString();
     },
     callSciCrunch: function (apiLocation, params = {}, signal) {
       return new Promise((resolve, reject) => {
         // Add parameters if we are sent them
         let fullEndpoint =
-          this.envVars.API_LOCATION +
-          this.searchEndpoint +
-          '?' +
-          this.createfilterParams(params)
+          this.envVars.API_LOCATION + this.searchEndpoint + '?' + this.createfilterParams(params);
         fetch(fullEndpoint, { signal })
           .then(handleErrors)
           .then((response) => response.json())
           .then((data) => resolve(data))
-          .catch((data) => reject(data))
-      })
+          .catch((data) => reject(data));
+      });
     },
     getAlgoliaFacets: async function () {
-      let facets = await this.algoliaClient.getAlgoliaFacets(
-        facetPropPathMapping
-      )
-      return facets
+      let facets = await this.algoliaClient.getAlgoliaFacets(facetPropPathMapping);
+      return facets;
     },
     searchHistorySearch: function (item) {
-      this.searchInput = item.search
-      this.filter = item.filters
+      this.searchInput = item.search;
+      this.filter = item.filters;
       this.openSearch([...item.filters], item.search);
     },
     getSearch: function () {
-      return this.searchInput
+      return this.searchInput;
     },
     getFilters: function () {
       const hasFilters = this.filter.some((f) => f.facet.toLowerCase() !== 'show all');
@@ -557,19 +514,21 @@ export default {
   },
   mounted: function () {
     // initialise algolia
-    this.algoliaClient = markRaw(new AlgoliaClient(
-      this.envVars.ALGOLIA_ID,
-      this.envVars.ALGOLIA_KEY,
-      this.envVars.PENNSIEVE_API_LOCATION
-    ))
-    this.algoliaClient.initIndex(this.envVars.ALGOLIA_INDEX)
-    this.openSearch(this.filter, this.searchInput)
+    this.algoliaClient = markRaw(
+      new AlgoliaClient(
+        this.envVars.ALGOLIA_ID,
+        this.envVars.ALGOLIA_KEY,
+        this.envVars.PENNSIEVE_API_LOCATION,
+      ),
+    );
+    this.algoliaClient.initIndex(this.envVars.ALGOLIA_INDEX);
+    this.openSearch(this.filter, this.searchInput);
   },
   created: function () {
     //Create non-reactive local variables
-    this.searchEndpoint = 'dataset_info/using_multiple_dois/'
+    this.searchEndpoint = 'dataset_info/using_multiple_dois/';
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -580,7 +539,7 @@ export default {
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     display: block;
     width: calc(100% - 15px);
     height: 100%;

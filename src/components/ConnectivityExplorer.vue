@@ -3,7 +3,7 @@
     <MapSvgSpriteColor />
     <template #header>
       <div class="header">
-        <div class="search-input-container" :class="{'is-focus': inputFocus}">
+        <div class="search-input-container" :class="{ 'is-focus': inputFocus }">
           <el-input
             class="search-input"
             placeholder="Search"
@@ -15,11 +15,7 @@
             clearable
             @clear="clearSearchClicked"
           ></el-input>
-          <el-popover
-            width="350"
-            trigger="hover"
-            popper-class="filter-help-popover"
-          >
+          <el-popover width="350" trigger="hover" popper-class="filter-help-popover">
             <template #reference>
               <MapSvgIcon icon="help" class="help" />
             </template>
@@ -27,54 +23,60 @@
               <strong>Search rules:</strong>
               <ul>
                 <li>
-                  <strong>Partial Matching:</strong> You don't need to type the full word or ID.
-                  The search will find items that contain your search term.
+                  <strong>Partial Matching:</strong>
+                  You don't need to type the full word or ID. The search will find items that
+                  contain your search term.
                 </li>
                 <li>
-                  <strong>Multiple Terms:</strong> Separate terms with a comma (<code>,</code>).
-                  This will find pathways that match any of the terms (an "OR" search).
+                  <strong>Multiple Terms:</strong>
+                  Separate terms with a comma (
+                  <code>,</code>
+                  ). This will find pathways that match any of the terms (an "OR" search).
                 </li>
               </ul>
-              <br/>
+              <br />
               <strong>Examples:</strong>
               <ul>
                 <li>
                   <strong>To find by partial ID:</strong>
-                  Searching for <code>kidney/132</code> will match the full <strong>Pathway ID</strong> <code>ilxtr:sparc-nlp/kidney/132</code>
+                  Searching for
+                  <code>kidney/132</code>
+                  will match the full
+                  <strong>Pathway ID</strong>
+                  <code>ilxtr:sparc-nlp/kidney/132</code>
                 </li>
                 <li>
                   <strong>To find by keyword:</strong>
-                  Searching for (<code>vagus nerve</code>) will match <strong>pathways</strong> that have <code>vagus nerve</code> in their title OR are linked to a related component (like UBERON:0001759).
+                  Searching for (
+                  <code>vagus nerve</code>
+                  ) will match
+                  <strong>pathways</strong>
+                  that have
+                  <code>vagus nerve</code>
+                  in their title OR are linked to a related component (like UBERON:0001759).
                 </li>
                 <li>
                   <strong>To find by multiple terms:</strong>
-                  Searching for <code>kidney</code>, <code>vagus nerve</code> will find pathways that are related to either <code>kidney</code> OR <code>vagus nerve</code>.</li>
+                  Searching for
+                  <code>kidney</code>
+                  ,
+                  <code>vagus nerve</code>
+                  will find pathways that are related to either
+                  <code>kidney</code>
+                  OR
+                  <code>vagus nerve</code>
+                  .
+                </li>
               </ul>
             </div>
           </el-popover>
         </div>
-        <el-button
-          type="primary"
-          class="button"
-          @click="searchEvent"
-          size="large"
-        >
+        <el-button type="primary" class="button" @click="searchEvent" size="large">
           Search
         </el-button>
-        <el-button
-          link
-          class="el-button-link"
-          @click="onResetClick"
-          size="large"
-        >
-          Reset
-        </el-button>
+        <el-button link class="el-button-link" @click="onResetClick" size="large">Reset</el-button>
         <div v-if="showVisibilityFilter" class="visibility-filter">
-          <el-checkbox
-            v-model="filterVisibility"
-          >
-          Focused
-          </el-checkbox>
+          <el-checkbox v-model="filterVisibility">Focused</el-checkbox>
           <el-popover
             title="How does focused checkbox work?"
             width="250"
@@ -125,7 +127,7 @@
       <div
         v-for="result in paginatedResults"
         :key="result.id"
-        :ref="'stepItem-'  + result.id"
+        :ref="'stepItem-' + result.id"
         class="step-item"
         @mouseenter="onHoverChanged($event, result)"
       >
@@ -170,27 +172,18 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-import {
-  ElButton as Button,
-  ElCard as Card,
-  ElCheckbox as Checkbox,
-  ElIcon as Icon,
-  ElInput as Input,
-  ElPagination as Pagination,
-  ElMessage as Message,
-} from "element-plus";
 import 'element-plus/es/components/message/style/css';
-import EventBus from './EventBus.js'
-import SearchFilters from "./SearchFilters.vue";
-import SearchHistory from "./SearchHistory.vue";
-import ConnectivityCard from "./ConnectivityCard.vue";
-import ConnectivityInfo from "./ConnectivityInfo.vue";
-import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import { ElMessage } from 'element-plus';
+import EventBus from './EventBus.js';
+import SearchFilters from './SearchFilters.vue';
+import SearchHistory from './SearchHistory.vue';
+import ConnectivityCard from './ConnectivityCard.vue';
+import ConnectivityInfo from './ConnectivityInfo.vue';
+import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite';
 
 var initial_state = {
-  searchInput: "",
-  lastSearch: "",
+  searchInput: '',
+  lastSearch: '',
   results: [],
   numberOfHits: 0,
   filter: [],
@@ -206,20 +199,14 @@ export default {
     SearchHistory,
     ConnectivityCard,
     ConnectivityInfo,
-    Button,
-    Card,
-    Checkbox,
-    Icon,
-    Input,
-    Pagination,
     MapSvgIcon,
-    MapSvgSpriteColor
+    MapSvgSpriteColor,
   },
-  name: "ConnectivityExplorer",
+  name: 'ConnectivityExplorer',
   props: {
     connectivityKnowledge: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     entry: {
       type: Object,
@@ -231,15 +218,15 @@ export default {
     },
     connectivityEntry: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     availableAnatomyFacets: {
-      type: Object,
-      default: [],
+      type: Array,
+      default: () => [],
     },
     connectivityFilterOptions: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     showVisibilityFilter: {
       type: Boolean,
@@ -254,15 +241,15 @@ export default {
     return {
       ...this.entry,
       bodyStyle: {
-        flex: "1 1 auto",
-        "flex-flow": "column",
-        display: "flex",
+        flex: '1 1 auto',
+        'flex-flow': 'column',
+        display: 'flex',
       },
       cascaderIsReady: false,
       freezeTimeout: undefined,
       freezed: false,
       initLoading: true,
-      expanded: "",
+      expanded: '',
       filterVisibility: true,
       expandedData: null,
       inputFocus: false,
@@ -278,8 +265,8 @@ export default {
         showFilters: true,
         helper: {
           within: "'CNS' OR 'Local circuit neuron'",
-          between: "'Somatic lower motor' AND 'Human'"
-        }
+          between: "'Somatic lower motor' AND 'Human'",
+        },
       };
     },
     paginatedResults: function () {
@@ -288,7 +275,7 @@ export default {
   },
   watch: {
     connectivityKnowledge: function (newVal, oldVal) {
-      this.expanded = ""; // reset expanded state
+      this.expanded = ''; // reset expanded state
       this.expandedData = null;
       this.loadingCards = false;
       if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
@@ -296,7 +283,7 @@ export default {
         this.initLoading = false;
         this.numberOfHits = this.results.length;
         // knowledge is from the neuron click if there is 'ready' property
-        if (this.numberOfHits > 0 && ('ready' in this.results[0])) {
+        if (this.numberOfHits > 0 && 'ready' in this.results[0]) {
           this.$refs.filtersRef.checkShowAllBoxes();
           this.searchInput = '';
           this.filter = [];
@@ -309,19 +296,18 @@ export default {
     connectivityEntry: function (newVal, oldVal) {
       if (
         JSON.stringify(newVal) !== JSON.stringify(oldVal) &&
-        newVal.length === 1 && newVal[0].ready
+        newVal.length === 1 &&
+        newVal[0].ready
       ) {
-        const hasValidFacet = this.filter.some(f => f.facet !== "Show all");
+        const hasValidFacet = this.filter.some((f) => f.facet !== 'Show all');
         if (
           // card should not be expanded if only one entry and from neuron click
-          (this.numberOfHits === 1 && !this.searchInput && !hasValidFacet)||
+          (this.numberOfHits === 1 && !this.searchInput && !hasValidFacet) ||
           // if the changed property is connectivity source,
           // or two different maps in split view, do not collapse
-          (
-            newVal[0].connectivitySource !== oldVal[0].connectivitySource ||
-            newVal[0].mapId !== oldVal[0].mapId
-          ) &&
-          oldVal[0].ready
+          ((newVal[0].connectivitySource !== oldVal[0].connectivitySource ||
+            newVal[0].mapId !== oldVal[0].mapId) &&
+            oldVal[0].ready)
         ) {
           return;
         }
@@ -344,7 +330,7 @@ export default {
       }
       this.freezeTimeout = setTimeout(() => {
         this.freezed = false;
-      }, 3000)
+      }, 3000);
     },
     onShowConnectivity: function (data) {
       this.freezeHoverChange();
@@ -359,8 +345,8 @@ export default {
       this.searchAndFilterUpdate();
       this.updateInputFocus();
     },
-    collapseChange:function (data) {
-      this.expanded = this.expanded === data.id ? "" : data.id;
+    collapseChange: function (data) {
+      this.expanded = this.expanded === data.id ? '' : data.id;
       this.expandedData = this.expanded ? data : null;
     },
     closeConnectivity: function () {
@@ -370,15 +356,15 @@ export default {
     },
     onConnectivityCollapseChange: function (data) {
       // close connectivity event will not trigger emit
-      if (this.connectivityEntry.find(entry => entry.featureId[0] === data.id)) {
+      if (this.connectivityEntry.find((entry) => entry.featureId[0] === data.id)) {
         this.collapseChange(data);
         this.closeConnectivity();
       } else {
-        this.expanded = "";
+        this.expanded = '';
         this.expandedData = null;
         // Make sure to emit the change after the next DOM update
         this.$nextTick(() => {
-          this.$emit("connectivity-collapse-change", data);
+          this.$emit('connectivity-collapse-change', data);
         });
       }
     },
@@ -388,21 +374,21 @@ export default {
       // mouseleave event won't trigger if the connectivity explorer tab is not in view
       // e.g., switching to annotation tab on item click
       if (data || (target && target.checkVisibility())) {
-        this.hoverChanged(data)
+        this.hoverChanged(data);
       }
     },
     hoverChanged: function (data) {
       // disable hover changes when show connectivity is clicked
       if (!this.freezed) {
-        let payload = { tabType: "connectivity" };
+        let payload = { tabType: 'connectivity' };
 
         if (data) {
-          payload = {...payload, ...data};
+          payload = { ...payload, ...data };
         } else if (this.expandedData) {
-          payload = {...payload, ...this.expandedData};
+          payload = { ...payload, ...this.expandedData };
         }
 
-        this.$emit("hover-changed", payload);
+        this.$emit('hover-changed', payload);
       }
     },
     resetSearch: function () {
@@ -410,8 +396,8 @@ export default {
       this.results = [];
       this.loadingCards = false;
     },
-    resetSearchIfNoActiveSearch: function() {
-      const hasValidFacet = this.filter.some(f => f.facet !== "Show all");
+    resetSearchIfNoActiveSearch: function () {
+      const hasValidFacet = this.filter.some((f) => f.facet !== 'Show all');
       if (!this.searchInput && !hasValidFacet) {
         this.openSearch([], '');
       }
@@ -422,15 +408,15 @@ export default {
         value: [],
         tabType: 'connectivity',
         type: 'reset-update',
-      })
+      });
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_action_filter`,
-        'category': `reset`,
-        'location': 'map_sidebar_connectivity',
+        event_name: `portal_maps_action_filter`,
+        category: `reset`,
+        location: 'map_sidebar_connectivity',
       });
     },
-    openSearch: function (filter, search = "") {
+    openSearch: function (filter, search = '') {
       this.searchInput = search;
       this.updateInputFocus();
       this.resetPageNavigation();
@@ -438,7 +424,7 @@ export default {
       if (this.cascaderIsReady) {
         const validatedFilters = this.$refs.filtersRef.getHierarchicalValidatedFilters(filter);
         const notFoundItems = validatedFilters.notFound
-          ? validatedFilters.notFound.filter(item => item.facet.toLowerCase() !== 'show all')
+          ? validatedFilters.notFound.filter((item) => item.facet.toLowerCase() !== 'show all')
           : [];
         this.filter = validatedFilters.result;
 
@@ -446,7 +432,7 @@ export default {
         notFoundItems.forEach((notFoundItem) => {
           const itemLabel = notFoundItem.tagLabel || notFoundItem.facet;
           const itemLabelLowerCase = itemLabel.charAt(0).toLowerCase() + itemLabel.slice(1);
-          let message = '';
+          let message;
           if (notFoundItem.term.toLowerCase() === 'origin') {
             message = `There are no neuron populations beginning at <strong>${itemLabelLowerCase}</strong>.`;
           } else if (notFoundItem.term.toLowerCase() === 'via') {
@@ -454,11 +440,11 @@ export default {
           } else if (notFoundItem.term.toLowerCase() === 'destination') {
             message = `There are no neuron populations terminating at <strong>${itemLabelLowerCase}</strong>.`;
           } else {
-            message = `There are no neuron populations beginning, terminating, or running through <strong>${itemLabelLowerCase}</strong>.`
+            message = `There are no neuron populations beginning, terminating, or running through <strong>${itemLabelLowerCase}</strong>.`;
           }
-          Message({
+          ElMessage({
             dangerouslyUseHTMLString: true,
-            message: message,
+            message,
             appendTo: this.$el,
             showClose: true,
             offset: 113,
@@ -470,18 +456,13 @@ export default {
             value: notFoundItems,
             tabType: 'connectivity',
             type: 'reset-update',
-          })
+          });
         }
 
         //Facets provided but cannot find at least one valid
         //facet. Tell the users the search is invalid and reset
         //facets check boxes.
-        if (
-          filter &&
-          filter.length > 0 &&
-          this.filter &&
-          this.filter.length === 0
-        ) {
+        if (filter && filter.length > 0 && this.filter && this.filter.length === 0) {
           this.$refs.filtersRef.checkShowAllBoxes();
           this.resetSearch();
         } else if (this.filter) {
@@ -503,8 +484,7 @@ export default {
       if (this.cascaderIsReady) {
         this.resetPageNavigation();
         if (filter) {
-          if (this.$refs.filtersRef.addFilter(filter))
-            this.$refs.filtersRef.initiateSearch();
+          if (this.$refs.filtersRef.addFilter(filter)) this.$refs.filtersRef.initiateSearch();
         }
       } else {
         if (Array.isArray(this.filter)) {
@@ -519,7 +499,7 @@ export default {
       this.openSearch(this.filter, this.searchInput);
     },
     clearSearchClicked: function () {
-      this.searchInput = "";
+      this.searchInput = '';
       this.searchAndFilterUpdate();
       this.updateInputFocus();
     },
@@ -563,17 +543,17 @@ export default {
         this.$refs.searchHistory.addSearchToHistory(this.filter, search);
       }
     },
-    searchKnowledge: function (filters, query = "") {
-      this.expanded = "";
+    searchKnowledge: function (filters, query = '') {
+      this.expanded = '';
       this.expandedData = null;
       this.loadingCards = true;
       this.scrollToTop();
-      this.$emit("search-changed", {
+      this.$emit('search-changed', {
         // value: this.searchInput,
         // type: "query-update",
         query: query,
         filter: filters,
-        tabType: "connectivity",
+        tabType: 'connectivity',
       });
       this.lastSearch = query;
     },
@@ -584,9 +564,9 @@ export default {
       this.numberPerPage = val;
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_connectivity_perPage`,
-        'category': val + '',
-        'location': 'map_sidebar_connectivity',
+        event_name: `portal_maps_connectivity_perPage`,
+        category: val + '',
+        location: 'map_sidebar_connectivity',
       });
 
       const preventPaginationTracking = this.page === 1;
@@ -595,22 +575,22 @@ export default {
     pageChange: function (page, preventPaginationTracking = false) {
       this.start = (page - 1) * this.numberPerPage;
       this.page = page;
-      this.expanded = "";
+      this.expanded = '';
       this.expandedData = null;
       this.scrollToTop();
       // this.searchKnowledge(this.filter, this.searchInput);
 
       if (!preventPaginationTracking) {
         EventBus.emit('trackEvent', {
-          'event_name': `portal_maps_connectivity_pagination`,
-          'category': `page_${this.page}`,
-          'location': 'map_sidebar_connectivity',
+          event_name: `portal_maps_connectivity_pagination`,
+          category: `page_${this.page}`,
+          location: 'map_sidebar_connectivity',
         });
       }
     },
     scrollToTop: function () {
       if (this.$refs.content) {
-        this.$refs.content.scroll({ top: 0, behavior: "smooth" });
+        this.$refs.content.scroll({ top: 0, behavior: 'smooth' });
       }
     },
     resetPageNavigation: function () {
@@ -660,7 +640,7 @@ export default {
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     display: block;
     width: calc(100% - 15px);
     height: 100%;
@@ -826,5 +806,4 @@ export default {
     color: #f9f2fc !important;
   }
 }
-
 </style>
