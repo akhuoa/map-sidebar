@@ -935,6 +935,9 @@ export default {
         return null;
       }
 
+      //A scicrunch entry typically looks like  https://scicrunch.org/resolver/RRID:XXXXXX
+      //but due to CORS issue, we need to replace it with sparc-api interface,
+      //Replacing the domain while leaving the subpath the same.
       const APIURL = isScicrunchURL
         ? url.replace(scicrunchBase, `${apiLocationBase}scicrunch`)
         : url.replace(orcidBase, orcidAPIBase);
