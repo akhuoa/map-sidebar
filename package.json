@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/map-side-bar",
-  "version": "2.17.0",
+  "version": "2.19.0",
   "license": "Apache-2.0",
   "engines": {
     "node": "^24.20.0"
@@ -21,6 +21,8 @@
     "build-bundle": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "cypress run --component",
     "cypress:open": "cypress open",
     "release:beta": "npm version prerelease --preid=beta; npm publish --tag beta",
@@ -47,9 +49,9 @@
     "./src/*": "./src/*"
   },
   "dependencies": {
-    "@abi-software/gallery": "1.4.0",
-    "@abi-software/map-utilities": "1.10.0",
-    "@abi-software/svg-sprite": "1.2.0",
+    "@abi-software/gallery": "1.6.0",
+    "@abi-software/map-utilities": "1.12.0",
+    "@abi-software/svg-sprite": "1.4.0",
     "@element-plus/icons-vue": "^2.3.2",
     "algoliasearch": "^4.27.0",
     "element-plus": "^2.14.5",
@@ -62,7 +64,6 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@vitejs/plugin-vue": "^6.0.8",
-    "unplugin-vue-components": "^32.1.0",
     "@vue/compiler-sfc": "^3.5.41",
     "@vuese/markdown-render": "^2.11.3",
     "auto-changelog": "^2.6.0",
@@ -73,13 +74,19 @@
     "cypress-multi-reporters": "^2.0.5",
     "cypress-wait-until": "^3.0.2",
     "eslint": "^10.9.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-cypress": "^7.0.0",
     "eslint-plugin-vue": "^10.10.0",
     "globals": "^17.11.0",
     "mochawesome": "^8.0.1",
+    "prettier": "3.9.6",
     "raw-loader": "^4.0.2",
     "sass": "^1.103.1",
     "transform-loader": "^0.2.4",
     "typescript": "^7.0.2",
+    "unplugin-auto-import": "^21.1.0",
+    "unplugin-vue-components": "^32.1.0",
     "vite": "^8.2.1",
     "vitepress": "^1.6.4",
     "vue-custom-element": "^3.3.0",

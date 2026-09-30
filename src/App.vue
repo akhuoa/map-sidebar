@@ -38,25 +38,24 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 // optionally import default styles
-import SideBar from './components/SideBar.vue'
-import EventBus from './components/EventBus.js'
-import exampleConnectivityInput from './exampleConnectivityInput.js'
+import SideBar from './components/SideBar.vue';
+import EventBus from './components/EventBus.js';
+import exampleConnectivityInput from './exampleConnectivityInput.js';
 import { capitalise } from './utils/common.js'
 
 const flatmapQuery = (flatmapApi, sql) => {
   const data = { sql: sql };
   return fetch(`${flatmapApi}knowledge/query/`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
   })
     .then((response) => response.json())
     .catch((error) => {
-      console.error("Error:", error);
+      console.error('Error:', error);
     });
 };
 
@@ -113,24 +112,28 @@ export default {
     return {
       $annotator: undefined,
       userApiKey: undefined,
-    }
+    };
   },
   data: function () {
     return {
-      annotationEntry: [{
-        featureId: "epicardium",
-        resourceId: "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json",
-        "resource": "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json"
-      }],
+      annotationEntry: [
+        {
+          featureId: 'epicardium',
+          resourceId:
+            'https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json',
+          resource:
+            'https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json',
+        },
+      ],
       sideBarVisibility: true,
       envVars: {
-        API_LOCATION: import.meta.env.VITE_APP_API_LOCATION,
-        ALGOLIA_KEY: import.meta.env.VITE_APP_ALGOLIA_KEY,
-        ALGOLIA_ID: import.meta.env.VITE_APP_ALGOLIA_ID,
-        ALGOLIA_INDEX: import.meta.env.VITE_APP_ALGOLIA_INDEX,
-        PENNSIEVE_API_LOCATION: import.meta.env.VITE_APP_PENNSIEVE_API_LOCATION,
-        BL_SERVER_URL: import.meta.env.VITE_APP_BL_SERVER_URL,
-        ROOT_URL: import.meta.env.VITE_APP_ROOT_URL,
+        API_LOCATION: import.meta.env.VITE_API_LOCATION,
+        ALGOLIA_KEY: import.meta.env.VITE_ALGOLIA_KEY,
+        ALGOLIA_ID: import.meta.env.VITE_ALGOLIA_ID,
+        ALGOLIA_INDEX: import.meta.env.VITE_ALGOLIA_INDEX,
+        PENNSIEVE_API_LOCATION: import.meta.env.VITE_PENNSIEVE_API_LOCATION,
+        BL_SERVER_URL: import.meta.env.VITE_BL_SERVER_URL,
+        ROOT_URL: import.meta.env.VITE_ROOT_URL,
         FLATMAPAPI_LOCATION: import.meta.env.VITE_FLATMAPAPI_LOCATION,
         CELL_CARDS_API: import.meta.env.VITE_APP_CELL_CARDS_API,
       },
@@ -138,7 +141,7 @@ export default {
       createData: {
         toBeConfirmed: false,
         points: [],
-        shape: "",
+        shape: '',
         x: 0,
         y: 0,
       },
@@ -158,8 +161,8 @@ export default {
         where source="${this.sckanVersion}"
         order by source desc`;
       const response = await flatmapQuery(this.envVars.FLATMAPAPI_LOCATION, sql);
-      const mappedData = response.values.map(x => x[0]);
-      const knowledge = mappedData.map(x => JSON.parse(x));
+      const mappedData = response.values.map((x) => x[0]);
+      const knowledge = mappedData.map((x) => JSON.parse(x));
       this.flatmapKnowledge = knowledge.filter((item) => {
         if (item.connectivity?.length) return true;
         return false;
@@ -168,66 +171,65 @@ export default {
     },
     connectivityQueryFilter: async function (payload) {
       let results = this.flatmapKnowledge;
-      if (payload.type === "query-update") {
+      if (payload.type === 'query-update') {
         if (this.query !== payload.value) this.target = [];
         this.query = payload.value;
-      } else if (payload.type === "filter-update") {
+      } else if (payload.type === 'filter-update') {
         this.filter = payload.value;
         this.target = [];
-      } else if (payload.type === "query-filter-update") {
+      } else if (payload.type === 'query-filter-update') {
         this.query = payload.query;
         this.filter = payload.filter;
         this.target = payload.data;
       }
       if (this.query) {
-        let flag = "", order = [], paths = [];
+        let flag = '',
+          order = [],
+          paths = [];
         const labels = ['neuron type aacar 11'];
         flag = 'label';
         order = labels;
         if (labels.length === 1) {
-          paths =['ilxtr:neuron-type-aacar-11', 'ilxtr:neuron-type-bolew-unbranched-11'];
+          paths = ['ilxtr:neuron-type-aacar-11', 'ilxtr:neuron-type-bolew-unbranched-11'];
           flag = 'id';
-          order = [this.query, ...paths.filter(item => item !== this.query)];
+          order = [this.query, ...paths.filter((item) => item !== this.query)];
         }
-        results = results.filter(item => paths.includes(item.id) || labels.includes(item.label));
+        results = results.filter((item) => paths.includes(item.id) || labels.includes(item.label));
         results.sort((a, b) => order.indexOf(a[flag]) - order.indexOf(b[flag]));
       }
       this.connectivityKnowledge = results;
     },
     hoverChanged: function (data) {
-      console.log('hoverChanged', data)
+      console.log('hoverChanged', data);
     },
     searchChanged: function (data) {
       if (!this.flatmapKnowledge.length) {
         this.loadConnectivityKnowledge();
       }
       if (data.id === 2) {
-        this.connectivityQueryFilter(data)
+        this.connectivityQueryFilter(data);
       }
     },
     // For connectivity input actions
     action: function (action) {
-      console.log('action fired: ', action)
+      console.log('action fired: ', action);
       let facets = [];
       if (action.labels) {
         facets.push(
-          ...action.labels.map(val => ({
+          ...action.labels.map((val) => ({
             facet: capitalise(val),
-            term: "Anatomical structure",
-            facetPropPath: "anatomy.organ.category.name",
-          }))
+            term: 'Anatomical structure',
+            facetPropPath: 'anatomy.organ.category.name',
+          })),
         );
       }
       if (this.$refs.sideBar && facets?.length) {
-        console.log('openSearch', facets)
-        this.$refs.sideBar.openSearch(facets, "");
+        console.log('openSearch', facets);
+        this.$refs.sideBar.openSearch(facets, '');
       }
     },
     openSearch: function () {
-      this.$refs.sideBar.openSearch(
-        [],
-        'http://purl.obolibrary.org/obo/UBERON_0001103'
-      )
+      this.$refs.sideBar.openSearch([], 'http://purl.obolibrary.org/obo/UBERON_0001103');
     },
     singleFacets: function () {
       this.$refs.sideBar.addFilter({
@@ -236,7 +238,7 @@ export default {
         term: 'Anatomical structure',
         facetPropPath: 'anatomy.organ.category.name',
         AND: true,
-      })
+      });
     },
     addStomach: function () {
       this.$refs.sideBar.addFilter({
@@ -244,7 +246,7 @@ export default {
         term: 'Anatomical structure',
         facetPropPath: 'anatomy.organ.category.name',
         AND: true,
-      })
+      });
     },
     addDRG: function () {
       this.$refs.sideBar.addFilter({
@@ -252,7 +254,7 @@ export default {
         term: 'Anatomical structure',
         facetPropPath: 'anatomy.organ.category.name',
         AND: true,
-      })
+      });
     },
     addSubsubPath: function () {
       this.$refs.sideBar.addFilter({
@@ -260,7 +262,7 @@ export default {
         term: 'Anatomical structure',
         facetPropPath: 'anatomy.organ.category.name',
         AND: true,
-      })
+      });
     },
     addInferiorVagus: function () {
       this.$refs.sideBar.addFilter({
@@ -268,7 +270,7 @@ export default {
         term: 'Anatomical structure',
         facetPropPath: 'anatomy.organ.category.name',
         AND: true,
-      })
+      });
     },
     addInvalidTerm: function () {
       this.$refs.sideBar.addFilter({
@@ -276,7 +278,7 @@ export default {
         term: 'Anatomical structure',
         facetPropPath: 'anatomy.organ.name',
         AND: true,
-      })
+      });
     },
     multiFacets: function () {
       this.$refs.sideBar.openSearch(
@@ -289,9 +291,9 @@ export default {
           {
             facet: 'Heart',
             term: 'Anatomical structure',
-            facetSubPropPath: "anatomy.organ.name",
+            facetSubPropPath: 'anatomy.organ.name',
             facetPropPath: 'anatomy.organ.category.name',
-            label :'Heart',
+            label: 'Heart',
             AND: true,
           },
           {
@@ -300,8 +302,8 @@ export default {
             facetPropPath: 'anatomy.organ.name',
           },
         ],
-        ''
-      )
+        '',
+      );
     },
     keywordSearch: function () {
       this.$refs.sideBar.addFilter({
@@ -311,7 +313,7 @@ export default {
         facetPropPath: 'item.keywords.keyword',
         term: 'Keywords',
         AND: true,
-      })
+      });
     },
     markerFromFlatmap: function () {
       this.$refs.sideBar.openSearch([
@@ -320,50 +322,50 @@ export default {
           term: 'Keywords',
           facetPropPath: 'item.keywords.keyword',
         },
-      ])
+      ]);
     },
     neuronSearch: function () {
-      this.$refs.sideBar.openNeuronSearch('ilxtr:neuron-type-keast-10')
+      this.$refs.sideBar.openNeuronSearch('ilxtr:neuron-type-keast-10');
     },
     getFacets: async function () {
-      let facets = await this.$refs.sideBar.getAlgoliaFacets()
-      console.log('Algolia facets:', facets)
+      let facets = await this.$refs.sideBar.getAlgoliaFacets();
+      console.log('Algolia facets:', facets);
     },
-    toggleCreateData : function() {
+    toggleCreateData: function () {
       if (!this.createDataSet) {
         this.createData = {
           drawingBox: false,
           toBeConfirmed: true,
           points: [[1.0, 1.0, 1.0]],
-          shape: "Lines",
+          shape: 'Lines',
           x: 0,
           y: 0,
           editingIndex: -1,
           faceIndex: -1,
           toBeDeleted: false,
-        }
-        this.createDataSet = true
+        };
+        this.createDataSet = true;
       } else {
         this.createData = {
           toBeConfirmed: false,
           points: [],
-          shape: "",
+          shape: '',
           x: 0,
           y: 0,
-        }
-        this.createDataSet = false
+        };
+        this.createDataSet = false;
       }
     },
-    onConnectivityHovered: function(data) {
-      console.log("onConnectivityHovered" , data)
+    onConnectivityHovered: function (data) {
+      console.log('onConnectivityHovered', data);
     },
     openConnectivitySearch: function (entry) {
-      const query = entry ? entry.query : 'ilxtr:neuron-type-aacar-5'
-      const filter = entry ? entry.filter : []
-      this.$refs.sideBar.openConnectivitySearch(filter, query)
+      const query = entry ? entry.query : 'ilxtr:neuron-type-aacar-5';
+      const filter = entry ? entry.filter : [];
+      this.$refs.sideBar.openConnectivitySearch(filter, query);
     },
     onConnectivityCollapseChange: function () {
-      this.connectivityEntry = [...exampleConnectivityInput]
+      this.connectivityEntry = [...exampleConnectivityInput];
     },
     showCellCardExplorer: function () {
       this.showCellCards = true;
@@ -372,15 +374,15 @@ export default {
     },
   },
   mounted: async function () {
-    console.log('mounted app')
+    console.log('mounted app');
     EventBus.on('contextUpdate', (payLoad) => {
-      console.log('contextUpdate', payLoad)
+      console.log('contextUpdate', payLoad);
     });
     EventBus.on('datalink-clicked', (payLoad) => {
-      console.log('datalink-clicked', payLoad)
+      console.log('datalink-clicked', payLoad);
     });
   },
-}
+};
 </script>
 
 <style lang="scss">

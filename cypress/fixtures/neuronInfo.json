@@ -1,55 +1,41 @@
 {
-    "destinations": [
-        "uterus",
-        "uterine cervix",
-        "nucleus of solitary tract"
-    ],
-    "origins": [
-        "inferior vagus X ganglion"
-    ],
-    "components": [
-        "vagus nerve"
-    ],
-    "destinationsWithDatasets": [
-        {
-            "id": "UBERON:0000002",
-            "name": "uterine cervix"
-        },
-        {
-            "id": "UBERON:0000995",
-            "name": "uterus"
-        },
-        {
-            "id": "UBERON:0009050",
-            "name": "nucleus of solitary tract"
-        }
-    ],
-    "originsWithDatasets": [
-        {
-            "id": "UBERON:0005363",
-            "name": "inferior vagus X ganglion"
-        }
-    ],
-    "componentsWithDatasets": [
-        {
-            "id": "UBERON:0001759",
-            "name": "vagus nerve"
-        }
-    ],
-    "title": "nodose ganglion with axon sensory terminal in uterus or uterine cervix via abdominal vagal nerve with axon terminal in nucleus of the tractus solitarius via vagus nerve",
-    "featureId": [
-        "ilxtr:sparc-nlp/femrep/64"
-    ],
-    "hyperlinks": [
-        {
-            "url": "https://pubmed.ncbi.nlm.nih.gov/?term=%2F%2Fdoi.org%2F10.1016%2F0196-9781%2885%2990306-7%2C%2F%2Fdx.doi.org%2F10.1007%2Fs004410051211%2C%2F%2Fdoi.org%2F10.1016%2F0361-9230%2890%2990221-K%2C%2F%2Fdoi.org%2F10.1016%2Fj.autneu.2014.11.009%2C%2F%2Fdoi.org%2F10.1016%2F0006-8993%2895%2901312-1",
-            "id": "pubmed"
-        }
-    ],
-    "provenanceTaxonomy": [
-        "NCBITaxon:10116"
-    ],
-    "provenanceTaxonomyLabel": [
-        "Rattus norvegicus"
-    ]
+  "destinations": ["uterus", "uterine cervix", "nucleus of solitary tract"],
+  "origins": ["inferior vagus X ganglion"],
+  "components": ["vagus nerve"],
+  "destinationsWithDatasets": [
+    {
+      "id": "UBERON:0000002",
+      "name": "uterine cervix"
+    },
+    {
+      "id": "UBERON:0000995",
+      "name": "uterus"
+    },
+    {
+      "id": "UBERON:0009050",
+      "name": "nucleus of solitary tract"
+    }
+  ],
+  "originsWithDatasets": [
+    {
+      "id": "UBERON:0005363",
+      "name": "inferior vagus X ganglion"
+    }
+  ],
+  "componentsWithDatasets": [
+    {
+      "id": "UBERON:0001759",
+      "name": "vagus nerve"
+    }
+  ],
+  "title": "nodose ganglion with axon sensory terminal in uterus or uterine cervix via abdominal vagal nerve with axon terminal in nucleus of the tractus solitarius via vagus nerve",
+  "featureId": ["ilxtr:sparc-nlp/femrep/64"],
+  "hyperlinks": [
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/?term=%2F%2Fdoi.org%2F10.1016%2F0196-9781%2885%2990306-7%2C%2F%2Fdx.doi.org%2F10.1007%2Fs004410051211%2C%2F%2Fdoi.org%2F10.1016%2F0361-9230%2890%2990221-K%2C%2F%2Fdoi.org%2F10.1016%2Fj.autneu.2014.11.009%2C%2F%2Fdoi.org%2F10.1016%2F0006-8993%2895%2901312-1",
+      "id": "pubmed"
+    }
+  ],
+  "provenanceTaxonomy": ["NCBITaxon:10116"],
+  "provenanceTaxonomyLabel": ["Rattus norvegicus"]
 }

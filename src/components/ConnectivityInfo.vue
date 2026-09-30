@@ -48,12 +48,7 @@
         </div>
       </div>
       <div class="title-buttons">
-        <el-popover
-          width="auto"
-          trigger="hover"
-          :teleported="false"
-          popper-class="popover-map-pin"
-        >
+        <el-popover width="auto" trigger="hover" :teleported="false" popper-class="popover-map-pin">
           <template #reference>
             <el-button class="button-circle secondary" circle @click="showConnectivity">
               <el-icon color="#8300bf">
@@ -61,9 +56,7 @@
               </el-icon>
             </el-button>
           </template>
-          <span>
-            Show connectivity on map
-          </span>
+          <span>Show connectivity on map</span>
         </el-popover>
         <CopyToClipboard @copied="onCopied" :content="updatedCopyContent" />
         <template v-if="withCloseButton">
@@ -86,7 +79,10 @@
       </div>
     </div>
 
-    <div class="content-container population-details" :class="{'flex-row': hasSingleConnectivityList}">
+    <div
+      class="content-container population-details"
+      :class="{ 'flex-row': hasSingleConnectivityList }"
+    >
       <div class="block attribute-title-container">
         <span class="attribute-title">Population Details</span>
         <el-popover
@@ -100,12 +96,11 @@
             <el-icon class="info"><el-icon-warning /></el-icon>
           </template>
           <span v-if="hasSingleConnectivityList" style="word-break: keep-all">
-            This list is ordered alphabetically. Switch to graph view for path details,
-            and use the legend below for reconciliation status.
+            This list is ordered alphabetically. Switch to graph view for path details, and use the
+            legend below for reconciliation status.
           </span>
           <span v-else style="word-break: keep-all">
-            This list is ordered alphabetically,
-            switch to graph view for path details.
+            This list is ordered alphabetically, switch to graph view for path details.
           </span>
           <div v-if="hasSingleConnectivityList" class="connectivity-legends">
             <div class="legend-title">Legend</div>
@@ -138,9 +133,11 @@
                 <el-icon class="info"><el-icon-warning /></el-icon>
               </template>
               <span style="word-break: keep-all">
-                <strong>Map</strong> - connectivity as defined in active map.
-                <br>
-                <strong>SCKAN</strong> - connectivity as defined in SCKAN.
+                <strong>Map</strong>
+                - connectivity as defined in active map.
+                <br />
+                <strong>SCKAN</strong>
+                - connectivity as defined in SCKAN.
               </span>
             </el-popover>
           </span>
@@ -149,7 +146,7 @@
             <el-radio value="sckan">SCKAN</el-radio>
           </el-radio-group>
         </div>
-        <div class="population-details-view" :class="{'align-right': hasSingleConnectivityList}">
+        <div class="population-details-view" :class="{ 'align-right': hasSingleConnectivityList }">
           <el-button
             :class="activeView === 'listView' ? 'button' : 'el-button-secondary'"
             @click="switchConnectivityView('listView')"
@@ -170,16 +167,12 @@
       <div class="attribute-title-container">
         <span class="attribute-title">Nerves</span>
       </div>
-      <div v-for="(nerve, i) in entry['nerve-label']">
-        <div
-          class="attribute-content"
-          :origin-item-label="nerve.nerve"
-          :key="nerve.nerve"
-        >
+      <div v-for="(nerve, i) in entry['nerve-label']" :key="i">
+        <div class="attribute-content" :origin-item-label="nerve.nerve" :key="nerve.nerve">
           <span>{{ capitalise(nerve.nerve) }}</span>
         </div>
         <div
-          v-for="(subNerve, i) in nerve.subNerves"
+          v-for="subNerve in nerve.subNerves"
           class="attribute-content"
           style="margin-left: 1rem"
           :origin-item-label="subNerve"
@@ -205,7 +198,10 @@
       </div>
     </div>
 
-    <div class="content-container content-container-connectivity" v-show="activeView === 'listView'">
+    <div
+      class="content-container content-container-connectivity"
+      v-show="activeView === 'listView'"
+    >
       <!-- TODO: To use only one component when the data is ready -->
       <template v-if="hasSingleConnectivityList">
         <connectivity-reconciliation-list
@@ -248,14 +244,12 @@
       </template>
     </div>
 
-    <div class="content-container content-container-connectivity" v-show="activeView === 'graphView'">
+    <div
+      class="content-container content-container-connectivity"
+      v-show="activeView === 'graphView'"
+    >
       <template v-if="graphViewLoaded">
-        <el-button
-          class="button"
-          @click="openGraphInViewer"
-        >
-          Open in viewer
-        </el-button>
+        <el-button class="button" @click="openGraphInViewer">Open in viewer</el-button>
         <connectivity-graph
           v-loading="connectivityLoading"
           :key="`${connectivityKey}graph`"
@@ -297,8 +291,10 @@
         <span class="attribute-title">Notes</span>
       </div>
       <div class="block">
-        <div class="alert-block"
-          v-for="alert in entry.featuresAlert"
+        <div
+          class="alert-block"
+          v-for="(alert, alertIndex) in entry.featuresAlert"
+          :key="alertIndex"
           v-html="formatAlertText(alert)"
         ></div>
       </div>
@@ -320,9 +316,7 @@
             <template v-if="consultant.refreshable">
               <br />
               Please try again.
-              <span class="reload-button" @click="reloadConsultant(consultant)">
-                Reload
-              </span>
+              <span class="reload-button" @click="reloadConsultant(consultant)">Reload</span>
             </template>
           </div>
         </li>
@@ -332,21 +326,15 @@
 </template>
 
 <script>
-  /* eslint-disable no-alert, no-console */
 import {
   Warning as ElIconWarning,
   Location as ElIconLocation,
   Search as ElIconSearch,
   ArrowDown as ElIconArrowDown,
   ArrowUp as ElIconArrowUp,
-} from '@element-plus/icons-vue'
-import {
-  ElButton as Button,
-  ElContainer as Container,
-  ElIcon as Icon,
-} from 'element-plus'
-import ContributorItem from './ContributorItem.vue'
-import EventBus from './EventBus.js'
+} from '@element-plus/icons-vue';
+import ContributorItem from './ContributorItem.vue';
+import EventBus from './EventBus.js';
 import {
   CopyToClipboard,
   ConnectivityGraph,
@@ -359,16 +347,13 @@ import { capitalise, formatAlertText as formatAlertTextUtil, scrollToRef } from 
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => {
-    return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase()
-  })
-}
+    return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase();
+  });
+};
 
 export default {
   name: 'ConnectivityInfo',
   components: {
-    Button,
-    Container,
-    Icon,
     ElIconWarning,
     ElIconLocation,
     ElIconSearch,
@@ -384,7 +369,7 @@ export default {
   props: {
     connectivityEntry: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     entryData: {
       type: Object,
@@ -392,7 +377,7 @@ export default {
     },
     entryId: {
       type: String,
-      default: "",
+      default: '',
     },
     envVars: {
       type: Object,
@@ -440,18 +425,15 @@ export default {
       return this.entry?.title || '';
     },
     hasProvenanceTaxonomyLabel: function () {
-      return (
-        this.entry.provenanceTaxonomyLabel &&
-        this.entry.provenanceTaxonomyLabel.length > 0
-      );
+      return this.entry.provenanceTaxonomyLabel && this.entry.provenanceTaxonomyLabel.length > 0;
     },
     provSpeciesDescription: function () {
-      let text = "Studied in";
+      let text = 'Studied in';
       this.entry.provenanceTaxonomyLabel.forEach((label) => {
         text += ` ${label},`;
       });
       text = text.slice(0, -1); // remove last comma
-      text += " species";
+      text += ' species';
       return text;
     },
     connectivityKey: function () {
@@ -513,9 +495,7 @@ export default {
       handler: function (newVal, oldVal) {
         if (newVal && newVal !== oldVal) {
           this.connectivityLoading = true;
-          this.activeView =
-            localStorage.getItem('connectivity-active-view') ||
-            this.activeView;
+          this.activeView = localStorage.getItem('connectivity-active-view') || this.activeView;
           if (this.activeView === 'graphView') {
             this.graphViewLoaded = true;
           }
@@ -540,10 +520,10 @@ export default {
   },
   methods: {
     titleCase: function (title) {
-      return titleCase(title)
+      return titleCase(title);
     },
     capitalise: function (text) {
-      return capitalise(text)
+      return capitalise(text);
     },
     toggleTitleExpansion: function () {
       this.isTitleExpanded = !this.isTitleExpanded;
@@ -585,16 +565,16 @@ export default {
       this.$emit('show-connectivity', featureIds);
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_show_connectivity_on_map`,
-        'category': this.entry.id || '',
-        'location': 'map_sidebar_connectivity',
+        event_name: `portal_maps_show_connectivity_on_map`,
+        category: this.entry.id || '',
+        location: 'map_sidebar_connectivity',
       });
     },
     onCopied: function () {
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_connectivity_copy`,
-        'category': this.entry.id || '',
-        'location': 'map_sidebar_connectivity',
+        event_name: `portal_maps_connectivity_copy`,
+        category: this.entry.id || '',
+        location: 'map_sidebar_connectivity',
       });
     },
     switchConnectivityView: function (val) {
@@ -609,9 +589,9 @@ export default {
       }
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_connectivity_switch_view`,
-        'category': val,
-        'location': 'map_sidebar_connectivity',
+        event_name: `portal_maps_connectivity_switch_view`,
+        category: val,
+        location: 'map_sidebar_connectivity',
       });
     },
     openGraphInViewer: function () {
@@ -643,7 +623,7 @@ export default {
     },
     onTapNode: function (data) {
       // save selected state for list view
-      const name = data.map(t => t.label).join(', ');
+      const name = data.map((t) => t.label).join(', ');
       this.onConnectivityHovered(name);
     },
     onShowReferenceConnectivities: function (refSource) {
@@ -712,9 +692,7 @@ export default {
           });
           transformedItems.push(itemNames.join(','));
         });
-        const contentList = transformedItems
-          .map((item) => `<li>${item}</li>`)
-          .join('\n');
+        const contentList = transformedItems.map((item) => `<li>${item}</li>`).join('\n');
         contentString += '\n';
         contentString += `<ul>${contentList}</ul>`;
         return contentString;
@@ -730,7 +708,7 @@ export default {
         const getFirstId = (idArr) => {
           if (!idArr?.length) return null;
           const first = idArr[0];
-          return typeof first === 'string' ? first : (first?.[0] || null);
+          return typeof first === 'string' ? first : first?.[0] || null;
         };
         const transformedItems = sortedCombinations.map((item) => {
           const isDirectMatch =
@@ -760,9 +738,7 @@ export default {
           hasDifferReference = true;
           return `<s>${sckanLabelWithId}</s> (<strong>Map:</strong> ${mapLabelWithId}) **`;
         });
-        const contentList = transformedItems
-          .map((item) => `<li>${item}</li>`)
-          .join('\n');
+        const contentList = transformedItems.map((item) => `<li>${item}</li>`).join('\n');
         contentString += '\n';
         contentString += `<ul>${contentList}</ul>`;
         return contentString;
@@ -772,7 +748,7 @@ export default {
       if (this.entry['nerve-label']?.length) {
         const title = 'Nerves';
         const nerves = this.entry['nerve-label'];
-        const nerveLabels = nerves.map(nerve => Object.values(nerve)).flat(Infinity);
+        const nerveLabels = nerves.map((nerve) => Object.values(nerve)).flat(Infinity);
         const transformedNerves = transformData(title, nerveLabels);
         contentArray.push(transformedNerves);
       }
@@ -780,17 +756,26 @@ export default {
       // Origins / Components / Destination
       if (this.hasSingleConnectivityList) {
         if (this.originsCombinations?.length) {
-          const transformedOrigins = transformReconciliationData('Origin', this.originsCombinations);
+          const transformedOrigins = transformReconciliationData(
+            'Origin',
+            this.originsCombinations,
+          );
           contentArray.push(transformedOrigins);
         }
 
         if (this.componentsCombinations?.length) {
-          const transformedComponents = transformReconciliationData('Components', this.componentsCombinations);
+          const transformedComponents = transformReconciliationData(
+            'Components',
+            this.componentsCombinations,
+          );
           contentArray.push(transformedComponents);
         }
 
         if (this.destinationsCombinations?.length) {
-          const transformedDestinations = transformReconciliationData('Destination', this.destinationsCombinations);
+          const transformedDestinations = transformReconciliationData(
+            'Destination',
+            this.destinationsCombinations,
+          );
           contentArray.push(transformedDestinations);
         }
 
@@ -806,17 +791,29 @@ export default {
         }
       } else {
         if (this.origins?.length) {
-          const transformedOrigins = transformData('Origin', this.origins, this.originsWithDatasets);
+          const transformedOrigins = transformData(
+            'Origin',
+            this.origins,
+            this.originsWithDatasets,
+          );
           contentArray.push(transformedOrigins);
         }
 
         if (this.components?.length) {
-          const transformedComponents = transformData('Components', this.components, this.componentsWithDatasets);
+          const transformedComponents = transformData(
+            'Components',
+            this.components,
+            this.componentsWithDatasets,
+          );
           contentArray.push(transformedComponents);
         }
 
         if (this.destinations?.length) {
-          const transformedDestinations = transformData('Destination', this.destinations, this.destinationsWithDatasets);
+          const transformedDestinations = transformData(
+            'Destination',
+            this.destinations,
+            this.destinationsWithDatasets,
+          );
           contentArray.push(transformedDestinations);
         }
       }
@@ -825,9 +822,7 @@ export default {
       if (references) {
         let contentString = `<div><strong>References</strong></div>`;
         contentString += '\n';
-        const contentList = references.list
-          .map((item) => `<li>${item}</li>`)
-          .join('\n');
+        const contentList = references.list.map((item) => `<li>${item}</li>`).join('\n');
         contentString += `<ul>${contentList}</ul>`;
         contentArray.push(contentString);
       }
@@ -842,19 +837,24 @@ export default {
             const fields = [`<div><strong>${consultant.name}</strong></div>`];
 
             if (consultant.orcidId) {
-              fields.push(`<div>`)
-              fields.push(`<strong>ORCID iD</strong>: <span>${consultant.orcidId}</span> `)
-              fields.push(`(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`)
+              fields.push(`<div>`);
+              fields.push(`<strong>ORCID iD</strong>: <span>${consultant.orcidId}</span> `);
+              fields.push(
+                `(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`,
+              );
               fields.push(`</div>`);
             }
 
-            const rrid = consultant.url.indexOf('RRID:') > -1
-              ? 'RRID:' + consultant.url.split('RRID:')[1]
-              : '';
+            const rrid =
+              consultant.url.indexOf('RRID:') > -1
+                ? 'RRID:' + consultant.url.split('RRID:')[1]
+                : '';
             if (rrid) {
-              fields.push(`<div>`)
-              fields.push(`<strong>RRID</strong>: <span>${rrid}</span> `)
-              fields.push(`(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`)
+              fields.push(`<div>`);
+              fields.push(`<strong>RRID</strong>: <span>${rrid}</span> `);
+              fields.push(
+                `(<a href="${consultant.url}" target="_blank" rel="noopener noreferrer">${consultant.url}</a>)`,
+              );
               fields.push(`</div>`);
             }
 
@@ -892,17 +892,17 @@ export default {
       const names = label.split(','); // some features have more than one value
       let data = [];
       names.forEach((n) => {
-        const foundData = allWithDatasets.find((a) =>
-          a.name.toLowerCase().trim() === n.toLowerCase().trim()
+        const foundData = allWithDatasets.find(
+          (a) => a.name.toLowerCase().trim() === n.toLowerCase().trim(),
         );
         if (foundData) {
           data.push({
             id: foundData.id,
-            label: foundData.name
+            label: foundData.name,
           });
         }
       });
-      return data
+      return data;
     },
     fetchExpertConsultants: async function () {
       this.expertConsultants = this.expertConsultantURLs.map((url) => ({
@@ -931,6 +931,9 @@ export default {
         return null;
       }
 
+      //A scicrunch entry typically looks like  https://scicrunch.org/resolver/RRID:XXXXXX
+      //but due to CORS issue, we need to replace it with sparc-api interface,
+      //Replacing the domain while leaving the subpath the same.
       const APIURL = isScicrunchURL
         ? url.replace(scicrunchBase, `${apiLocationBase}scicrunch`)
         : url.replace(orcidBase, orcidAPIBase);
@@ -1008,7 +1011,8 @@ export default {
           }
 
           const orcidId = data?.['orcid-identifier']?.path || '';
-          const employmentSummary = data?.['activities-summary']?.['employments']?.['employment-summary'] || [];
+          const employmentSummary =
+            data?.['activities-summary']?.['employments']?.['employment-summary'] || [];
           const latestEmployment = employmentSummary[0] || {};
 
           this.updateExpertConsultantByURL(url, {
@@ -1035,7 +1039,9 @@ export default {
       }
     },
     updateExpertConsultantByURL: function (url, fields = {}) {
-      const consultantIndex = this.expertConsultants.findIndex((consultant) => consultant.url === url);
+      const consultantIndex = this.expertConsultants.findIndex(
+        (consultant) => consultant.url === url,
+      );
       if (consultantIndex === -1) {
         return;
       }
@@ -1095,13 +1101,13 @@ export default {
       });
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_connectivity_source_change`,
-        'category': connectivitySource,
-        'location': 'map_sidebar_connectivity',
+        event_name: `portal_maps_connectivity_source_change`,
+        category: connectivitySource,
+        location: 'map_sidebar_connectivity',
       });
     },
     updateGraphConnectivity: function () {
-      if (this.connectivitySource === "map") {
+      if (this.connectivitySource === 'map') {
         this.getConnectionsFromMap().then((response) => {
           // show sckan source graph if map source not exist
           this.connectivityFromMap = null;
@@ -1118,8 +1124,7 @@ export default {
     getConnectionsFromMap: async function () {
       if (this.entry.mapuuid) {
         const url =
-          this.flatmapApi +
-          `flatmap/${this.entry.mapuuid}/connectivity/${this.entry.featureId[0]}`;
+          this.flatmapApi + `flatmap/${this.entry.mapuuid}/connectivity/${this.entry.featureId[0]}`;
 
         try {
           const response = await fetch(url);
@@ -1131,9 +1136,9 @@ export default {
         } catch (error) {
           EventBus.emit('connectivity-source-change', {
             entry: this.entry,
-            connectivitySource: "sckan",
+            connectivitySource: 'sckan',
           });
-          throw new Error(error);
+          throw error;
         }
       }
     },
@@ -1144,9 +1149,9 @@ export default {
       this.$emit('close-connectivity');
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_connectivity_close`,
-        'category': this.entry.id || '',
-        'location': 'map_sidebar_connectivity',
+        event_name: `portal_maps_connectivity_close`,
+        category: this.entry.id || '',
+        location: 'map_sidebar_connectivity',
       });
     },
     onTrackEvent: function (data) {
@@ -1169,7 +1174,7 @@ export default {
       this.connectivityError = { ...connectivityError };
     });
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -1292,10 +1297,14 @@ export default {
 }
 
 .slide-fade-enter-active {
-  transition: opacity 0.5s, transform 0.5s;
+  transition:
+    opacity 0.5s,
+    transform 0.5s;
 }
 .slide-fade-leave-active {
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
 }
 .slide-fade-enter, .slide-fade-leave-to /* .slide-fade-leave-active in <2.1.8 */ {
   opacity: 0;
@@ -1694,7 +1703,7 @@ export default {
 
   + .attribute-content {
     &::before {
-      content: "";
+      content: '';
       width: 90%;
       height: 1px;
       background-color: var(--el-border-color);
@@ -1752,7 +1761,7 @@ export default {
   }
 
   &::after {
-    content: "";
+    content: '';
     display: block;
     width: 100%;
     height: 100%;
@@ -1764,7 +1773,8 @@ export default {
     animation-iteration-count: infinite;
     animation-name: loadingAnimation;
     animation-timing-function: linear;
-    background: linear-gradient(to right,
+    background: linear-gradient(
+      to right,
       var(--el-bg-color-page) 5%,
       var(--el-color-info-light-8) 15%,
       var(--el-bg-color-page) 30%

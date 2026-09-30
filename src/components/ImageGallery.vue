@@ -1,27 +1,27 @@
 <template>
   <div class="full-size">
     <Gallery
-        :bottomSpacer="bottomSpacer"
-        :cardWidth="10"
-        :items="galleryItems"
-        :max-width="maxWidth"
-        :show-indicator-bar="false"
-        :show-card-details="true"
-        :highlight-active="false"
-        :image-style="imageStyle"
-        :image-container-style="imageContainerStyle"
-        :body-style="bodyStyle"
-        :shadow="shadow"
-        @card-clicked="cardClicked"
-        @datalink-clicked="datalinkClicked"
-        ref="gallery"
-      />
+      :bottomSpacer="bottomSpacer"
+      :cardWidth="10"
+      :items="galleryItems"
+      :max-width="maxWidth"
+      :show-indicator-bar="false"
+      :show-card-details="true"
+      :highlight-active="false"
+      :image-style="imageStyle"
+      :image-container-style="imageContainerStyle"
+      :body-style="bodyStyle"
+      :shadow="shadow"
+      @card-clicked="cardClicked"
+      @datalink-clicked="datalinkClicked"
+      ref="gallery"
+    />
   </div>
 </template>
 
 <script>
-import Gallery from "@abi-software/gallery";
-import "@abi-software/gallery/dist/style.css";
+import Gallery from '@abi-software/gallery';
+import '@abi-software/gallery/dist/style.css';
 //provide the s3Bucket related methods and data.
 
 export default {
@@ -35,17 +35,17 @@ export default {
     items: {
       type: Object,
       defualt: () => {
-        return  {
+        return {
           Dataset: [],
-          Flatmaps:[],
+          Flatmaps: [],
           Images: [],
           Scaffolds: [],
           Simulations: [],
           Videos: [],
           Plots: [],
-        }
-      }
-    }
+        };
+      },
+    },
   },
   data() {
     return {
@@ -64,50 +64,49 @@ export default {
       shadow: 'never',
       bottomSpacer: { minHeight: '0rem' },
       resetIndex: false,
-    }
+    };
   },
   methods: {
     cardClicked: function (payload) {
-      this.$emit('card-clicked', payload)
+      this.$emit('card-clicked', payload);
     },
     datalinkClicked: function (payload) {
       this.$emit('datalink-clicked', payload);
     },
     onResize: function () {
-      this.maxWidth = this.$el.clientWidth
+      this.maxWidth = this.$el.clientWidth;
       // this.$emit('resize', this.$el.clientWidth)
     },
-
   },
   computed: {
     galleryItems() {
       if (this.resetIndex) {
-        this.$refs.gallery.indicatorClicked(0)
+        this.$refs.gallery.indicatorClicked(0);
       }
-      let items = [...this.items['Dataset']]
+      let items = [...this.items['Dataset']];
       if (this.category === 'All') {
         for (const [key, value] of Object.entries(this.items)) {
-          if (key !== 'Dataset') items = items.concat(value)
+          if (key !== 'Dataset') items = items.concat(value);
         }
-        return items
-      } else return [...this.items[this.category]]
+        return items;
+      } else return [...this.items[this.category]];
     },
   },
   watch: {
     category: function () {
-      this.resetIndex = true
+      this.resetIndex = true;
     },
     galleryItems: function () {
-      this.resetIndex = false
+      this.resetIndex = false;
     },
   },
   mounted() {
-    this.ro = new ResizeObserver(this.onResize).observe(this.$el)
+    this.ro = new ResizeObserver(this.onResize).observe(this.$el);
   },
   unmounted() {
-    delete this.ro
+    delete this.ro;
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>

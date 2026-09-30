@@ -29,7 +29,7 @@
             @tabClosed="tabClosed"
             @trackEvent="trackEvent"
           />
-          <template v-for="tab in tabs" key="tab.id">
+          <template v-for="tab in tabs" :key="tab.id">
             <template v-if="tab.type === 'annotation'">
               <AnnotationTool
                 :ref="'annotationTab_' + tab.id"
@@ -101,16 +101,14 @@
 import {
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
-} from '@element-plus/icons-vue'
-/* eslint-disable no-alert, no-console */
-import { ElDrawer as Drawer, ElIcon as Icon } from 'element-plus'
-import DatasetExplorer from './DatasetExplorer.vue'
-import EventBus from './EventBus.js'
-import Tabs from './Tabs.vue'
-import AnnotationTool from './AnnotationTool.vue'
-import ConnectivityExplorer from './ConnectivityExplorer.vue'
-import CellCardExplorer from './CellCardExplorer.vue'
-import { removeShowAllFacets } from '../algolia/utils.js'
+} from '@element-plus/icons-vue';
+import DatasetExplorer from './DatasetExplorer.vue';
+import EventBus from './EventBus.js';
+import Tabs from './Tabs.vue';
+import AnnotationTool from './AnnotationTool.vue';
+import ConnectivityExplorer from './ConnectivityExplorer.vue';
+import CellCardExplorer from './CellCardExplorer.vue';
+import { removeShowAllFacets } from '../algolia/utils.js';
 
 /**
  * Aims to provide a sidebar for searching capability for SPARC portal.
@@ -121,8 +119,6 @@ export default {
     Tabs,
     ElIconArrowLeft,
     ElIconArrowRight,
-    Drawer,
-    Icon,
     AnnotationTool,
     ConnectivityExplorer,
     CellCardExplorer,
@@ -131,7 +127,7 @@ export default {
   props: {
     tabs: {
       type: Array,
-      default: [
+      default: () => [
         { title: 'Dataset Explorer', id: 1, type: 'datasetExplorer', closable: false },
         { title: 'Connectivity Explorer', id: 2, type: 'connectivityExplorer', closable: false },
         { title: 'Annotation', id: 3, type: 'annotation', closable: true },
@@ -166,32 +162,32 @@ export default {
      */
     connectivityEntry: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     /**
      * The annotation data to show in sidebar.
      */
     annotationEntry: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     createData: {
       type: Object,
-      default: {
+      default: () => ({
         toBeConfirmed: false,
         points: [],
-        shape: "",
+        shape: '',
         x: 0,
         y: 0,
-      },
+      }),
     },
     connectivityKnowledge: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     filterOptions: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     showVisibilityFilter: {
       type: Boolean,
@@ -211,8 +207,8 @@ export default {
       drawerOpen: false,
       availableAnatomyFacets: [],
       activeTabId: 1,
-      activeAnnotationData: { tabType: "annotation" },
-      activeConnectivityData: { tabType: "connectivity" },
+      activeAnnotationData: { tabType: 'annotation' },
+      activeConnectivityData: { tabType: 'connectivity' },
       activeSpeciesForEntries: [],
       state: {
         dataset: {
@@ -231,11 +227,11 @@ export default {
         annotationEntries: [],
         activeTabId: this.activeTabId,
       },
-    }
+    };
   },
   methods: {
     onConnectivityCollapseChange: function (data) {
-      this.$emit('connectivity-collapse-change', data)
+      this.$emit('connectivity-collapse-change', data);
     },
     /**
      * This event is emitted when
@@ -250,7 +246,7 @@ export default {
      * @arg data
      */
     hoverChanged: function (id, data) {
-      this.$emit('hover-changed', {...data,  tabId: id })
+      this.$emit('hover-changed', { ...data, tabId: id });
 
       const activeTabType = this.getActiveTabTypeById(id);
       // save the last highlighted data for connectivity and annotation tabs
@@ -297,21 +293,21 @@ export default {
      * @arg `obj` {data, id}
      */
     searchChanged: function (id, data) {
-      this.$emit('search-changed', { ...data, tabId: id })
+      this.$emit('search-changed', { ...data, tabId: id });
     },
     /**
      * The function to close sidebar.
      * @public
      */
     close: function () {
-      this.drawerOpen = false
+      this.drawerOpen = false;
     },
     /**
      * The function to toggle (open and close) sidebar.
      * @public
      */
     toggleDrawer: function () {
-      this.drawerOpen = !this.drawerOpen
+      this.drawerOpen = !this.drawerOpen;
     },
     openConnectivitySearch: function (facets, query) {
       this.drawerOpen = true;
@@ -319,21 +315,21 @@ export default {
       this.$nextTick(() => {
         const connectivityExplorerTabRef = this.getTabRef(undefined, 'connectivityExplorer', true);
         connectivityExplorerTabRef.openSearch(facets, query);
-      })
+      });
     },
     resetConnectivitySearch: function () {
       this.$nextTick(() => {
         const connectivityExplorerTabRef = this.getTabRef(undefined, 'connectivityExplorer', false);
         connectivityExplorerTabRef.resetSearchIfNoActiveSearch();
-      })
+      });
     },
     openSearch: function (facets, query) {
-      this.drawerOpen = true
+      this.drawerOpen = true;
       // Because refs are in v-for, nextTick is needed here
       this.$nextTick(() => {
         const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer', true);
         datasetExplorerTabRef.openSearch(facets, query);
-      })
+      });
     },
     openCellCardExplorerSearch: function (filters, query) {
       this.drawerOpen = true
@@ -376,8 +372,9 @@ export default {
      */
     getTabRef: function (id, type, switchTab = false) {
       const matchedTab = this.tabEntries.filter((tabEntry) => {
-        return (id === undefined || tabEntry.id === id) &&
-          (type === undefined || tabEntry.type === type);
+        return (
+          (id === undefined || tabEntry.id === id) && (type === undefined || tabEntry.type === type)
+        );
       });
       const tabInfo = matchedTab.length ? matchedTab : this.tabEntries;
       const tabRef = tabInfo[0].type + 'Tab_' + tabInfo[0].id;
@@ -395,40 +392,38 @@ export default {
      */
     addFilter: function (filter) {
       if (filter) {
-        this.drawerOpen = true
+        this.drawerOpen = true;
         let filterToAdd = filter;
         if (Array.isArray(filter)) {
-          filterToAdd.forEach(item => item.AND = true);
+          filterToAdd.forEach((item) => (item.AND = true));
         } else {
-          filter.AND = true // When we add a filter external, it is currently only with an AND boolean
-          filterToAdd = [filter]
+          filter.AND = true; // When we add a filter external, it is currently only with an AND boolean
+          filterToAdd = [filter];
         }
         // Because refs are in v-for, nextTick is needed here
         this.$nextTick(() => {
           const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer', true);
-          datasetExplorerTabRef.addFilter(filterToAdd)
-        })
+          datasetExplorerTabRef.addFilter(filterToAdd);
+        });
       }
     },
     openNeuronSearch: function (neuron) {
-      this.drawerOpen = true
+      this.drawerOpen = true;
       // Because refs are in v-for, nextTick is needed here
       this.$nextTick(() => {
         const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer', true);
-        datasetExplorerTabRef.openSearch(
-          '',
-          undefined,
-          'scicrunch-query-string/',
-          { field: '*organ.curie', curie: neuron }
-        )
-      })
+        datasetExplorerTabRef.openSearch('', undefined, 'scicrunch-query-string/', {
+          field: '*organ.curie',
+          curie: neuron,
+        });
+      });
     },
     getAlgoliaFacets: async function () {
       const datasetExplorerTabRef = this.getTabRef(undefined, 'datasetExplorer');
-      return await datasetExplorerTabRef.getAlgoliaFacets()
+      return await datasetExplorerTabRef.getAlgoliaFacets();
     },
     setDrawerOpen: function (value = true) {
-      this.drawerOpen = value
+      this.drawerOpen = value;
     },
     setActiveTab: function (tab) {
       const matchedTab = this.tabs.filter((tabEntry) => {
@@ -454,10 +449,10 @@ export default {
         if (connectivityExplorerTabRef && !connectivityExplorerTabRef.expanded) {
           data = { tabType: 'connectivity' };
         } else {
-          data = {...this.activeConnectivityData};
+          data = { ...this.activeConnectivityData };
         }
       } else if (tab.type === 'annotation') {
-        data = {...this.activeAnnotationData};
+        data = { ...this.activeAnnotationData };
       } else {
         // switching to dataset explorer tab will not highlight
         // the highlight is from the last tab
@@ -465,7 +460,7 @@ export default {
       }
 
       if (data) {
-        this.$emit('hover-changed', {...data,  tabId: tab.id })
+        this.$emit('hover-changed', { ...data, tabId: tab.id });
       }
     },
     tabClicked: function (tab) {
@@ -487,7 +482,7 @@ export default {
      * Store available anatomy facets data for connectivity list component
      */
     storeAvailableAnatomyFacets: function (availableAnatomyFacets) {
-      localStorage.setItem('available-anatomy-facets', JSON.stringify(availableAnatomyFacets))
+      localStorage.setItem('available-anatomy-facets', JSON.stringify(availableAnatomyFacets));
     },
     closeConnectivity: function () {
       EventBus.emit('close-connectivity');
@@ -583,8 +578,8 @@ export default {
      */
     trackEvent: function (data) {
       const taggingData = {
-        'event': 'interaction_event',
-        'location': 'map_sidebar',
+        event: 'interaction_event',
+        location: 'map_sidebar',
         ...data,
       };
       this.$emit('trackEvent', taggingData);
@@ -619,7 +614,7 @@ export default {
     },
   },
   created: function () {
-    this.drawerOpen = this.openAtStart
+    this.drawerOpen = this.openAtStart;
   },
   mounted: function () {
     EventBus.on('PopoverActionClick', (payLoad) => {
@@ -627,22 +622,22 @@ export default {
        * This event is emitted when the image is clicked on or the button below the image is clicked on.
        * @arg payLoad
        */
-      this.$emit('actionClick', payLoad)
-    })
+      this.$emit('actionClick', payLoad);
+    });
     EventBus.on('number-of-datasets-for-anatomies', (payLoad) => {
       /**
        * This emits a object with keys as anatomy and values as number of datasets for that anatomy.
        * @arg payload
        */
-      this.$emit('number-of-datasets-for-anatomies', payLoad)
-    })
+      this.$emit('number-of-datasets-for-anatomies', payLoad);
+    });
     EventBus.on('anatomy-in-datasets', (payLoad) => {
-       /**
+      /**
        * This emits a lis of datasets, with the anatomy for each one. Used by flatmap for markers
        * @arg payload
        */
-      this.$emit('anatomy-in-datasets', payLoad)
-    })
+      this.$emit('anatomy-in-datasets', payLoad);
+    });
 
     EventBus.on('contextUpdate', (payLoad) => {
       /**
@@ -650,8 +645,8 @@ export default {
        * Example, context card update on first load.
        * @arg payload
        */
-      this.$emit('contextUpdate', payLoad)
-    })
+      this.$emit('contextUpdate', payLoad);
+    });
     EventBus.on('datalink-clicked', (payLoad) => {
       /**
        * This event is emitted
@@ -660,31 +655,33 @@ export default {
        * @arg payload
        */
       this.$emit('datalink-clicked', payLoad);
-    })
+    });
     EventBus.on('onConnectivityActionClick', (payLoad) => {
       // switch to search tab with tab id: 1
-      this.tabClicked({id: 1, type: 'datasetExplorer'});
+      this.tabClicked({ id: 1, type: 'datasetExplorer' });
       this.$emit('actionClick', payLoad);
-    })
+    });
     EventBus.on('connectivity-source-change', (payLoad) => {
       this.$emit('connectivity-source-change', payLoad);
-    })
+    });
     EventBus.on('show-connectivity-graph', (payLoad) => {
       this.$emit('show-connectivity-graph', payLoad);
-    })
+    });
 
     // Get available anatomy facets for the connectivity info
     EventBus.on('available-facets', (payLoad) => {
-        this.availableAnatomyFacets = payLoad.find((facet) => facet.label === 'Anatomical Structure').children
-        this.storeAvailableAnatomyFacets(this.availableAnatomyFacets);
-    })
+      this.availableAnatomyFacets = payLoad.find(
+        (facet) => facet.label === 'Anatomical Structure',
+      ).children;
+      this.storeAvailableAnatomyFacets(this.availableAnatomyFacets);
+    });
 
     // Event tracking
     EventBus.on('trackEvent', (data) => {
       this.trackEvent(data);
     });
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -699,7 +696,7 @@ export default {
   position: relative;
   height: 100%;
   pointer-events: none;
-  width:600px;
+  width: 600px;
   float: right;
 }
 
@@ -786,12 +783,12 @@ export default {
 
 <style lang="scss">
 .side-bar {
-  --el-color-primary: #8300BF;
-  --el-color-primary-light-7: #DAB3EC;
+  --el-color-primary: #8300bf;
+  --el-color-primary-light-7: #dab3ec;
   --el-color-primary-light-8: #e6ccf2;
   --el-color-primary-light-9: #f3e6f9;
   --el-color-primary-light-3: #f3e6f9;
-  --el-color-primary-dark-2: #7600AC;
+  --el-color-primary-dark-2: #7600ac;
 }
 .el-button--primary {
   --el-button-hover-text-color: var(--el-color-primary);
