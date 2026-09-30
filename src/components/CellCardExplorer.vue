@@ -106,13 +106,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-import {
-  ElButton as Button,
-  ElCard as Card,
-  ElInput as Input,
-  ElPagination as Pagination,
-} from 'element-plus';
 import 'element-plus/es/components/message/style/css';
 import SearchFilters from './SearchFilters.vue';
 import SearchHistory from './SearchHistory.vue';
@@ -128,12 +121,8 @@ export default {
   components: {
     SearchFilters,
     SearchHistory,
-    Button,
-    Card,
     CellCard,
-    Input,
     MapSvgIcon,
-    Pagination,
   },
   name: 'CellCardExplorer',
   emits: ['soma-location-hovered', 'dataset-search', 'connectivity-search', 'soma-locations-ready'],

@@ -176,7 +176,8 @@
             <div class="alert-block-section" v-if="cellType.alertNotes?.length">
               <div class="alert-block-title">Alert Notes:</div>
               <div
-                v-for="note in cellType.alertNotes"
+                v-for="(note, index) in cellType.alertNotes"
+                :key="`alert-${index}`"
                 v-html="formatAlertText(note)"
                 class="alert-block-note"
               ></div>
@@ -184,7 +185,8 @@
             <div class="alert-block-section" v-if="cellType.curatorNotes?.length">
               <div class="alert-block-title">Curator Notes:</div>
               <div
-                v-for="note in cellType.curatorNotes"
+                v-for="(note, index) in cellType.curatorNotes"
+                :key="`curator-${index}`"
                 v-html="formatAlertText(note)"
                 class="alert-block-note"
               ></div>
@@ -197,8 +199,6 @@
 </template>
 
 <script>
-import { ElButton as Button, ElIcon as Icon } from 'element-plus';
-import { Warning as ElIconWarning } from '@element-plus/icons-vue';
 import { CopyToClipboard } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
 import EventBus from './EventBus.js';
@@ -217,9 +217,6 @@ const LOCATION_ID_MAP = {
 export default {
   name: 'CellCard',
   components: {
-    Button,
-    Icon,
-    ElIconWarning,
     CopyToClipboard,
     IconOpenExternal,
   },
@@ -433,7 +430,7 @@ export default {
       const facets = locationCurie
         ? [
             {
-              facet: `[\"${locationCurie}\",[]]`,
+              facet: `["${locationCurie}",[]]`,
               facetPropPath: 'flatmap.connectivity.source.all',
               tagLabel: query,
               term: 'All',
