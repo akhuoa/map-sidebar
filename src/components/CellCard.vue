@@ -1,14 +1,6 @@
 <template>
-  <div
-    ref="cardElementRef"
-    class="card"
-    :class="{ active: isActive }"
-    :style="cardStyleVars"
-  >
-    <div
-      class="card-header"
-      @click="openCard"
-    >
+  <div ref="cardElementRef" class="card" :class="{ active: isActive }" :style="cardStyleVars">
+    <div class="card-header" @click="openCard">
       <div class="title-content">
         <div class="card-title">
           {{ cellType.preferredLabel }}
@@ -19,7 +11,8 @@
             <span
               v-for="somaLocation in cellType.somaLocations"
               class="card-chip"
-              :key="somaLocation">
+              :key="somaLocation"
+            >
               {{ somaLocation }}
             </span>
           </div>
@@ -40,12 +33,7 @@
       </div>
       <div class="title-buttons" @click.stop>
         <CopyToClipboard @copied="onCopied" :content="updatedCopyContent" />
-        <el-popover
-          width="auto"
-          trigger="hover"
-          :teleported="false"
-          popper-class="popover-map-pin"
-        >
+        <el-popover width="auto" trigger="hover" :teleported="false" popper-class="popover-map-pin">
           <template #reference>
             <el-button class="button-circle" circle @click="closeCard">
               <el-icon color="white">
@@ -187,14 +175,16 @@
           <div class="alert-block">
             <div class="alert-block-section" v-if="cellType.alertNotes?.length">
               <div class="alert-block-title">Alert Notes:</div>
-              <div v-for="note in cellType.alertNotes"
+              <div
+                v-for="note in cellType.alertNotes"
                 v-html="formatAlertText(note)"
                 class="alert-block-note"
               ></div>
             </div>
             <div class="alert-block-section" v-if="cellType.curatorNotes?.length">
               <div class="alert-block-title">Curator Notes:</div>
-              <div v-for="note in cellType.curatorNotes"
+              <div
+                v-for="note in cellType.curatorNotes"
                 v-html="formatAlertText(note)"
                 class="alert-block-note"
               ></div>
@@ -207,22 +197,21 @@
 </template>
 
 <script>
-import {
-  ElButton as Button,
-  ElIcon as Icon,
-} from 'element-plus'
-import { Warning as ElIconWarning } from '@element-plus/icons-vue'
-import {
-  CopyToClipboard,
-} from '@abi-software/map-utilities';
+import { ElButton as Button, ElIcon as Icon } from 'element-plus';
+import { Warning as ElIconWarning } from '@element-plus/icons-vue';
+import { CopyToClipboard } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
-import EventBus from './EventBus.js'
-import { capitalise, formatAlertText as formatAlertTextUtil, scrollToRef } from '../utils/common.js';
+import EventBus from './EventBus.js';
+import {
+  capitalise,
+  formatAlertText as formatAlertTextUtil,
+  scrollToRef,
+} from '../utils/common.js';
 import IconOpenExternal from './icons/IconOpenExternal.vue';
 
 const LOCATION_ID_MAP = {
-  'soma_tg': 'trigeminal ganglion',
-  'soma_drg': 'dorsal root ganglion',
+  soma_tg: 'trigeminal ganglion',
+  soma_drg: 'dorsal root ganglion',
 };
 
 export default {
@@ -244,7 +233,14 @@ export default {
       default: false,
     },
   },
-  emits: ['open', 'close', 'soma-location-hovered', 'dataset-search', 'connectivity-search', 'related-cell-click'],
+  emits: [
+    'open',
+    'close',
+    'soma-location-hovered',
+    'dataset-search',
+    'connectivity-search',
+    'related-cell-click',
+  ],
   data() {
     return {
       cardElement: null,
@@ -255,12 +251,12 @@ export default {
     this.cardElement = this.$refs.cardElementRef;
   },
   computed: {
-    cardStyleVars: function() {
+    cardStyleVars: function () {
       return {
         '--cell-card-source-color': this.cellType?.sourceColor || this.cellType?.color || '#8300bf',
       };
     },
-    formattedMarkerGenes: function() {
+    formattedMarkerGenes: function () {
       return (this.cellType?.markerGenes || [])
         .map((markerGene, index) => {
           const name = String(markerGene?.name || '').trim();
@@ -280,7 +276,7 @@ export default {
         })
         .filter(Boolean);
     },
-    updatedCopyContent: function() {
+    updatedCopyContent: function () {
       const {
         preferredLabel,
         entity,
@@ -295,7 +291,7 @@ export default {
         alertNotes,
         curatorNotes,
         sourceNomenclature,
-        sourceNomenclatureLabel
+        sourceNomenclatureLabel,
       } = this.cellType;
 
       const contentArray = [];
@@ -334,7 +330,9 @@ export default {
           .map((label) => `<li>${label}</li>`)
           .join('');
         if (relatedItems) {
-          contentArray.push(`<div><strong>Related Species Variants:</strong><ul>${relatedItems}</ul></div>`);
+          contentArray.push(
+            `<div><strong>Related Species Variants:</strong><ul>${relatedItems}</ul></div>`,
+          );
         }
       }
       if (sourceNomenclatureLabel) {
@@ -345,30 +343,27 @@ export default {
       }
 
       if (alertNotes?.length) {
-        const alertContent = alertNotes
-          .map((note) => formatAlertTextUtil(note))
-          .join('\n');
+        const alertContent = alertNotes.map((note) => formatAlertTextUtil(note)).join('\n');
         contentArray.push(`<div><strong>Alert Notes:</strong></div>\n${alertContent}`);
       }
 
       if (curatorNotes?.length) {
-        const curatorContent = curatorNotes
-          .map((note) => formatAlertTextUtil(note))
-          .join('\n');
+        const curatorContent = curatorNotes.map((note) => formatAlertTextUtil(note)).join('\n');
         contentArray.push(`<div><strong>Curator Notes:</strong></div>\n${curatorContent}`);
       }
 
       return contentArray.join('\n');
     },
-    somaLocations: function() {
+    somaLocations: function () {
       const mappedLocations = this.cellType.somaLocations.map((location) => {
-        const locationKey = Object.keys(LOCATION_ID_MAP).find((key) => LOCATION_ID_MAP[key] === location) || '';
+        const locationKey =
+          Object.keys(LOCATION_ID_MAP).find((key) => LOCATION_ID_MAP[key] === location) || '';
         const isClustered = this.cellType.clusterAttributes?.[locationKey];
         if (isClustered) {
           return {
             name: capitalise(location),
             id: locationKey,
-          }
+          };
         }
         return false;
       });
@@ -376,7 +371,7 @@ export default {
     },
   },
   methods: {
-    sanitizeMarkerGeneUri: function(uri, expression = '') {
+    sanitizeMarkerGeneUri: function (uri, expression = '') {
       let normalizedUri = String(uri || '').trim();
       const normalizedExpression = String(expression || '').trim();
 
@@ -389,34 +384,34 @@ export default {
 
       return normalizedUri.trim();
     },
-    transformString: function(str) {
+    transformString: function (str) {
       if (!str) return '';
       // replace the string with ^ with <sup> and the next word with </sup>
       return str.replace(/\^(\w+)/g, '<sup>$1</sup>');
     },
-    onCopied: function() {
+    onCopied: function () {
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_cell_card_copy`,
-        'category': this.cellType.preferredLabel || '',
-        'location': 'map_sidebar_cell_card',
+        event_name: `portal_maps_cell_card_copy`,
+        category: this.cellType.preferredLabel || '',
+        location: 'map_sidebar_cell_card',
       });
     },
-    openCard: function() {
+    openCard: function () {
       this.$emit('open', this.cellType.id);
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_cell_card_open`,
-        'category': this.cellType.id || '',
-        'location': 'map_sidebar_cell_card',
+        event_name: `portal_maps_cell_card_open`,
+        category: this.cellType.id || '',
+        location: 'map_sidebar_cell_card',
       });
     },
-    closeCard: function() {
+    closeCard: function () {
       this.$emit('close');
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_cell_card_close`,
-        'category': this.cellType.id || '',
-        'location': 'map_sidebar_cell_card',
+        event_name: `portal_maps_cell_card_close`,
+        category: this.cellType.id || '',
+        location: 'map_sidebar_cell_card',
       });
     },
     showSomaLocation: function (name) {
@@ -433,16 +428,18 @@ export default {
       const availableDataRaw = localStorage.getItem('available-name-curie-mapping');
       const availableData = availableDataRaw ? JSON.parse(availableDataRaw) : {};
       const locationCurie = Object.keys(availableData).find(
-        (curie) => availableData[curie].toLowerCase() === query.toLowerCase()
+        (curie) => availableData[curie].toLowerCase() === query.toLowerCase(),
       );
-      const facets = locationCurie ? [
-        {
-          "facet": `[\"${locationCurie}\",[]]`,
-          "facetPropPath": "flatmap.connectivity.source.all",
-          "tagLabel": query,
-          "term": "All"
-        }
-      ] : [];
+      const facets = locationCurie
+        ? [
+            {
+              facet: `[\"${locationCurie}\",[]]`,
+              facetPropPath: 'flatmap.connectivity.source.all',
+              tagLabel: query,
+              term: 'All',
+            },
+          ]
+        : [];
       this.$emit('connectivity-search', {
         facets: facets,
         query: '',
@@ -462,8 +459,8 @@ export default {
     formatAlertText: function (text) {
       return formatAlertTextUtil(text);
     },
-  }
-}
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -554,7 +551,7 @@ export default {
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     bottom: 7px;
     left: 5px;
@@ -622,7 +619,6 @@ export default {
   .card-details & {
     padding: 4px 8px;
     border: 1px solid #dcdcdc;
-
   }
 }
 
@@ -648,7 +644,9 @@ export default {
     content: '';
     position: absolute;
     inset: 0;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
     background-color: rgba($app-primary-color, 0.04);
     border-left: 4px solid rgba($app-primary-color, 0.16);
   }
@@ -985,7 +983,10 @@ export default {
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
-  transition: background-color 0.2s ease, border-color 0.2s ease, text-decoration-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    text-decoration-color 0.2s ease;
 
   &:hover {
     background-color: rgba($app-primary-color, 0.08);

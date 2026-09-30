@@ -343,7 +343,11 @@ import {
   ExternalResourceCard,
 } from '@abi-software/map-utilities';
 import '@abi-software/map-utilities/dist/style.css';
-import { capitalise, formatAlertText as formatAlertTextUtil, scrollToRef } from '../utils/common.js'
+import {
+  capitalise,
+  formatAlertText as formatAlertTextUtil,
+  scrollToRef,
+} from '../utils/common.js';
 
 const titleCase = (str) => {
   return str.replace(/\w\S*/g, (t) => {

@@ -42,7 +42,7 @@
 import SideBar from './components/SideBar.vue';
 import EventBus from './components/EventBus.js';
 import exampleConnectivityInput from './exampleConnectivityInput.js';
-import { capitalise } from './utils/common.js'
+import { capitalise } from './utils/common.js';
 
 const flatmapQuery = (flatmapApi, sql) => {
   const data = { sql: sql };
@@ -153,7 +153,7 @@ export default {
       filter: [],
       target: [],
       showCellCards: false,
-    }
+    };
   },
   methods: {
     loadConnectivityKnowledge: async function () {

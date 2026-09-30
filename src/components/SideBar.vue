@@ -332,14 +332,14 @@ export default {
       });
     },
     openCellCardExplorerSearch: function (filters, query) {
-      this.drawerOpen = true
+      this.drawerOpen = true;
       // Because refs are in v-for, nextTick is needed here
       this.$nextTick(() => {
         const cellCardExplorerTabRef = this.getTabRef(undefined, 'cellCardExplorer', true);
         if (cellCardExplorerTabRef && typeof cellCardExplorerTabRef.openSearch === 'function') {
           cellCardExplorerTabRef.openSearch(filters, query);
         }
-      })
+      });
     },
     openDatasetSearchFromCellCard: function (payload) {
       if (!payload || typeof payload !== 'object') {
@@ -598,18 +598,12 @@ export default {
   computed: {
     // This should respect the information provided by the property
     tabEntries: function () {
-      return this.tabs.filter((tab) =>
-        tab.type === "datasetExplorer" ||
-        tab.type === "connectivityExplorer" ||
-        (
-          tab.type === "annotation" &&
-          this.annotationEntry &&
-          this.annotationEntry.length > 0
-        ) ||
-        (
-          tab.type === "cellCardExplorer" &&
-          this.showCellCards
-        )
+      return this.tabs.filter(
+        (tab) =>
+          tab.type === 'datasetExplorer' ||
+          tab.type === 'connectivityExplorer' ||
+          (tab.type === 'annotation' && this.annotationEntry && this.annotationEntry.length > 0) ||
+          (tab.type === 'cellCardExplorer' && this.showCellCards),
       );
     },
   },

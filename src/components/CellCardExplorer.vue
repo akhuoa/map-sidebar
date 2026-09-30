@@ -2,7 +2,7 @@
   <el-card :body-style="bodyStyle" class="content-card">
     <template #header>
       <div class="header">
-        <div class="search-input-container" :class="{'is-focus': searchInput}">
+        <div class="search-input-container" :class="{ 'is-focus': searchInput }">
           <el-input
             class="search-input"
             placeholder="Search"
@@ -11,11 +11,7 @@
             clearable
             @clear="clearSearchClicked"
           ></el-input>
-          <el-popover
-            width="350"
-            trigger="hover"
-            popper-class="filter-help-popover"
-          >
+          <el-popover width="350" trigger="hover" popper-class="filter-help-popover">
             <template #reference>
               <MapSvgIcon icon="help" class="help" />
             </template>
@@ -23,44 +19,45 @@
               <strong>Search rules:</strong>
               <ul>
                 <li>
-                  <strong>Multiple Terms:</strong> Separate terms with a comma (<code>,</code>).
-                  This will find cell cards that match any of the terms (an "OR" search).
+                  <strong>Multiple Terms:</strong>
+                  Separate terms with a comma (
+                  <code>,</code>
+                  ). This will find cell cards that match any of the terms (an "OR" search).
                 </li>
                 <li>
-                  <strong>Exact Phrase:</strong> Terms within a comma block will be matched as an exact phrase.
+                  <strong>Exact Phrase:</strong>
+                  Terms within a comma block will be matched as an exact phrase.
                 </li>
               </ul>
-              <br/>
+              <br />
               <strong>Examples:</strong>
               <ul>
                 <li>
                   <strong>To find by exact phrase:</strong>
-                  Searching for <code>soma location</code> will find any card containing <code>"soma location"</code>.
+                  Searching for
+                  <code>soma location</code>
+                  will find any card containing
+                  <code>"soma location"</code>
+                  .
                 </li>
                 <li>
                   <strong>To find by multiple terms:</strong>
-                  Searching for <code>mouse, vagal</code> will find cards that contain either <code>mouse</code> OR <code>vagal</code>.
+                  Searching for
+                  <code>mouse, vagal</code>
+                  will find cards that contain either
+                  <code>mouse</code>
+                  OR
+                  <code>vagal</code>
+                  .
                 </li>
               </ul>
             </div>
           </el-popover>
         </div>
-        <el-button
-          type="primary"
-          class="button"
-          @click="searchEvent"
-          size="large"
-        >
+        <el-button type="primary" class="button" @click="searchEvent" size="large">
           Search
         </el-button>
-        <el-button
-          link
-          class="el-button-link"
-          @click="onResetClick"
-          size="large"
-        >
-          Reset
-        </el-button>
+        <el-button link class="el-button-link" @click="onResetClick" size="large">Reset</el-button>
       </div>
     </template>
 
@@ -115,17 +112,17 @@ import {
   ElCard as Card,
   ElInput as Input,
   ElPagination as Pagination,
-} from 'element-plus'
+} from 'element-plus';
 import 'element-plus/es/components/message/style/css';
-import SearchFilters from './SearchFilters.vue'
-import SearchHistory from './SearchHistory.vue'
-import EventBus from './EventBus.js'
-import CellCard from './CellCard.vue'
+import SearchFilters from './SearchFilters.vue';
+import SearchHistory from './SearchHistory.vue';
+import EventBus from './EventBus.js';
+import CellCard from './CellCard.vue';
 import { capitalise, generateUUID } from '../utils/common.js';
 import { MapSvgIcon } from '@abi-software/svg-sprite';
 
-let cachedCellCardsData = null
-let pendingCellCardsRequest = null
+let cachedCellCardsData = null;
+let pendingCellCardsRequest = null;
 
 export default {
   components: {
@@ -184,7 +181,7 @@ export default {
           within: "'mouse' OR 'human'",
           between: "'species' AND 'soma location'",
         },
-      }
+      };
     },
   },
   watch: {
@@ -194,11 +191,11 @@ export default {
       handler: 'syncActiveSpeciesFilters',
     },
   },
-  mounted: function() {
+  mounted: function () {
     this.fetchCellTypes(this.envVars.CELL_CARDS_API);
   },
   methods: {
-    syncCascaderFromActiveFilters: function() {
+    syncCascaderFromActiveFilters: function () {
       if (!this.cascaderIsReady || !this.$refs.filtersRef) {
         return;
       }
@@ -210,7 +207,7 @@ export default {
 
       this.$refs.filtersRef.checkShowAllBoxes();
     },
-    syncActiveSpeciesFilters: function() {
+    syncActiveSpeciesFilters: function () {
       this.page = 1;
       this.start = 0;
       const normalizedActiveSpecies = this.getValidatedActiveSpecies();
@@ -232,7 +229,7 @@ export default {
       this.applyFilters(this.activeFilters);
       this.emitSomaLocations(this.filterOptions);
     },
-    getCellCardsData: async function(url) {
+    getCellCardsData: async function (url) {
       if (cachedCellCardsData) {
         return cachedCellCardsData;
       }
@@ -256,7 +253,7 @@ export default {
 
       return pendingCellCardsRequest;
     },
-    fetchCellTypes: async function(url) {
+    fetchCellTypes: async function (url) {
       if (url) {
         this.loadingCards = true;
         try {
@@ -266,7 +263,7 @@ export default {
               return {
                 ...cellType,
                 id: generateUUID(),
-              }
+              };
             });
 
             this.setGeneMappings(data.DEFAULT_GENES);
@@ -282,16 +279,16 @@ export default {
         }
       }
     },
-    activateCard: function(cardId) {
+    activateCard: function (cardId) {
       this.activeCardId = this.activeCardId === cardId ? null : cardId;
     },
-    openCard: function(cardId) {
+    openCard: function (cardId) {
       this.activeCardId = cardId;
     },
-    closeCard: function() {
+    closeCard: function () {
       this.activeCardId = null;
     },
-    openSearch: function(filters, query) {
+    openSearch: function (filters, query) {
       this.page = 1;
       this.start = 0;
       this.searchInput = String(query || '').trim();
@@ -321,17 +318,17 @@ export default {
       this.searchHistoryUpdate(this.activeFilters, this.searchInput);
       this.$nextTick(() => this.scrollToTop());
     },
-    clearSearchClicked: function() {
+    clearSearchClicked: function () {
       this.searchInput = '';
       this.searchAndFilterUpdate();
     },
-    searchEvent: function(event = false) {
+    searchEvent: function (event = false) {
       if (event.keyCode === 13 || event instanceof MouseEvent) {
         this.searchInput = this.searchInput.trim();
         this.searchAndFilterUpdate();
       }
     },
-    onResetClick: function() {
+    onResetClick: function () {
       this.searchInput = '';
       this.activeFilters = [];
       this.page = 1;
@@ -344,19 +341,19 @@ export default {
       this.emitSomaLocations(this.filterOptions);
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_action_filter`,
-        'category': `reset`,
-        'location': 'map_sidebar_cell_card_explorer',
+        event_name: `portal_maps_action_filter`,
+        category: `reset`,
+        location: 'map_sidebar_cell_card_explorer',
       });
     },
-    searchAndFilterUpdate: function() {
+    searchAndFilterUpdate: function () {
       this.page = 1;
       this.start = 0;
       this.applyFilters(this.activeFilters);
       this.emitSomaLocations(this.filterOptions);
       this.searchHistoryUpdate(this.activeFilters, this.searchInput);
     },
-    filterUpdate: function(filters) {
+    filterUpdate: function (filters) {
       this.activeFilters = [...filters];
       this.page = 1;
       this.start = 0;
@@ -365,19 +362,19 @@ export default {
       this.searchHistoryUpdate(this.activeFilters, this.searchInput);
       this.loadingCards = false;
     },
-    numberPerPageUpdate: function(value) {
+    numberPerPageUpdate: function (value) {
       this.numberPerPage = parseInt(value, 10) || 10;
 
       EventBus.emit('trackEvent', {
-        'event_name': `portal_maps_cell_card_perPage`,
-        'category': value + '',
-        'location': 'map_sidebar_cell_card_explorer',
+        event_name: `portal_maps_cell_card_perPage`,
+        category: value + '',
+        location: 'map_sidebar_cell_card_explorer',
       });
 
       const preventPaginationTracking = this.page === 1;
       this.pageChange(1, preventPaginationTracking);
     },
-    pageChange: function(page, preventTracking = false) {
+    pageChange: function (page, preventTracking = false) {
       this.page = page;
       this.start = (page - 1) * this.numberPerPage;
       this.applyFilters(this.activeFilters);
@@ -385,22 +382,22 @@ export default {
 
       if (!preventTracking) {
         EventBus.emit('trackEvent', {
-          'event_name': `portal_maps_cell_card_pagination`,
-          'category': `page_${this.page}`,
-          'location': 'map_sidebar_cell_card_explorer',
+          event_name: `portal_maps_cell_card_pagination`,
+          category: `page_${this.page}`,
+          location: 'map_sidebar_cell_card_explorer',
         });
       }
     },
-    scrollToTop: function() {
+    scrollToTop: function () {
       if (this.$refs.content) {
         this.$refs.content.scroll({ top: 0, behavior: 'smooth' });
       }
     },
-    filtersLoading: function() {
+    filtersLoading: function () {
       // SearchFilters only emits loading:true and never emits false.
       // CellCardExplorer filters synchronously, so loading is reset in filterUpdate.
     },
-    searchHistoryUpdate: function(filters, search) {
+    searchHistoryUpdate: function (filters, search) {
       if (this.$refs.searchHistory) {
         this.$refs.searchHistory.selectValue = 'Search history';
         // save history only if there has value
@@ -409,7 +406,7 @@ export default {
         }
       }
     },
-    searchHistorySearch: function(item) {
+    searchHistorySearch: function (item) {
       this.searchInput = item.search || '';
       this.activeFilters = Array.isArray(item.filters) ? [...item.filters] : [];
       this.page = 1;
@@ -426,14 +423,16 @@ export default {
 
       this.emitSomaLocations(this.filterOptions);
     },
-    cascaderReady: function() {
+    cascaderReady: function () {
       this.cascaderIsReady = true;
       this.syncCascaderFromActiveFilters();
     },
-    normalizeFacetValue: function(value) {
-      return String(value || '').trim().toLowerCase();
+    normalizeFacetValue: function (value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase();
     },
-    getSelectedSomaLocationFilters: function() {
+    getSelectedSomaLocationFilters: function () {
       return (this.activeFilters || [])
         .filter((filter) => {
           return (
@@ -444,7 +443,7 @@ export default {
         .map((filter) => this.normalizeFacetValue(filter?.facet))
         .filter(Boolean);
     },
-    getAvailableSpeciesSet: function() {
+    getAvailableSpeciesSet: function () {
       const availableSpecies = new Set();
 
       this.allCellTypes.forEach((cellType) => {
@@ -456,7 +455,7 @@ export default {
 
       return availableSpecies;
     },
-    getValidatedActiveSpecies: function() {
+    getValidatedActiveSpecies: function () {
       const availableSpecies = this.getAvailableSpeciesSet();
       const normalizedActiveSpecies = this.activeSpecies
         .map((species) => this.normalizeActiveSpeciesFilterTerm(species))
@@ -466,7 +465,7 @@ export default {
         return availableSpecies.has(species);
       });
     },
-    getCellTypesForActiveSpecies: function() {
+    getCellTypesForActiveSpecies: function () {
       const normalizedActiveSpecies = this.getValidatedActiveSpecies();
       if (!normalizedActiveSpecies.length) {
         return this.allCellTypes;
@@ -480,14 +479,14 @@ export default {
     },
     // To update the species from the flatmap,
     // mainly from "human male" and "human female" to "human".
-    normalizeActiveSpeciesFilterTerm: function(value) {
+    normalizeActiveSpeciesFilterTerm: function (value) {
       const normalized = this.normalizeFacetValue(value);
       if (normalized === 'human male' || normalized === 'human female') {
         return 'human';
       }
       return normalized;
     },
-    setGeneMappings: function(genes) {
+    setGeneMappings: function (genes) {
       const baseToDisplay = {};
       const displayToBase = {};
 
@@ -510,13 +509,13 @@ export default {
       this.geneBaseToDisplay = baseToDisplay;
       this.geneDisplayToBase = displayToBase;
     },
-    normalizeSearchTerms: function(query) {
+    normalizeSearchTerms: function (query) {
       return String(query || '')
         .split(',')
         .map((term) => term.trim().toLowerCase())
         .filter(Boolean);
     },
-    getCellTypeSearchText: function(cellType) {
+    getCellTypeSearchText: function (cellType) {
       const relatedCellLabels = (cellType.relatedCells || [])
         .map((relatedCell) => relatedCell.label)
         .filter(Boolean)
@@ -539,7 +538,7 @@ export default {
         .join(' ')
         .toLowerCase();
     },
-    matchSearchQuery: function(cellType, searchTerms) {
+    matchSearchQuery: function (cellType, searchTerms) {
       if (!searchTerms.length) {
         return true;
       }
@@ -547,7 +546,7 @@ export default {
       const searchableText = this.getCellTypeSearchText(cellType);
       return searchTerms.some((term) => searchableText.includes(term));
     },
-    buildFacetChildren: function(cellTypes, key) {
+    buildFacetChildren: function (cellTypes, key) {
       const values = new Set();
 
       cellTypes.forEach((cellType) => {
@@ -568,7 +567,7 @@ export default {
         .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
         .map((value) => ({ label: value }));
     },
-    buildFilterOptions: function(cellTypes) {
+    buildFilterOptions: function (cellTypes) {
       const options = [
         {
           key: 'species',
@@ -593,29 +592,33 @@ export default {
         {
           key: 'notes',
           label: 'Notes',
-          children: [
-            { label: 'with notes' },
-            { label: 'without notes' },
-          ],
+          children: [{ label: 'with notes' }, { label: 'without notes' }],
         },
       ];
 
       return options.filter((option) => option.children.length > 0);
     },
-    emitSomaLocations: function(filterOptions) {
-      const somaLocationOption = (filterOptions || []).find((option) => option.key === 'somaLocations');
+    emitSomaLocations: function (filterOptions) {
+      const somaLocationOption = (filterOptions || []).find(
+        (option) => option.key === 'somaLocations',
+      );
       const availableDataRaw = localStorage.getItem('available-name-curie-mapping');
       const availableData = availableDataRaw ? JSON.parse(availableDataRaw) : {};
       const selectedSomaLocationFilters = this.getSelectedSomaLocationFilters();
-      const shouldFilterBySelectedSomaLocations = (this.activeFilters || []).length > 0 && selectedSomaLocationFilters.length > 0;
+      const shouldFilterBySelectedSomaLocations =
+        (this.activeFilters || []).length > 0 && selectedSomaLocationFilters.length > 0;
       const selectedSomaLocationSet = new Set(selectedSomaLocationFilters);
       const filteredCellTypes = this.getFilteredCellTypes(this.activeFilters, this.searchInput);
       const somaLocationCounts = filteredCellTypes.reduce((counts, cellType) => {
-        (Array.isArray(cellType?.somaLocations) ? cellType.somaLocations : []).forEach((location) => {
-          const normalizedLocation = String(location || '').trim().toLowerCase();
-          if (!normalizedLocation) return;
-          counts.set(normalizedLocation, (counts.get(normalizedLocation) || 0) + 1);
-        });
+        (Array.isArray(cellType?.somaLocations) ? cellType.somaLocations : []).forEach(
+          (location) => {
+            const normalizedLocation = String(location || '')
+              .trim()
+              .toLowerCase();
+            if (!normalizedLocation) return;
+            counts.set(normalizedLocation, (counts.get(normalizedLocation) || 0) + 1);
+          },
+        );
         return counts;
       }, new Map());
       const somaLocations = (somaLocationOption?.children || [])
@@ -629,9 +632,10 @@ export default {
           return selectedSomaLocationSet.has(label.toLowerCase());
         })
         .map((label) => {
-          const curie = Object.keys(availableData).find(
-            (curie) => String(availableData[curie] || '').toLowerCase() === label.toLowerCase()
-          ) || '';
+          const curie =
+            Object.keys(availableData).find(
+              (curie) => String(availableData[curie] || '').toLowerCase() === label.toLowerCase(),
+            ) || '';
 
           return {
             label,
@@ -640,13 +644,13 @@ export default {
           };
         });
 
-      const uniqueSomaLocations = [...new Map(
-        somaLocations.map((item) => [item.label.toLowerCase(), item])
-      ).values()];
+      const uniqueSomaLocations = [
+        ...new Map(somaLocations.map((item) => [item.label.toLowerCase(), item])).values(),
+      ];
 
       this.$emit('soma-locations-ready', uniqueSomaLocations);
     },
-    buildGeneFacetChildren: function(cellTypes) {
+    buildGeneFacetChildren: function (cellTypes) {
       const values = new Set();
 
       cellTypes.forEach((cellType) => {
@@ -662,7 +666,7 @@ export default {
           label: this.geneBaseToDisplay[base] || base,
         }));
     },
-    matchFieldFilter: function(cellType, filter) {
+    matchFieldFilter: function (cellType, filter) {
       const filterFacet = this.normalizeFacetValue(filter.facet);
       const filterTerm = this.normalizeFacetValue(filter.term);
 
@@ -696,7 +700,7 @@ export default {
       }
 
       if (filterTerm === 'notes') {
-        const hasNotes = (cellType.alertNotes?.length > 0 || cellType.curatorNotes?.length > 0);
+        const hasNotes = cellType.alertNotes?.length > 0 || cellType.curatorNotes?.length > 0;
         if (filterFacet === 'with notes') return hasNotes;
         if (filterFacet === 'without notes') return !hasNotes;
         return false;
@@ -704,10 +708,12 @@ export default {
 
       return false;
     },
-    getFilteredCellTypes: function(filters = this.activeFilters, searchInput = this.searchInput) {
+    getFilteredCellTypes: function (filters = this.activeFilters, searchInput = this.searchInput) {
       const searchTerms = this.normalizeSearchTerms(searchInput);
       const activeFilters = (filters || []).filter((filter) => {
-        return filter?.term && filter?.facet && this.normalizeFacetValue(filter.facet) !== 'show all';
+        return (
+          filter?.term && filter?.facet && this.normalizeFacetValue(filter.facet) !== 'show all'
+        );
       });
 
       const filtersByTerm = activeFilters.reduce((grouped, filter) => {
@@ -729,7 +735,7 @@ export default {
         })
         .filter((cellType) => this.matchSearchQuery(cellType, searchTerms));
     },
-    applyFilters: function(filters) {
+    applyFilters: function (filters) {
       const filtered = this.getFilteredCellTypes(filters, this.searchInput);
 
       this.totalFilteredCount = filtered.length;
@@ -742,10 +748,10 @@ export default {
       this.$emit('search-changed', {
         query: this.searchInput,
         filter: filters,
-        tabType: "cellType",
+        tabType: 'cellType',
       });
     },
-    onRelatedCellClick: function(relatedCell) {
+    onRelatedCellClick: function (relatedCell) {
       const species = relatedCell.species;
       const label = relatedCell.label;
 
@@ -753,9 +759,11 @@ export default {
       const normalizedSpecies = this.normalizeActiveSpeciesFilterTerm(species);
 
       // Check if this species filter already exists
-      const speciesFilterExists = this.activeFilters.some(function(filter) {
-        return this.normalizeFacetValue(filter.term) === 'species'
-          && this.normalizeFacetValue(filter.facet) === this.normalizeFacetValue(normalizedSpecies);
+      const speciesFilterExists = this.activeFilters.some(function (filter) {
+        return (
+          this.normalizeFacetValue(filter.term) === 'species' &&
+          this.normalizeFacetValue(filter.facet) === this.normalizeFacetValue(normalizedSpecies)
+        );
       }, this);
 
       // Add species filter if not already present
@@ -779,7 +787,7 @@ export default {
       this.emitSomaLocations(this.filterOptions);
 
       // Find the matching cell type by preferredLabel and open its card
-      const matchingCellType = this.allCellTypes.find(function(ct) {
+      const matchingCellType = this.allCellTypes.find(function (ct) {
         return (ct.preferredLabel || '').toLowerCase() === (label || '').toLowerCase();
       });
 
@@ -787,7 +795,7 @@ export default {
         this.activeCardId = matchingCellType.id;
       }
 
-      this.$nextTick(function() {
+      this.$nextTick(function () {
         this.scrollToTop();
       });
     },
@@ -808,7 +816,7 @@ export default {
       return hasFilters ? this.activeFilters : [];
     },
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
