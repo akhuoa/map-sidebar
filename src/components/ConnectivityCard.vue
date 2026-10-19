@@ -8,18 +8,22 @@
         </div>
         <template v-for="field in displayFields" :key="field">
           <div class="card-details" v-if="entry[field]">
-            <strong>{{ field }}: </strong>
             <div v-if="field === 'nerve-label'" class="card-tags">
               <div v-for="nerve in entry[field]" :key="nerve.nerve">
                 <el-tag type="primary" size="small">
                   {{ nerve.nerve }}
                 </el-tag>
-                <el-tag type="primary" size="small" v-for="subNerve in nerve.subNerves">
+                <el-tag
+                  type="primary"
+                  size="small"
+                  v-for="subNerve in nerve.subNerves"
+                  :key="subNerve"
+                >
                   {{ subNerve }}
                 </el-tag>
               </div>
             </div>
-            <span v-else>{{ entry[field] }}</span>
+            <span class="id-tag" v-else>{{ entry[field] }}</span>
           </div>
         </template>
       </div>
@@ -31,10 +35,10 @@
 import EventBus from './EventBus';
 
 export default {
-  name: "ConnectivityCard",
+  name: 'ConnectivityCard',
   data() {
     return {
-      displayFields: ["id", "nerve-label"],
+      displayFields: ['id', 'nerve-label'],
     };
   },
   props: {
@@ -64,13 +68,11 @@ export default {
     },
     loading: function () {
       // for clicking on the flatmap neuron
-      if ("ready" in this.entry) {
+      if ('ready' in this.entry) {
         return !this.entry.ready;
       }
       // for clicking on the explorer card
-      const cEntry = this.connectivityEntry.find(
-        (entry) => entry.id === this.entry.id
-      );
+      const cEntry = this.connectivityEntry.find((entry) => entry.id === this.entry.id);
       if (cEntry) {
         return !cEntry.ready;
       }
@@ -80,16 +82,16 @@ export default {
   methods: {
     capitalise: function (text) {
       if (text) return text.charAt(0).toUpperCase() + text.slice(1);
-      return "";
+      return '';
     },
     cardClicked: function (data) {
       if (!this.loading) {
-        this.$emit("open-connectivity", data);
+        this.$emit('open-connectivity', data);
 
         EventBus.emit('trackEvent', {
-          'event_name': `portal_maps_connectivity_open`,
-          'category': data.id || '',
-          'location': 'map_sidebar_connectivity',
+          event_name: `portal_maps_connectivity_open`,
+          category: data.id || '',
+          location: 'map_sidebar_connectivity',
         });
       }
     },
@@ -98,6 +100,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '../assets/connectivity-explorer.scss';
+
 .connectivity-card {
   padding-left: 5px;
   position: relative;
@@ -111,7 +115,7 @@ export default {
 }
 
 .card-title {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   font-weight: bold;
   line-height: 1.5;
   letter-spacing: 1.05px;
@@ -125,15 +129,19 @@ export default {
 .card-details {
   line-height: 1.5;
   letter-spacing: 1.05px;
+
+  + .card-details {
+    margin-top: 0.25em;
+  }
 }
 
 .el-tag {
-  border-radius: 4px!important;
-  font-size: 0.75rem!important;
-  margin: 2px!important;
-  background: #f9f2fc!important;
-  border: 1px solid $app-primary-color!important;
-  color: $app-primary-color!important;
+  border-radius: 4px !important;
+  font-size: 0.75rem !important;
+  margin: 2px !important;
+  background: #f9f2fc !important;
+  border: 1px solid $app-primary-color !important;
+  color: $app-primary-color !important;
 }
 
 .card-tags {

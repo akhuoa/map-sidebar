@@ -1,3 +1,5 @@
+@use '_variables' as *;
+@forward '_variables';
 
 .filter-help-popover {
   font-family: 'Asap', sans-serif;
@@ -26,7 +28,7 @@
     border-color: $app-primary-color !important;
   }
 
-  &[data-popper-placement^=bottom] .el-popper__arrow:before {
+  &[data-popper-placement^='bottom'] .el-popper__arrow:before {
     border-bottom-color: transparent !important;
     border-right-color: transparent !important;
   }
