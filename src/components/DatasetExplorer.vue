@@ -181,7 +181,7 @@ export default {
       },
       cascaderIsReady: false,
       anatomyInDatasets: [],
-    }
+    };
   },
   computed: {
     // This computed property populates filter data's entry object with $data from this sidebar
@@ -316,15 +316,15 @@ export default {
     },
     searchAlgolia(filters, query = '') {
       // Algolia search
-      this.loadingCards = true
+      this.loadingCards = true;
       this.algoliaClient
         .anatomyInSearch(getFilters(filters, this.anatomyInDatasets), query)
         .then((r) => {
           // Send result anatomy to the scaffold and flatmap
           this.anatomyInDatasets = r.forFlatmap;
-          EventBus.emit('anatomy-in-datasets', r.forFlatmap)
-          EventBus.emit('number-of-datasets-for-anatomies', r.forScaffold)
-        })
+          EventBus.emit('anatomy-in-datasets', r.forFlatmap);
+          EventBus.emit('number-of-datasets-for-anatomies', r.forScaffold);
+        });
       this.algoliaClient
         .search(getFilters(filters, this.anatomyInDatasets), query, this.numberPerPage, this.page)
         .then((searchData) => {

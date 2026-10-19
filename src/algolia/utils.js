@@ -58,8 +58,8 @@ export const shownFilters = {
 };
 
 /* Returns filter for searching algolia. All facets of the same category are joined with OR,
-  * and each of those results is then joined with an AND.
-  * i.e. (color:blue OR color:red) AND (shape:circle OR shape:red) */
+ * and each of those results is then joined with an AND.
+ * i.e. (color:blue OR color:red) AND (shape:circle OR shape:red) */
 export function getFilters(selectedFacetArray = undefined, anatomyInDatasets = []) {
   // return all datasets if no filter
   if (selectedFacetArray === undefined) {
@@ -98,11 +98,13 @@ export function getFilters(selectedFacetArray = undefined, anatomyInDatasets = [
           : facetPropPath;
       if (facet.AND) {
         let term = '';
-        if (facetPropPathToUse === "anatomy.organ.name" && anatomyInDatasets.length > 0) {
+        if (facetPropPathToUse === 'anatomy.organ.name' && anatomyInDatasets.length > 0) {
           const lowerLabel = facet.label.toLowerCase();
-          const dataset = anatomyInDatasets.find(item => item.labels.map(label => label.toLowerCase()).includes(lowerLabel));
+          const dataset = anatomyInDatasets.find((item) =>
+            item.labels.map((label) => label.toLowerCase()).includes(lowerLabel),
+          );
           if (dataset) {
-            const index = dataset.labels.map(label => label.toLowerCase()).indexOf(lowerLabel);
+            const index = dataset.labels.map((label) => label.toLowerCase()).indexOf(lowerLabel);
             term = dataset.terms[index];
           }
         }
