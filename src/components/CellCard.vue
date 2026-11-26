@@ -184,28 +184,32 @@
           <div class="card-section-title">Equivalent Cell Types</div>
           <ul class="related-cell-list">
             <li v-for="equivalentCell in equivalentCellLinks" :key="equivalentCell.key">
-              <el-tooltip
+              <el-popover
                 :disabled="!equivalentCell.isOtherSpecies"
-                :content="equivalentCell.tooltip"
+                width="auto"
+                trigger="hover"
                 placement="top"
                 :teleported="false"
-                :show-after="200"
+                popper-class="popover-map-pin popover-species-hint"
               >
-                <button
-                  class="related-cell-item equivalent-cell-item"
-                  :aria-label="equivalentCell.isOtherSpecies ? equivalentCell.tooltip : undefined"
-                  @click.stop="$emit('related-cell-click', equivalentCell.cell)"
-                >
-                  <span>{{ equivalentCell.label }}</span>
-                  <span
-                    v-if="equivalentCell.speciesLabel"
-                    class="species-tag"
-                    :class="{ 'species-tag--other': equivalentCell.isOtherSpecies }"
+                <template #reference>
+                  <button
+                    class="related-cell-item equivalent-cell-item"
+                    :aria-label="equivalentCell.isOtherSpecies ? equivalentCell.tooltip : undefined"
+                    @click.stop="$emit('related-cell-click', equivalentCell.cell)"
                   >
-                    {{ equivalentCell.speciesLabel }}
-                  </span>
-                </button>
-              </el-tooltip>
+                    <span>{{ equivalentCell.label }}</span>
+                    <span
+                      v-if="equivalentCell.speciesLabel"
+                      class="species-tag"
+                      :class="{ 'species-tag--other': equivalentCell.isOtherSpecies }"
+                    >
+                      {{ equivalentCell.speciesLabel }}
+                    </span>
+                  </button>
+                </template>
+                <span>{{ equivalentCell.tooltip }}</span>
+              </el-popover>
             </li>
           </ul>
         </div>
@@ -400,6 +404,17 @@ export default {
         sourceNomenclatureLabel,
       } = this.cellType;
 
+      // CopyToClipboard copies this as HTML and as plain text (textContent).
+      // The new lines and indents only show in the plain text: HTML copy removes the new lines,
+      // and the spaces at the start of a list item are not displayed.
+      const listSection = (title, items) => {
+        const listItems = items
+          .filter(Boolean)
+          .map((item) => `\n<li>  ${item}</li>`)
+          .join('');
+        return listItems ? `<div><strong>${title}:</strong><ul>${listItems}</ul></div>` : '';
+      };
+
       const contentArray = [];
       if (preferredLabel) {
         contentArray.push(`<div><strong>Cell Type:</strong> ${preferredLabel}</div>`);
@@ -411,8 +426,7 @@ export default {
         contentArray.push(`<div><strong>Species:</strong> ${species}</div>`);
       }
       if (somaLocations?.length) {
-        const items = somaLocations.map((location) => `<li>${location}</li>`).join('');
-        contentArray.push(`<div><strong>Soma Locations:</strong><ul>${items}</ul></div>`);
+        contentArray.push(listSection('Soma Locations', somaLocations));
       }
       const terminalItems = [
         ...(axonTerminalLocations || []).map((location) => `${location} (presynaptic)`),
@@ -420,8 +434,7 @@ export default {
         ...(sensoryTerminalStructures || []).map((structure) => `${structure} (sensory structure)`),
       ];
       if (terminalItems.length) {
-        const items = terminalItems.map((item) => `<li>${item}</li>`).join('');
-        contentArray.push(`<div><strong>Axon Terminals:</strong><ul>${items}</ul></div>`);
+        contentArray.push(listSection('Axon Terminals', terminalItems));
       }
       if (circuitRole) {
         contentArray.push(`<div><strong>Circuit Role:</strong> ${circuitRole}</div>`);
@@ -442,27 +455,22 @@ export default {
         contentArray.push(`<div><strong>Physiology:</strong> ${physiologyString}</div>`);
       }
       if (relatedCells?.length) {
-        const relatedItems = relatedCells
-          .map((cell) => cell?.label)
-          .filter(Boolean)
-          .map((label) => `<li>${label}</li>`)
-          .join('');
-        if (relatedItems) {
-          contentArray.push(
-            `<div><strong>Related Species Variants:</strong><ul>${relatedItems}</ul></div>`,
-          );
-        }
+        contentArray.push(
+          listSection(
+            'Related Species Variants',
+            relatedCells.map((cell) => cell?.label),
+          ),
+        );
       }
       if (equivalentCells?.length) {
-        const equivalentItems = equivalentCells
-          .filter((cell) => cell?.label)
-          .map((cell) => `<li>${cell.label}${cell.species ? ` (${cell.species})` : ''}</li>`)
-          .join('');
-        if (equivalentItems) {
-          contentArray.push(
-            `<div><strong>Equivalent Cell Types:</strong><ul>${equivalentItems}</ul></div>`,
-          );
-        }
+        contentArray.push(
+          listSection(
+            'Equivalent Cell Types',
+            equivalentCells
+              .filter((cell) => cell?.label)
+              .map((cell) => `${cell.label}${cell.species ? ` (${cell.species})` : ''}`),
+          ),
+        );
       }
       if (sourceNomenclatureLabel) {
         const sourceLabel = sourceNomenclature
@@ -470,13 +478,18 @@ export default {
           : sourceNomenclatureLabel;
         contentArray.push(`<div><strong>Source Publication:</strong> ${sourceLabel}</div>`);
       }
-      const sourceDataItems = (sourceData || [])
-        .filter((dataset) => dataset?.uri)
-        .map((dataset) => `<li><a href="${dataset.uri}">${dataset.label || dataset.uri}</a></li>`)
-        .join('');
-      if (sourceDataItems) {
-        contentArray.push(`<div><strong>Source Data:</strong><ul>${sourceDataItems}</ul></div>`);
-      }
+      contentArray.push(
+        listSection(
+          'Source Data',
+          (sourceData || [])
+            .filter((dataset) => dataset?.uri)
+            .map((dataset) =>
+              dataset.label && dataset.label !== dataset.uri
+                ? `${dataset.label} (<a href="${dataset.uri}">${dataset.uri}</a>)`
+                : `<a href="${dataset.uri}">${dataset.uri}</a>`,
+            ),
+        ),
+      );
 
       if (alertNotes?.length) {
         const alertContent = alertNotes.map((note) => formatAlertTextUtil(note)).join('\n');
@@ -488,7 +501,7 @@ export default {
         contentArray.push(`<div><strong>Curator Notes:</strong></div>\n${curatorContent}`);
       }
 
-      return contentArray.join('\n');
+      return contentArray.filter(Boolean).join('\n');
     },
     somaLocations: function () {
       // Soma locations with UBERON curies from the API (query 35).
@@ -1184,6 +1197,12 @@ export default {
   &:hover {
     background-color: rgba($app-primary-color, 0.08);
   }
+}
+
+:deep(.el-popper.popover-map-pin.popover-species-hint) {
+  min-width: 0;
+  max-width: 240px;
+  white-space: normal;
 }
 
 .equivalent-cell-item {
