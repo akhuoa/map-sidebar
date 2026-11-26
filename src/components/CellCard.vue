@@ -1220,7 +1220,28 @@ export default {
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
+  padding: 4px 8px;
+  border-radius: 14px 14px;
   text-align: left;
+  background-color: $app-primary-color;
+  border-color: $app-primary-color;
+  color: #fff;
+
+  &:hover {
+    color: #fff !important;
+    background-color: #ac76c5 !important;
+    border: 1px solid #ac76c5 !important;
+
+    .species-tag {
+      background-color: #c799dd !important;
+    }
+  }
+
+  .species-tag {
+    color: #fff !important;
+    background-color: #ac76c5 !important;
+    border: 0 none !important;
+  }
 }
 
 .species-tag {
