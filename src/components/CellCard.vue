@@ -183,17 +183,29 @@
         <div v-if="cellType.equivalentCells?.length" class="card-section">
           <div class="card-section-title">Equivalent Cell Types</div>
           <ul class="related-cell-list">
-            <li
-              v-for="equivalentCell in cellType.equivalentCells"
-              :key="equivalentCell.id || equivalentCell.label"
-            >
-              <button
-                class="related-cell-item"
-                @click.stop="$emit('related-cell-click', equivalentCell)"
-                title="Click to view this cell type"
+            <li v-for="equivalentCell in equivalentCellLinks" :key="equivalentCell.key">
+              <el-tooltip
+                :disabled="!equivalentCell.isOtherSpecies"
+                :content="equivalentCell.tooltip"
+                placement="top"
+                :teleported="false"
+                :show-after="200"
               >
-                {{ equivalentCell.label }}
-              </button>
+                <button
+                  class="related-cell-item equivalent-cell-item"
+                  :aria-label="equivalentCell.isOtherSpecies ? equivalentCell.tooltip : undefined"
+                  @click.stop="$emit('related-cell-click', equivalentCell.cell)"
+                >
+                  <span>{{ equivalentCell.label }}</span>
+                  <span
+                    v-if="equivalentCell.speciesLabel"
+                    class="species-tag"
+                    :class="{ 'species-tag--other': equivalentCell.isOtherSpecies }"
+                  >
+                    {{ equivalentCell.speciesLabel }}
+                  </span>
+                </button>
+              </el-tooltip>
             </li>
           </ul>
         </div>
@@ -328,6 +340,36 @@ export default {
         })
         .filter(Boolean);
     },
+    /**
+     * Equivalent cells (maps-to) with a species tag. A cell from another species than this card
+     * gets a highlighted tag and a tooltip, because opening it changes the species filter.
+     */
+    equivalentCellLinks: function () {
+      const cardSpecies = String(this.cellType?.species || '')
+        .trim()
+        .toLowerCase();
+
+      return (this.cellType?.equivalentCells || [])
+        .filter((cell) => cell?.label)
+        .map((cell, index) => {
+          const species = String(cell.species || '')
+            .trim()
+            .toLowerCase();
+          const speciesLabel = capitalise(species);
+          const isOtherSpecies = Boolean(species && cardSpecies && species !== cardSpecies);
+
+          return {
+            key: cell.id || `${cell.label}-${index}`,
+            cell,
+            label: cell.label,
+            speciesLabel,
+            isOtherSpecies,
+            tooltip: isOtherSpecies
+              ? `${speciesLabel} cell type. Opening it includes ${speciesLabel} in the species filter.`
+              : '',
+          };
+        });
+    },
     // Dataset links (SCKAN data citations, e.g. GEO accessions) the cell was derived from.
     sourceDataLinks: function () {
       return (this.cellType?.sourceData || [])
@@ -413,9 +455,8 @@ export default {
       }
       if (equivalentCells?.length) {
         const equivalentItems = equivalentCells
-          .map((cell) => cell?.label)
-          .filter(Boolean)
-          .map((label) => `<li>${label}</li>`)
+          .filter((cell) => cell?.label)
+          .map((cell) => `<li>${cell.label}${cell.species ? ` (${cell.species})` : ''}</li>`)
           .join('');
         if (equivalentItems) {
           contentArray.push(
@@ -1142,6 +1183,32 @@ export default {
 
   &:hover {
     background-color: rgba($app-primary-color, 0.08);
+  }
+}
+
+.equivalent-cell-item {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  text-align: left;
+}
+
+.species-tag {
+  padding: 0 6px;
+  border: 1px solid $lineColor1;
+  border-radius: 10px;
+  background-color: $background;
+  color: $mediumGrey;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+
+  &.species-tag--other {
+    border-color: rgba($app-primary-color, 0.4);
+    background-color: rgba($app-primary-color, 0.08);
+    color: $app-primary-color;
+    font-weight: 500;
   }
 }
 </style>
