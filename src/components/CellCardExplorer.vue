@@ -524,6 +524,10 @@ export default {
         .map((relatedCell) => relatedCell.label)
         .filter(Boolean)
         .join(' ');
+      const equivalentCellLabels = (cellType.equivalentCells || [])
+        .map((equivalentCell) => equivalentCell.label)
+        .filter(Boolean)
+        .join(' ');
 
       return [
         cellType.id,
@@ -542,6 +546,9 @@ export default {
         cellType.physiologyString,
         cellType.sourceNomenclatureLabel,
         relatedCellLabels,
+        equivalentCellLabels,
+        // Synonyms of genes, locations and phenotypes (query 39), e.g. "parvalbumin" for Pvalb.
+        (cellType.synonyms || []).join(' '),
       ]
         .filter(Boolean)
         .join(' ')

@@ -180,6 +180,23 @@
             </li>
           </ul>
         </div>
+        <div v-if="cellType.equivalentCells?.length" class="card-section">
+          <div class="card-section-title">Equivalent Cell Types</div>
+          <ul class="related-cell-list">
+            <li
+              v-for="equivalentCell in cellType.equivalentCells"
+              :key="equivalentCell.id || equivalentCell.label"
+            >
+              <button
+                class="related-cell-item"
+                @click.stop="$emit('related-cell-click', equivalentCell)"
+                title="Click to view this cell type"
+              >
+                {{ equivalentCell.label }}
+              </button>
+            </li>
+          </ul>
+        </div>
         <div v-if="cellType.sourceNomenclature" class="card-section source-publication-section">
           <div class="card-section-title">Source Publication</div>
           <p>
@@ -190,6 +207,20 @@
               rel="noopener noreferrer"
             >
               {{ cellType.sourceNomenclatureLabel }}
+              <IconOpenExternal class="external-link-icon" />
+            </a>
+          </p>
+        </div>
+        <div v-if="cellType.sourceData?.length" class="card-section source-publication-section">
+          <div class="card-section-title">Datasets</div>
+          <p v-for="dataset in cellType.sourceData" :key="dataset.uri">
+            <a
+              class="source-publication-link"
+              :href="dataset.uri"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ dataset.label }}
               <IconOpenExternal class="external-link-icon" />
             </a>
           </p>
@@ -313,6 +344,8 @@ export default {
         fiberTypeString,
         physiologyString,
         relatedCells,
+        equivalentCells,
+        sourceData,
         alertNotes,
         curatorNotes,
         sourceNomenclature,
@@ -372,11 +405,29 @@ export default {
           );
         }
       }
+      if (equivalentCells?.length) {
+        const equivalentItems = equivalentCells
+          .map((cell) => cell?.label)
+          .filter(Boolean)
+          .map((label) => `<li>${label}</li>`)
+          .join('');
+        if (equivalentItems) {
+          contentArray.push(
+            `<div><strong>Equivalent Cell Types:</strong><ul>${equivalentItems}</ul></div>`,
+          );
+        }
+      }
       if (sourceNomenclatureLabel) {
         const sourceLabel = sourceNomenclature
           ? `${sourceNomenclatureLabel} (<a href="${sourceNomenclature}">${sourceNomenclature}</a>)`
           : sourceNomenclatureLabel;
         contentArray.push(`<div><strong>Source Publication:</strong> ${sourceLabel}</div>`);
+      }
+      if (sourceData?.length) {
+        const datasetItems = sourceData
+          .map((dataset) => `<li><a href="${dataset.uri}">${dataset.label}</a></li>`)
+          .join('');
+        contentArray.push(`<div><strong>Datasets:</strong><ul>${datasetItems}</ul></div>`);
       }
 
       if (alertNotes?.length) {

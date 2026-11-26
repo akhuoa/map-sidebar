@@ -1,20 +1,19 @@
-import { buildCellCards } from '../utils/cellPrecision.js';
+import { buildCellCards, getCellTermIds } from '../utils/cellPrecision.js';
 
 /**
- * Cell precision competency queries (31 to 37).
+ * Cell precision competency queries (31 to 40).
  * See the flatmap server's "Cell Precision Competency Queries" documentation.
  *
  * All queries are POST {endpoint}/competency/query with
  * { query_id, parameters: [{ column, value }] }
  * and return { query_id, results: { keys: [...], values: [[...], ...] } }.
+ * Every result has `source_id` (the requested map UUID or SCKAN release) and
+ * `sckan_id` (its SCKAN release).
  */
 
-const CELL_CLASSES_QUERY = 31;
-const CELL_LEAVES_QUERY = 32;
-const CELL_PROPERTIES_QUERY = 33;
-const CELL_ATTRIBUTES_QUERY = 34;
-const CELL_LOCATIONS_QUERY = 35;
 const CELL_PATHS_QUERY = 37;
+const TERMS_QUERY = 39;
+const CELLS_QUERY = 40;
 
 const cellCardsCache = new Map();
 
@@ -57,23 +56,35 @@ async function queryCellPrecision(endpoint, sourceId, queryId, parameters = []) 
 }
 
 /**
+ * Labels and synonyms of terms (query 39).
+ * Optional: the cards are still built from the query 40 labels if this fails.
+ */
+async function fetchTerms(endpoint, sourceId, termIds) {
+  if (!termIds.length) return [];
+  try {
+    return await queryCellPrecision(endpoint, sourceId, TERMS_QUERY, [
+      { column: 'term_id', value: termIds },
+    ]);
+  } catch (error) {
+    console.warn('Cell precision term labels and synonyms are not available:', error);
+    return [];
+  }
+}
+
+/**
  * Fetch every cell precision (for the map or SCKAN release given by `sourceId`)
- * and convert them to the card objects used by CellCard.vue.
+ * with query 40, the labels and synonyms of their terms with query 39, and
+ * convert them to the card objects used by CellCard.vue.
  * Results are cached per endpoint and source.
  */
 function fetchCellCards(endpoint, sourceId) {
   const cacheKey = `${endpoint}|${sourceId || ''}`;
 
   if (!cellCardsCache.has(cacheKey)) {
-    const request = Promise.all([
-      queryCellPrecision(endpoint, sourceId, CELL_CLASSES_QUERY),
-      queryCellPrecision(endpoint, sourceId, CELL_LEAVES_QUERY),
-      queryCellPrecision(endpoint, sourceId, CELL_PROPERTIES_QUERY),
-      queryCellPrecision(endpoint, sourceId, CELL_ATTRIBUTES_QUERY),
-      queryCellPrecision(endpoint, sourceId, CELL_LOCATIONS_QUERY),
-    ])
-      .then(([classes, leaves, properties, attributes, locations]) => {
-        return buildCellCards({ classes, leaves, properties, attributes, locations });
+    const request = queryCellPrecision(endpoint, sourceId, CELLS_QUERY)
+      .then(async (cells) => {
+        const terms = await fetchTerms(endpoint, sourceId, getCellTermIds(cells));
+        return buildCellCards({ cells, terms });
       })
       .catch((error) => {
         // Do not cache failures, so the next mount can retry.

@@ -1,60 +1,37 @@
 /**
- * Converts the rows of the cell precision competency queries (31 to 35)
- * into the card objects used by CellCard.vue and CellCardExplorer.vue.
+ * Converts the cell precision competency queries into the card objects
+ * used by CellCard.vue and CellCardExplorer.vue:
+ * - query 40: one row per cell precision with its properties (as query 33),
+ *   descriptive attributes (as query 34) and nodes (as query 35)
+ * - query 39: labels and synonyms of the terms used by the cells (optional)
  */
 
-// TEMPORARY: the API does not provide the source publication or species of a cell yet.
-// Cell labels end with a citation key, e.g. "DRG CGRP-zeta (Qi2024)", which is mapped here.
-// Remove when the API returns the source publication and taxon for each cell.
-const SOURCE_LOOKUP = {
-  Bhuiyan2024: {
-    uri: 'https://doi.org/10.1126/sciadv.adj9173',
-    label: 'CSA paper',
-    color: '#667eea',
-    species: '', // species is part of each cell label
-  },
-  Bhuiyan2025: {
-    uri: 'https://doi.org/10.1101/2025.11.05.686654',
-    label: 'big DRG paper',
-    color: '#f59e0b',
-    species: 'human',
-  },
-  'Tavares-Ferreira2022': {
-    uri: 'https://doi.org/10.1126/scitranslmed.abj8186',
-    label: 'Tavares-Ferreira et al., 2022',
-    color: '#22c55e',
-    species: 'human',
-  },
-  Yu2024: {
-    uri: 'https://doi.org/10.1038/s41593-024-01794-1',
-    label: 'Yu et al., 2024',
-    color: '#ef4444',
-    species: 'human',
-  },
-  Krauter2025: {
-    uri: 'https://doi.org/10.1038/s42003-025-08315-1',
-    label: 'Krauter et al., 2025',
-    color: '#8b5cf6',
-    species: 'mouse',
-  },
-  Qi2024: {
-    uri: 'https://doi.org/10.1016/j.cell.2024.02.006',
-    label: 'Qi et al., 2024',
-    color: '#06b6d4',
-    species: 'mouse',
-  },
-  Kupari2021: {
-    uri: 'https://doi.org/10.1038/s41467-021-21725-z',
-    label: 'Kupari et al., 2021',
-    color: '#ec4899',
-    species: 'macaque',
-  },
+// Display names and chip colours of the source publications, keyed by DOI.
+// The API returns the publication link (`reference`) but no short name for it.
+const SOURCE_PUBLICATIONS = {
+  '10.1126/sciadv.adj9173': { label: 'CSA paper', color: '#667eea' },
+  '10.1101/2025.11.05.686654': { label: 'big DRG paper', color: '#f59e0b' },
+  '10.1126/scitranslmed.abj8186': { label: 'Tavares-Ferreira et al., 2022', color: '#22c55e' },
+  '10.1038/s41593-024-01794-1': { label: 'Yu et al., 2024', color: '#ef4444' },
+  '10.1038/s42003-025-08315-1': { label: 'Krauter et al., 2025', color: '#8b5cf6' },
+  '10.1016/j.cell.2024.02.006': { label: 'Qi et al., 2024', color: '#06b6d4' },
+  '10.1038/s41467-021-21725-z': { label: 'Kupari et al., 2021', color: '#ec4899' },
 };
 
-// TEMPORARY: species names looked for in cell labels (longest first).
-const SPECIES_IN_LABELS = ['guinea pig', 'macaque', 'mouse', 'human', 'rat', 'pig'];
+// Common names used for the species facet. Other taxa use their query 39 label.
+const TAXON_NAMES = {
+  'NCBITaxon:9606': 'human',
+  'NCBITaxon:10090': 'mouse',
+  'NCBITaxon:10116': 'rat',
+  'NCBITaxon:9544': 'macaque',
+  'NCBITaxon:10141': 'guinea pig',
+  'NCBITaxon:9823': 'pig',
+};
 
 const DEFAULT_SOURCE_COLOR = '#8300bf';
+
+// Synonyms shorter than this (e.g. "m", "h" for mouse and human) are not searched.
+const MIN_SYNONYM_LENGTH = 3;
 
 const ATTRIBUTE_TYPES = {
   GENE: 'ilxtr:hasNucleicAcidExpressionPhenotype',
@@ -90,28 +67,38 @@ const isMissingValue = (id) => String(id || '').startsWith('TEMP:MISSING');
 
 const unique = (items) => [...new Set(items.filter(Boolean))];
 
+const asList = (value) => (Array.isArray(value) ? value.filter(Boolean) : []);
+
+const HTML_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+
 /**
- * Split "DRG Pvalb mouse (Bhuiyan2024)" into
- * { name: 'DRG Pvalb mouse', citationKey: 'Bhuiyan2024', species: 'mouse', className: 'DRG Pvalb' }
+ * Some labels and synonyms contain HTML entities, e.g. "Meissner&#39;s corpuscle".
+ */
+function decodeEntities(text) {
+  return String(text || '').replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (entity, code) => {
+    if (code[0] === '#') {
+      const value =
+        code[1] === 'x' || code[1] === 'X'
+          ? parseInt(code.slice(2), 16)
+          : parseInt(code.slice(1), 10);
+      return Number.isFinite(value) ? String.fromCodePoint(value) : entity;
+    }
+    return HTML_ENTITIES[code.toLowerCase()] ?? entity;
+  });
+}
+
+const cleanText = (text) => decodeEntities(text).replace(/\s+/g, ' ').trim();
+
+/**
+ * Split "DRG CGRP-zeta (Qi2024)" into { name: 'DRG CGRP-zeta', citationKey: 'Qi2024' }.
  */
 function parseCellLabel(label) {
-  const text = String(label || '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const text = cleanText(label);
   const match = text.match(/^(.*?)\s*\(([^()]*)\)$/);
-  const name = match ? match[1].trim() : text;
-  const citationKey = match ? match[2].trim() : '';
-
-  const species =
-    SPECIES_IN_LABELS.find((item) => new RegExp(`\\b${item}\\b`, 'i').test(name)) || '';
-  const className = species
-    ? name
-        .replace(new RegExp(`\\s*\\b${species}\\b`, 'i'), '')
-        .replace(/\s+/g, ' ')
-        .trim()
-    : '';
-
-  return { name, citationKey, species: species.toLowerCase(), className };
+  return {
+    name: match ? match[1].trim() : text,
+    citationKey: match ? match[2].trim() : '',
+  };
 }
 
 /**
@@ -149,6 +136,85 @@ function getGeneUri(featureId) {
     return `https://www.ncbi.nlm.nih.gov/gene/${id.split(':')[1]}`;
   }
   return '';
+}
+
+/**
+ * "https://www.biorxiv.org/content/10.1101/2025.11.05.686654v1" -> "10.1101/2025.11.05.686654"
+ */
+function getDoi(uri) {
+  const match = String(uri || '').match(/(10\.\d{4,9}\/[^\s?#]+)/);
+  return match ? match[1].replace(/v\d+$/, '').replace(/[.,;]+$/, '') : '';
+}
+
+function getSourcePublication(references, citationKey) {
+  const uri = asList(references)[0] || '';
+  const publication = SOURCE_PUBLICATIONS[getDoi(uri)];
+  return {
+    uri,
+    label: publication?.label || citationKey || uri,
+    color: publication?.color || DEFAULT_SOURCE_COLOR,
+  };
+}
+
+/**
+ * Dataset links (SCKAN ilxtr:dataCitation), labelled with a GEO accession when there is one.
+ */
+function getSourceData(datasetIds) {
+  return asList(datasetIds).map((uri) => {
+    const accession = String(uri).match(/[?&]acc=([^&#]+)/i);
+    const doi = getDoi(uri);
+    return { uri, label: accession ? accession[1] : doi || uri };
+  });
+}
+
+/**
+ * Labels and synonyms of terms (query 39 rows), keyed by term id.
+ */
+function buildTermLookup(termRows) {
+  const terms = new Map();
+  asList(termRows).forEach((row) => {
+    if (!row?.term_id) return;
+    terms.set(row.term_id, {
+      label: cleanText(row.label),
+      synonyms: unique(asList(row.synonym).map(cleanText)),
+    });
+  });
+  return terms;
+}
+
+/**
+ * The query 39 label when it is a real label, otherwise the label returned with the cell.
+ * Some terms only have their id as label, e.g. "JAX:021077".
+ */
+function getTermLabel(terms, featureId, featureLabel) {
+  const termLabel = terms.get(featureId)?.label;
+  if (termLabel && termLabel !== featureId) return termLabel;
+  return cleanText(featureLabel || featureId);
+}
+
+/**
+ * Query 40 lists:
+ *   descriptive_attribute: [type_id, combination_id, feature_id, feature_label]
+ *   node:                  [type_id, node_id, feature_id, feature_label]
+ */
+function toAttributeRows(cell, terms) {
+  return asList(cell.descriptive_attribute).map(
+    ([type_id, combination_id, feature_id, feature_label]) => ({
+      type_id,
+      combination_id,
+      feature_id,
+      feature_label: getTermLabel(terms, feature_id, feature_label),
+    }),
+  );
+}
+
+function toLocationRows(cell, terms) {
+  return asList(cell.node).map(([type_id, node_id, feature_id, feature_label]) => ({
+    type_id,
+    node_id,
+    feature_id,
+    feature_label: getTermLabel(terms, feature_id, feature_label),
+  }));
 }
 
 /**
@@ -221,18 +287,32 @@ function getLocationTerms(locationRows, typeId) {
   return [...terms.values()];
 }
 
-function groupByCell(rows) {
-  return rows.reduce((grouped, row) => {
-    if (!grouped.has(row.cell_id)) grouped.set(row.cell_id, []);
-    grouped.get(row.cell_id).push(row);
-    return grouped;
-  }, new Map());
+function getSpecies(taxonIds, terms) {
+  return unique(
+    asList(taxonIds).map((taxonId) => TAXON_NAMES[taxonId] || terms.get(taxonId)?.label || ''),
+  ).join(', ');
 }
 
-function buildCellCard(property, attributeRows, locationRows) {
-  const label = String(property.cell_label || property.cell_id).trim();
-  const { name, citationKey, species: labelSpecies, className } = parseCellLabel(label);
-  const source = SOURCE_LOOKUP[citationKey] || null;
+/**
+ * Synonyms of the attributes and locations of a cell, for the text search.
+ */
+function getSynonyms(attributeRows, locationRows, terms) {
+  return unique(
+    [...attributeRows, ...locationRows].flatMap((row) =>
+      (terms.get(row.feature_id)?.synonyms || []).filter(
+        (synonym) => synonym.length >= MIN_SYNONYM_LENGTH,
+      ),
+    ),
+  );
+}
+
+function buildCellCard(cell, terms) {
+  const label = cleanText(cell.cell_label || cell.cell_id);
+  const { name, citationKey } = parseCellLabel(label);
+  const source = getSourcePublication(cell.reference, citationKey);
+
+  const attributeRows = toAttributeRows(cell, terms);
+  const locationRows = toLocationRows(cell, terms);
 
   const markerGenes = buildMarkerGenes(attributeRows);
   const somaLocationTerms = getLocationTerms(locationRows, LOCATION_TYPES.SOMA);
@@ -243,14 +323,16 @@ function buildCellCard(property, attributeRows, locationRows) {
   );
 
   return {
-    id: property.cell_id,
-    cellId: property.cell_id,
+    id: cell.cell_id,
+    cellId: cell.cell_id,
     entity: label,
+    longLabel: cleanText(cell.long_label),
     preferredLabel: name || label,
-    className,
     citationKey,
-    species: labelSpecies || source?.species || '',
-    biologicalSex: property.biological_sex || '',
+    taxonIds: asList(cell.taxon_id),
+    species: getSpecies(cell.taxon_id, terms),
+    biologicalSex: cell.biological_sex || '',
+    phenotypes: asList(cell.phenotype),
     circuitRole: getAttributeLabels(attributeRows, ATTRIBUTE_TYPES.CIRCUIT).join(', '),
     neurotransmitter: getAttributeLabels(attributeRows, ATTRIBUTE_TYPES.NEUROTRANSMITTER).join(
       ', ',
@@ -271,98 +353,109 @@ function buildCellCard(property, attributeRows, locationRows) {
       PHYSIOLOGY_TYPES,
       removePhenotypeSuffix,
     ).join(' + '),
-    // API returns ids only (e.g. JAX:021077), no names yet.
+    // Driver lines without a label are shown by id, e.g. JAX:021077.
     creLine: getAttributeLabels(attributeRows, ATTRIBUTE_TYPES.DRIVER).join(', '),
-    sourceNomenclature: source?.uri || '',
-    sourceNomenclatureLabel: source?.label || citationKey,
-    sourceColor: source?.color || DEFAULT_SOURCE_COLOR,
-    alertNotes: parseAlert(property.alert),
-    // Not available from the API yet.
-    curatorNotes: [],
-    sourceData: [],
+    sourceNomenclature: source.uri,
+    sourceNomenclatureLabel: source.label,
+    sourceColor: source.color,
+    alertNotes: parseAlert(cell.alert),
+    curatorNotes: asList(cell.curator_note).map(cleanText),
+    sourceData: getSourceData(cell.dataset_id),
+    synonyms: getSynonyms(attributeRows, locationRows, terms),
+    superclassIds: asList(cell.superclass_id),
+    mapsToIds: asList(cell.maps_to_id),
+    // Filled in by linkCells.
     relatedCells: [],
+    equivalentCells: [],
   };
 }
 
+const toCellLink = (card) => ({
+  id: card.id,
+  label: card.preferredLabel,
+  species: card.species,
+});
+
 /**
- * Link species variants of the same cell class, e.g.
- * "DRG Pvalb mouse (Bhuiyan2024)" <-> "DRG Pvalb human (Bhuiyan2024)".
- * TEMPORARY: derived from labels until the API returns the parent class of each cell.
+ * relatedCells:    the other subclasses of the same superclass, e.g. the species variants
+ *                  "DRG Pvalb mouse (Bhuiyan2024)" <-> "DRG Pvalb human (Bhuiyan2024)".
+ * equivalentCells: cells linked by maps-to (the equivalent cell type from another study),
+ *                  in both directions. The API only gives the forward direction.
+ * Only cells that have a card are linked.
  */
-function linkRelatedCells(cards, classLabels) {
-  const families = new Map();
+function linkCells(cards, cells) {
+  const cardsById = new Map(cards.map((card) => [card.id, card]));
+  const subclassesById = new Map(cells.map((cell) => [cell.cell_id, asList(cell.subclass_id)]));
+  const mappedFrom = new Map();
 
   cards.forEach((card) => {
-    if (!card.className || !card.species) return;
-    const familyKey = `${card.className} (${card.citationKey})`.toLowerCase();
-    // Only group when a matching class exists in query 31.
-    if (!classLabels.has(familyKey)) return;
-    if (!families.has(familyKey)) families.set(familyKey, []);
-    families.get(familyKey).push(card);
+    card.mapsToIds.forEach((targetId) => {
+      if (!mappedFrom.has(targetId)) mappedFrom.set(targetId, []);
+      mappedFrom.get(targetId).push(card.id);
+    });
   });
 
-  families.forEach((members) => {
-    members.forEach((card) => {
-      card.relatedCells = members
-        .filter((member) => member.id !== card.id)
-        .map((member) => ({
-          id: member.id,
-          label: member.preferredLabel,
-          species: member.species,
-        }));
-    });
+  cards.forEach((card) => {
+    const siblingIds = card.superclassIds.flatMap(
+      (superclassId) => subclassesById.get(superclassId) || [],
+    );
+    const equivalentIds = [...card.mapsToIds, ...(mappedFrom.get(card.id) || [])];
+
+    card.relatedCells = unique(siblingIds)
+      .filter((id) => id !== card.id && cardsById.has(id))
+      .map((id) => toCellLink(cardsById.get(id)));
+
+    card.equivalentCells = unique(equivalentIds)
+      .filter((id) => id !== card.id && cardsById.has(id))
+      .map((id) => toCellLink(cardsById.get(id)));
   });
 }
 
 /**
- * @param {Object} data rows of queries 31 (classes), 32 (leaves), 33 (properties),
- *                      34 (attributes) and 35 (locations)
- * @returns {Array<Object>} cell cards for leaf cells (individual cell precisions)
+ * @param {Object} data
+ * @param {Array<Object>} data.cells rows of query 40
+ * @param {Array<Object>} [data.terms] rows of query 39 for the terms used by the cells
+ * @returns {Array<Object>} cell cards for the individual cells (cells without subclasses);
+ *          classes (query 31) only link their subclasses together.
  */
-function buildCellCards({
-  classes = [],
-  leaves = [],
-  properties = [],
-  attributes = [],
-  locations = [],
-}) {
-  const classIds = new Set(classes.map((row) => row.cell_id));
-  const leafIds = new Set(leaves.map((row) => row.cell_id));
-  const attributesByCell = groupByCell(attributes);
-  const locationsByCell = groupByCell(locations);
-
-  const classLabels = new Set(
-    properties
-      .filter((row) => classIds.has(row.cell_id))
-      .map((row) =>
-        String(row.cell_label || '')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .toLowerCase(),
-      ),
-  );
-
+function buildCellCards({ cells = [], terms = [] }) {
+  const termLookup = buildTermLookup(terms);
   const seen = new Set();
-  const cards = properties
-    .filter((row) => {
-      if (!row.cell_id || seen.has(row.cell_id)) return false;
-      seen.add(row.cell_id);
-      // Cards are individual cells; fall back to "not a class" if query 32 returned nothing.
-      return leafIds.size ? leafIds.has(row.cell_id) : !classIds.has(row.cell_id);
-    })
-    .map((row) =>
-      buildCellCard(
-        row,
-        attributesByCell.get(row.cell_id) || [],
-        locationsByCell.get(row.cell_id) || [],
-      ),
-    );
+  const uniqueCells = asList(cells).filter((cell) => {
+    if (!cell?.cell_id || seen.has(cell.cell_id)) return false;
+    seen.add(cell.cell_id);
+    return true;
+  });
 
-  linkRelatedCells(cards, classLabels);
+  const cards = uniqueCells
+    .filter((cell) => !asList(cell.subclass_id).length)
+    .map((cell) => buildCellCard(cell, termLookup));
+
+  linkCells(cards, uniqueCells);
 
   return cards.sort((a, b) =>
     a.entity.localeCompare(b.entity, undefined, { sensitivity: 'base', numeric: true }),
   );
 }
 
-export { buildCellCards, parseCellLabel, parseAlert, SOURCE_LOOKUP };
+/**
+ * Every term id used by the cells: attributes, nodes and species.
+ */
+function getCellTermIds(cells) {
+  return unique(
+    asList(cells).flatMap((cell) => [
+      ...asList(cell.descriptive_attribute).map((attribute) => attribute[2]),
+      ...asList(cell.node).map((node) => node[2]),
+      ...asList(cell.taxon_id),
+    ]),
+  ).filter((id) => !EXPRESSION_LEVELS[id]);
+}
+
+export {
+  buildCellCards,
+  getCellTermIds,
+  parseCellLabel,
+  parseAlert,
+  decodeEntities,
+  SOURCE_PUBLICATIONS,
+};
