@@ -188,7 +188,7 @@
                 :disabled="!equivalentCell.isOtherSpecies"
                 width="auto"
                 trigger="hover"
-                placement="top"
+                placement="right"
                 :teleported="false"
                 popper-class="popover-map-pin popover-species-hint"
               >
@@ -369,7 +369,7 @@ export default {
             speciesLabel,
             isOtherSpecies,
             tooltip: isOtherSpecies
-              ? `${speciesLabel} cell type. Opening it includes ${speciesLabel} in the species filter.`
+              ? `Opening it includes ${speciesLabel} in the species filter.`
               : '',
           };
         });
