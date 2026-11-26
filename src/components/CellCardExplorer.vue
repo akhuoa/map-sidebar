@@ -600,6 +600,9 @@ export default {
         .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
         .map((value) => ({ label: value }));
     },
+    hasSourceData: function (cellType) {
+      return (cellType?.sourceData || []).some((dataset) => dataset?.uri);
+    },
     buildFilterOptions: function (cellTypes) {
       const options = [
         {
@@ -626,6 +629,14 @@ export default {
           key: 'notes',
           label: 'Notes',
           children: [{ label: 'with notes' }, { label: 'without notes' }],
+        },
+        {
+          key: 'sourceData',
+          label: 'Source data',
+          // Only shown when some cards have source data (dataset links from the API).
+          children: cellTypes.some((cellType) => this.hasSourceData(cellType))
+            ? [{ label: 'with source data' }, { label: 'without source data' }]
+            : [],
         },
       ];
 
@@ -755,6 +766,13 @@ export default {
         const hasNotes = cellType.alertNotes?.length > 0 || cellType.curatorNotes?.length > 0;
         if (filterFacet === 'with notes') return hasNotes;
         if (filterFacet === 'without notes') return !hasNotes;
+        return false;
+      }
+
+      if (filterTerm === 'source data') {
+        const hasSourceData = this.hasSourceData(cellType);
+        if (filterFacet === 'with source data') return hasSourceData;
+        if (filterFacet === 'without source data') return !hasSourceData;
         return false;
       }
 

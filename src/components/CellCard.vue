@@ -211,9 +211,9 @@
             </a>
           </p>
         </div>
-        <div v-if="cellType.sourceData?.length" class="card-section source-publication-section">
-          <div class="card-section-title">Datasets</div>
-          <p v-for="dataset in cellType.sourceData" :key="dataset.uri">
+        <div v-if="sourceDataLinks.length" class="card-section source-publication-section">
+          <div class="card-section-title">Source Data</div>
+          <p v-for="dataset in sourceDataLinks" :key="dataset.uri">
             <a
               class="source-publication-link"
               :href="dataset.uri"
@@ -328,6 +328,12 @@ export default {
         })
         .filter(Boolean);
     },
+    // Dataset links (SCKAN data citations, e.g. GEO accessions) the cell was derived from.
+    sourceDataLinks: function () {
+      return (this.cellType?.sourceData || [])
+        .filter((dataset) => dataset?.uri)
+        .map((dataset) => ({ uri: dataset.uri, label: dataset.label || dataset.uri }));
+    },
     updatedCopyContent: function () {
       const {
         preferredLabel,
@@ -423,11 +429,12 @@ export default {
           : sourceNomenclatureLabel;
         contentArray.push(`<div><strong>Source Publication:</strong> ${sourceLabel}</div>`);
       }
-      if (sourceData?.length) {
-        const datasetItems = sourceData
-          .map((dataset) => `<li><a href="${dataset.uri}">${dataset.label}</a></li>`)
-          .join('');
-        contentArray.push(`<div><strong>Datasets:</strong><ul>${datasetItems}</ul></div>`);
+      const sourceDataItems = (sourceData || [])
+        .filter((dataset) => dataset?.uri)
+        .map((dataset) => `<li><a href="${dataset.uri}">${dataset.label || dataset.uri}</a></li>`)
+        .join('');
+      if (sourceDataItems) {
+        contentArray.push(`<div><strong>Source Data:</strong><ul>${sourceDataItems}</ul></div>`);
       }
 
       if (alertNotes?.length) {
