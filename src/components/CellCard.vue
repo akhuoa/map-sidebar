@@ -405,14 +405,24 @@ export default {
       } = this.cellType;
 
       // CopyToClipboard copies this as HTML and as plain text (textContent).
-      // The new lines and indents only show in the plain text: HTML copy removes the new lines,
-      // and the spaces at the start of a list item are not displayed.
+      // The new lines and leading spaces only show in the plain text:
+      // the HTML copy removes the new lines, and spaces at the start of a block are not displayed.
       const listSection = (title, items) => {
         const listItems = items
           .filter(Boolean)
           .map((item) => `\n<li>  ${item}</li>`)
           .join('');
         return listItems ? `<div><strong>${title}:</strong><ul>${listItems}</ul></div>` : '';
+      };
+      // Notes are indented as on the card: each line in its own indented block.
+      const notesSection = (title, notes) => {
+        const noteLines = notes
+          .flatMap((note) => formatAlertTextUtil(note).split('\n'))
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((line) => `\n<div>&nbsp;&nbsp;${line}</div>`)
+          .join('');
+        return noteLines ? `<div><strong>${title}:</strong></div>${noteLines}` : '';
       };
 
       const contentArray = [];
@@ -492,13 +502,11 @@ export default {
       );
 
       if (alertNotes?.length) {
-        const alertContent = alertNotes.map((note) => formatAlertTextUtil(note)).join('\n');
-        contentArray.push(`<div><strong>Alert Notes:</strong></div>\n${alertContent}`);
+        contentArray.push(notesSection('Alert Notes', alertNotes));
       }
 
       if (curatorNotes?.length) {
-        const curatorContent = curatorNotes.map((note) => formatAlertTextUtil(note)).join('\n');
-        contentArray.push(`<div><strong>Curator Notes:</strong></div>\n${curatorContent}`);
+        contentArray.push(notesSection('Curator Notes', curatorNotes));
       }
 
       return contentArray.filter(Boolean).join('\n');
