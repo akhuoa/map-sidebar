@@ -186,9 +186,10 @@
             <li v-for="equivalentCell in equivalentCellLinks" :key="equivalentCell.key">
               <el-popover
                 :disabled="!equivalentCell.isOtherSpecies"
-                width="auto"
+                :width="200"
                 trigger="hover"
                 placement="right"
+                :fallback-placements="['top', 'bottom']"
                 :teleported="false"
                 popper-class="popover-map-pin popover-species-hint"
               >
@@ -1208,8 +1209,10 @@ export default {
 }
 
 :deep(.el-popper.popover-map-pin.popover-species-hint) {
+  // Fixed width (the :width prop), so a long button leaves too little room on the right
+  // and the popover flips to the top instead of shrinking into the gap.
+  // popover-map-pin sets min-width: max-content, which would override the width.
   min-width: 0;
-  max-width: 240px;
   white-space: normal;
   color: $text-color;
   font-weight: normal;
