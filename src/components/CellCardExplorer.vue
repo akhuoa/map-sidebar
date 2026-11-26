@@ -155,6 +155,8 @@ export default {
       totalFilteredCount: 0,
       loadingCards: false,
       activeCardId: null,
+      // Card to open after SearchFilters emits the filters set by syncCascaderFromActiveFilters.
+      pendingCardId: null,
       cascaderIsReady: false,
       geneBaseToDisplay: {},
       geneDisplayToBase: {},
@@ -270,12 +272,15 @@ export default {
       this.fetchCellTypes();
     },
     activateCard: function (cardId) {
+      this.pendingCardId = null;
       this.activeCardId = this.activeCardId === cardId ? null : cardId;
     },
     openCard: function (cardId) {
+      this.pendingCardId = null;
       this.activeCardId = cardId;
     },
     closeCard: function () {
+      this.pendingCardId = null;
       this.activeCardId = null;
     },
     openSearch: function (filters, query) {
@@ -319,6 +324,7 @@ export default {
       }
     },
     onResetClick: function () {
+      this.pendingCardId = null;
       this.searchInput = '';
       this.activeFilters = [];
       this.page = 1;
@@ -337,6 +343,7 @@ export default {
       });
     },
     searchAndFilterUpdate: function () {
+      this.pendingCardId = null;
       this.page = 1;
       this.start = 0;
       this.applyFilters(this.activeFilters);
@@ -348,6 +355,15 @@ export default {
       this.page = 1;
       this.start = 0;
       this.applyFilters(this.activeFilters);
+
+      // SearchFilters emits the filters set by syncCascaderFromActiveFilters about 600 ms later.
+      // Going back to page 1 would close a card opened from a related or equivalent cell.
+      if (this.pendingCardId) {
+        const cardId = this.pendingCardId;
+        this.pendingCardId = null;
+        this.revealCard(cardId);
+      }
+
       this.emitSomaLocations(this.filterOptions);
       this.searchHistoryUpdate(this.activeFilters, this.searchInput);
       this.loadingCards = false;
@@ -365,6 +381,7 @@ export default {
       this.pageChange(1, preventPaginationTracking);
     },
     pageChange: function (page, preventTracking = false) {
+      this.pendingCardId = null;
       this.page = page;
       this.start = (page - 1) * this.numberPerPage;
       this.applyFilters(this.activeFilters);
@@ -813,15 +830,8 @@ export default {
 
       // Clear search input to avoid text search interfering
       this.searchInput = '';
-      this.page = 1;
-      this.start = 0;
 
-      // Apply filters and sync cascader UI
-      this.applyFilters(this.activeFilters);
-      this.syncCascaderFromActiveFilters();
-      this.emitSomaLocations(this.filterOptions);
-
-      // Find the matching cell type by preferredLabel and open its card
+      // Find the matching cell type by id (or preferredLabel) and open its card
       const matchingCellType = this.allCellTypes.find(function (ct) {
         if (relatedCell.id) {
           return ct.id === relatedCell.id;
@@ -829,13 +839,57 @@ export default {
         return (ct.preferredLabel || '').toLowerCase() === (label || '').toLowerCase();
       });
 
-      if (matchingCellType) {
-        this.activeCardId = matchingCellType.id;
+      // Keep only the species filters when the other filters would hide the card.
+      if (
+        matchingCellType &&
+        !this.getFilteredCellTypes(this.activeFilters).some((ct) => ct.id === matchingCellType.id)
+      ) {
+        this.activeFilters = this.activeFilters.filter((filter) => {
+          return this.normalizeFacetValue(filter.term) === 'species';
+        });
       }
 
-      this.$nextTick(function () {
+      if (matchingCellType) {
+        this.revealCard(matchingCellType.id);
+        this.pendingCardId = matchingCellType.id;
+      } else {
+        this.page = 1;
+        this.start = 0;
+        this.applyFilters(this.activeFilters);
+        this.$nextTick(() => this.scrollToTop());
+      }
+
+      // Sync cascader UI. SearchFilters then emits the same filters to filterUpdate,
+      // which opens the pending card again.
+      this.syncCascaderFromActiveFilters();
+      this.emitSomaLocations(this.filterOptions);
+    },
+    /**
+     * Go to the page that has the card, open it and scroll to it.
+     * @returns {boolean} false when the current filters and search hide the card
+     */
+    revealCard: function (cardId) {
+      const filtered = this.getFilteredCellTypes(this.activeFilters, this.searchInput);
+      const index = filtered.findIndex((cellType) => cellType.id === cardId);
+      if (index < 0) {
+        return false;
+      }
+
+      this.page = Math.floor(index / this.numberPerPage) + 1;
+      this.start = (this.page - 1) * this.numberPerPage;
+      this.applyFilters(this.activeFilters);
+      this.activeCardId = cardId;
+      this.$nextTick(() => this.scrollToCard(cardId));
+      return true;
+    },
+    scrollToCard: function (cardId) {
+      const indexOnPage = this.cellTypes.findIndex((cellType) => cellType.id === cardId);
+      const cardElement = this.$refs.content?.querySelectorAll(':scope > .card')[indexOnPage];
+      if (indexOnPage > 0 && cardElement) {
+        cardElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+      } else {
         this.scrollToTop();
-      });
+      }
     },
     showSomaLocation: function (name) {
       this.$emit('soma-location-hovered', name);
