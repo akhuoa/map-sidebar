@@ -1211,6 +1211,8 @@ export default {
   min-width: 0;
   max-width: 240px;
   white-space: normal;
+  color: $text-color;
+  font-weight: normal;
 }
 
 .equivalent-cell-item {
