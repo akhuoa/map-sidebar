@@ -55,64 +55,64 @@
           <div class="card-section-title">Species</div>
           <span>{{ cellType.species }}</span>
         </div>
-        <div v-if="cellType.somaLocations?.length" class="card-section">
-          <div class="card-section-title">Soma Location</div>
-          <div class="card-list-items">
-            <div
-              v-for="location in somaLocations"
-              class="card-list-item"
-              :key="location.id"
-              @mouseenter="showSomaLocation(location.name)"
-              @mouseleave="showSomaLocation()"
-            >
-              <span>{{ location.name }}</span>
-              <div class="card-list-search">
-                <el-popover
-                  width="180"
-                  trigger="hover"
-                  :teleported="true"
-                  :append-to="cardElement"
-                  popper-class="popover-origin-help popover-search-actions"
-                  @show="onSearchPopoverShow(location.id)"
-                  @hide="onSearchPopoverHide(location.id)"
-                >
-                  <template #reference>
-                    <el-icon
-                      class="status-search-icon"
-                      :class="{ 'is-visible': activeSearchPopoverLocationId === location.id }"
-                    >
-                      <el-icon-search />
-                    </el-icon>
-                  </template>
-                  <div class="search-action-list">
-                    <button
-                      type="button"
-                      class="search-action-button"
-                      @click="openDatasetSearch(location.name)"
-                    >
-                      Search dataset
-                    </button>
-                    <button
-                      type="button"
-                      class="search-action-button"
-                      @click="openConnectivitySearch(location)"
-                    >
-                      Search connectivity
-                    </button>
-                  </div>
-                </el-popover>
+        <!-- Soma locations and axon terminals: the locations can be shown on the map and searched -->
+        <div v-for="section in locationSections" :key="section.key" class="card-section">
+          <div class="card-section-title">{{ section.title }}</div>
+          <div v-for="group in section.groups" :key="group.key" class="card-list-group">
+            <div v-if="group.label" class="card-list-group-label">{{ group.label }}</div>
+            <div v-if="group.locations.length" class="card-list-items">
+              <div
+                v-for="location in group.locations"
+                class="card-list-item"
+                :key="location.id"
+                @mouseenter="showLocation(location)"
+                @mouseleave="showLocation()"
+              >
+                <span>{{ location.name }}</span>
+                <div class="card-list-search">
+                  <el-popover
+                    width="180"
+                    trigger="hover"
+                    :teleported="true"
+                    :append-to="cardElement"
+                    popper-class="popover-origin-help popover-search-actions"
+                    @show="onSearchPopoverShow(location.id)"
+                    @hide="onSearchPopoverHide(location.id)"
+                  >
+                    <template #reference>
+                      <el-icon
+                        class="status-search-icon"
+                        :class="{ 'is-visible': activeSearchPopoverLocationId === location.id }"
+                      >
+                        <el-icon-search />
+                      </el-icon>
+                    </template>
+                    <div class="search-action-list">
+                      <button
+                        type="button"
+                        class="search-action-button"
+                        @click="openDatasetSearch(location.name)"
+                      >
+                        Search dataset
+                      </button>
+                      <button
+                        type="button"
+                        class="search-action-button"
+                        @click="openConnectivitySearch(location)"
+                      >
+                        Search connectivity
+                      </button>
+                    </div>
+                  </el-popover>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div v-if="hasTerminals" class="card-section">
-          <div class="card-section-title">Axon Terminals</div>
-          <div class="card-list-items">
-            <div v-for="terminal in terminals" class="card-list-item" :key="terminal.key">
-              <span>
-                {{ terminal.label }}
-                <span class="card-list-item-meta">({{ terminal.type }})</span>
-              </span>
+            <div
+              v-for="endingType in group.endingTypes"
+              :key="endingType"
+              class="card-list-group-note"
+            >
+              Ending type: {{ endingType }}
             </div>
           </div>
         </div>
@@ -439,13 +439,24 @@ export default {
       if (somaLocations?.length) {
         contentArray.push(listSection('Soma Locations', somaLocations));
       }
-      const terminalItems = [
-        ...(axonTerminalLocations || []).map((location) => `${location} (presynaptic)`),
-        ...(sensoryTerminalLocations || []).map((location) => `${location} (sensory)`),
-        ...(sensoryTerminalStructures || []).map((structure) => `${structure} (sensory structure)`),
-      ];
-      if (terminalItems.length) {
-        contentArray.push(listSection('Axon Terminals', terminalItems));
+      const terminalLines = [];
+      if (axonTerminalLocations?.length) {
+        terminalLines.push(
+          `<div>&nbsp;&nbsp;Central (presynaptic): ${axonTerminalLocations.join(', ')}</div>`,
+        );
+      }
+      if (sensoryTerminalLocations?.length || sensoryTerminalStructures?.length) {
+        terminalLines.push(
+          `<div>&nbsp;&nbsp;Peripheral (sensory): ${(sensoryTerminalLocations || []).join(', ')}</div>`,
+        );
+        (sensoryTerminalStructures || []).forEach((structure) => {
+          terminalLines.push(`<div>&nbsp;&nbsp;&nbsp;&nbsp;Ending type: ${structure}</div>`);
+        });
+      }
+      if (terminalLines.length) {
+        contentArray.push(
+          `<div><strong>Axon Terminals:</strong></div>${terminalLines.map((line) => `\n${line}`).join('')}`,
+        );
       }
       if (circuitRole) {
         contentArray.push(`<div><strong>Circuit Role:</strong> ${circuitRole}</div>`);
@@ -512,43 +523,75 @@ export default {
 
       return contentArray.filter(Boolean).join('\n');
     },
-    somaLocations: function () {
-      // Soma locations with UBERON curies from the API (query 35).
-      const terms = this.cellType.somaLocationTerms?.length
-        ? this.cellType.somaLocationTerms
-        : (this.cellType.somaLocations || []).map((label) => ({ label, curie: '' }));
+    /**
+     * Soma locations and axon terminals. Locations have UBERON curies from the API (query 40),
+     * so they can be shown on the map and used for dataset and connectivity searches.
+     * Axon terminals are split into the central (presynaptic) and peripheral (sensory)
+     * branches; sensory ending types are not locations and are shown as notes.
+     */
+    locationSections: function () {
+      const toLocations = (groupKey, terms, labels) => {
+        const source = terms?.length
+          ? terms
+          : (labels || []).map((label) => ({ label, curie: '' }));
+        return source
+          .filter((term) => term?.label)
+          .map((term) => ({
+            name: capitalise(term.label),
+            label: term.label,
+            curie: term.curie || '',
+            id: `${groupKey}-${term.curie || term.label}`,
+          }));
+      };
 
-      return terms
-        .filter((term) => term?.label)
-        .map((term) => ({
-          name: capitalise(term.label),
-          label: term.label,
-          curie: term.curie || '',
-          id: term.curie || term.label,
-        }));
-    },
-    terminals: function () {
-      const terminals = [
-        ...(this.cellType.axonTerminalLocations || []).map((label) => ({
-          label,
-          type: 'presynaptic',
-        })),
-        ...(this.cellType.sensoryTerminalLocations || []).map((label) => ({
-          label,
-          type: 'sensory',
-        })),
-        ...(this.cellType.sensoryTerminalStructures || []).map((label) => ({
-          label,
-          type: 'sensory structure',
-        })),
-      ];
-      return terminals.map((terminal, index) => ({
-        ...terminal,
-        key: `${terminal.type}-${terminal.label}-${index}`,
-      }));
-    },
-    hasTerminals: function () {
-      return this.terminals.length > 0;
+      const somaLocations = toLocations(
+        'soma',
+        this.cellType.somaLocationTerms,
+        this.cellType.somaLocations,
+      );
+      const centralTerminals = toLocations(
+        'central',
+        this.cellType.axonTerminalTerms,
+        this.cellType.axonTerminalLocations,
+      );
+      const peripheralTerminals = toLocations(
+        'peripheral',
+        this.cellType.sensoryTerminalTerms,
+        this.cellType.sensoryTerminalLocations,
+      );
+      const endingTypes = (this.cellType.sensoryTerminalStructures || []).filter(Boolean);
+
+      const sections = [];
+      if (somaLocations.length) {
+        sections.push({
+          key: 'soma',
+          title: 'Soma Location',
+          groups: [{ key: 'soma', label: '', locations: somaLocations, endingTypes: [] }],
+        });
+      }
+
+      const terminalGroups = [];
+      if (centralTerminals.length) {
+        terminalGroups.push({
+          key: 'central',
+          label: 'Central (presynaptic)',
+          locations: centralTerminals,
+          endingTypes: [],
+        });
+      }
+      if (peripheralTerminals.length || endingTypes.length) {
+        terminalGroups.push({
+          key: 'peripheral',
+          label: 'Peripheral (sensory)',
+          locations: peripheralTerminals,
+          endingTypes,
+        });
+      }
+      if (terminalGroups.length) {
+        sections.push({ key: 'terminals', title: 'Axon Terminals', groups: terminalGroups });
+      }
+
+      return sections;
     },
   },
   methods: {
@@ -595,8 +638,9 @@ export default {
         location: 'map_sidebar_cell_card',
       });
     },
-    showSomaLocation: function (name) {
-      this.$emit('soma-location-hovered', name);
+    // The curie lets the map find the feature by id; the name is the fallback (text search).
+    showLocation: function (location) {
+      this.$emit('soma-location-hovered', location?.name, location?.curie || undefined);
     },
     openDatasetSearch: function (query) {
       this.$emit('dataset-search', {
@@ -859,10 +903,22 @@ export default {
   }
 }
 
-.card-list-item-meta {
-  color: #909399;
-  font-weight: 400;
-  font-size: 12px;
+.card-list-group + .card-list-group {
+  margin-top: 0.75rem;
+}
+
+.card-list-group-label {
+  margin-bottom: 0.25rem;
+  color: $mediumGrey;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.card-list-group-note {
+  margin-top: 0.25rem;
+  padding-left: 0.5rem;
+  color: $mediumGrey;
+  font-size: 13px;
 }
 
 .neuron-populations-button {

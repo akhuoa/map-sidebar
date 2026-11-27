@@ -340,8 +340,11 @@ function buildCellCard(cell, terms) {
     somaLocations: somaLocationTerms.map((term) => term.label),
     somaLocationTerms,
     sensoryTerminalLocations: sensoryTerminalTerms.map((term) => term.label),
+    // { label, curie } like somaLocationTerms, for the map hover and connectivity search.
+    sensoryTerminalTerms,
     sensoryTerminalStructures: getAttributeLabels(attributeRows, ATTRIBUTE_TYPES.SENSORY_STRUCTURE),
     axonTerminalLocations: presynapticTerminalTerms.map((term) => term.label),
+    axonTerminalTerms: presynapticTerminalTerms,
     markerGenes,
     geneBaseNames: unique(markerGenes.map((gene) => gene.name.toLowerCase())),
     geneExpressionString: markerGenes

@@ -909,8 +909,8 @@ export default {
         this.scrollToTop();
       }
     },
-    showSomaLocation: function (name) {
-      this.$emit('soma-location-hovered', name);
+    showSomaLocation: function (name, curie) {
+      this.$emit('soma-location-hovered', name, curie);
     },
     onDatasetSearch: function (query) {
       this.$emit('dataset-search', query);

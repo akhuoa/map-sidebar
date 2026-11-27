@@ -261,8 +261,13 @@ export default {
      * This event is emitted when the mouse hover on or off a soma location in cell card explorer.
      * @param name Soma location
      */
-    showSomaLocation: function (name) {
-      this.$emit('soma-location-hovered', name);
+    /**
+     * A location of a cell card (soma or axon terminal) is hovered.
+     * `curie` (UBERON id) is optional; it is passed as a second argument,
+     * so listeners that only use the name keep working.
+     */
+    showSomaLocation: function (name, curie) {
+      this.$emit('soma-location-hovered', name, curie);
     },
     onSomaLocationsReady: function (somaLocations) {
       this.$emit('soma-locations-ready', somaLocations);
