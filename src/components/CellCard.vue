@@ -89,6 +89,7 @@
                     </template>
                     <div class="search-action-list">
                       <button
+                        v-if="group.datasetSearch"
                         type="button"
                         class="search-action-button"
                         @click="openDatasetSearch(location.name)"
@@ -528,6 +529,10 @@ export default {
      * so they can be shown on the map and used for dataset and connectivity searches.
      * Axon terminals are split into the central (presynaptic) and peripheral (sensory)
      * branches; sensory ending types are not locations and are shown as notes.
+     * Dataset search filters by the "Anatomical structure" facet,
+     * which only has the top-level organ categories (e.g. dorsal root ganglion),
+     * so it is only offered for soma locations.
+     * Connectivity search uses the UBERON curie and works for every location.
      */
     locationSections: function () {
       const toLocations = (groupKey, terms, labels) => {
@@ -566,7 +571,15 @@ export default {
         sections.push({
           key: 'soma',
           title: 'Soma Location',
-          groups: [{ key: 'soma', label: '', locations: somaLocations, endingTypes: [] }],
+          groups: [
+            {
+              key: 'soma',
+              label: '',
+              locations: somaLocations,
+              endingTypes: [],
+              datasetSearch: true,
+            },
+          ],
         });
       }
 
@@ -577,6 +590,7 @@ export default {
           label: 'Central (presynaptic)',
           locations: centralTerminals,
           endingTypes: [],
+          datasetSearch: false,
         });
       }
       if (peripheralTerminals.length || endingTypes.length) {
@@ -585,6 +599,7 @@ export default {
           label: 'Peripheral (sensory)',
           locations: peripheralTerminals,
           endingTypes,
+          datasetSearch: false,
         });
       }
       if (terminalGroups.length) {
