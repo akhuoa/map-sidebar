@@ -5,6 +5,9 @@
         <div class="card-title">
           {{ cellType.preferredLabel }}
         </div>
+        <div v-if="cellType.id" class="card-id">
+          <span class="id-tag">{{ cellType.id }}</span>
+        </div>
         <div class="card-keywords">
           <span>{{ cellType.species }}</span>
           <div class="card-chips">
@@ -431,6 +434,9 @@ export default {
       if (preferredLabel) {
         contentArray.push(`<div><strong>Cell Type:</strong> ${preferredLabel}</div>`);
       }
+      if (this.cellType.id) {
+        contentArray.push(`<div><strong>ID:</strong> ${this.cellType.id}</div>`);
+      }
       if (entity) {
         contentArray.push(`<div><strong>Entity:</strong> ${entity}</div>`);
       }
@@ -720,6 +726,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// .id-tag, shared with the connectivity explorer cards
+@use '../assets/connectivity-explorer.scss';
+
 .card {
   position: relative;
   font-family: Asap;
@@ -788,6 +797,10 @@ export default {
         color: $app-primary-color;
       }
 
+      .card-id {
+        margin: 0.5rem 0 0;
+      }
+
       .card-keywords {
         display: none;
       }
@@ -845,6 +858,13 @@ export default {
   line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+// Under the title, as in the connectivity explorer cards (0.5rem from the title).
+.card-id {
+  margin: -0.25rem 0 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 1.05px;
 }
 
 .card-details-inner {
